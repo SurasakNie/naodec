@@ -3,12 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NaoDec: 3D Internal Edges LED Mapping and Tracing Rev 1.1</title>
+    <title>NaoDec: 3D Internal Edges LED Mapping and Tracing Rev 1.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: #f1f5f9; margin: 0; }
+        :root {
+            --bg-page:        #f1f5f9;
+            --bg-grid:        #cbd5e1;
+            --bg-panel:       rgba(255,255,255,0.92);
+            --bg-panel-solid: #ffffff;
+            --text-primary:   #1e293b;
+            --text-muted:     #64748b;
+            --text-faint:     #94a3b8;
+            --border:         #cbd5e1;
+            --header-bg:      #0f172a;
+            --header-text:    #ffffff;
+            --node-stroke-edge: #94a3b8;
+            --node-text:      #334155;
+            --node-fill:      #ffffff;
+            --node0-fill:     #1e293b;
+            --btn-bg:         #ffffff;
+            --btn-bg-hover:   #f8fafc;
+            --btn-bg-muted:   #f1f5f9;
+        }
+        [data-theme="dark"] {
+            --bg-page:        #0b1220;
+            --bg-grid:        #1e293b;
+            --bg-panel:       rgba(15,23,42,0.92);
+            --bg-panel-solid: #0f172a;
+            --text-primary:   #e2e8f0;
+            --text-muted:     #94a3b8;
+            --text-faint:     #64748b;
+            --border:         #334155;
+            --header-bg:      #020617;
+            --header-text:    #e2e8f0;
+            --node-stroke-edge: #475569;
+            --node-text:      #e2e8f0;
+            --node-fill:      #1e293b;
+            --node0-fill:     #0f172a;
+            --btn-bg:         #1e293b;
+            --btn-bg-hover:   #334155;
+            --btn-bg-muted:   #1e293b;
+        }
+        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: var(--bg-page); color: var(--text-primary); margin: 0; }
         #canvas-wrapper { cursor: grab; }
         #canvas-wrapper:active { cursor: grabbing; }
+
+        header { background-color: var(--header-bg) !important; color: var(--header-text) !important; }
+
+        /* Themed panels — override Tailwind's bg-white / border-slate / text colors when in dark mode */
+        .themed-panel { background: var(--bg-panel) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+        [data-theme="dark"] .themed-panel h3,
+        [data-theme="dark"] .themed-panel h4,
+        [data-theme="dark"] .themed-panel p,
+        [data-theme="dark"] .themed-panel li,
+        [data-theme="dark"] .themed-panel td,
+        [data-theme="dark"] .themed-panel div { color: var(--text-primary); }
+        [data-theme="dark"] .themed-panel .text-slate-500,
+        [data-theme="dark"] .themed-panel .text-slate-600 { color: var(--text-muted) !important; }
+        [data-theme="dark"] .themed-panel .text-slate-700,
+        [data-theme="dark"] .themed-panel .text-slate-800 { color: var(--text-primary) !important; }
+        [data-theme="dark"] .themed-panel .border-t,
+        [data-theme="dark"] .themed-panel .border-b,
+        [data-theme="dark"] .themed-panel .border-slate-300 { border-color: var(--border) !important; }
+        [data-theme="dark"] .themed-panel .bg-slate-100 { background-color: var(--btn-bg-muted) !important; }
+        [data-theme="dark"] .themed-panel .bg-slate-100.hover\:bg-slate-200:hover { background-color: var(--btn-bg-hover) !important; }
+        [data-theme="dark"] .view-btn { background-color: var(--btn-bg) !important; color: var(--text-primary) !important; border-color: var(--border) !important; }
+        [data-theme="dark"] .view-btn:hover { background-color: var(--btn-bg-hover) !important; }
+        [data-theme="dark"] .view-btn.active { background-color: #1e3a8a !important; border-color: #3b82f6 !important; color: #bfdbfe !important; }
 
         /* Node Hover Effects */
         .node circle { transition: all 0.2s; }
@@ -18,8 +79,8 @@
 
         /* Grid background */
         .bg-grid {
-            background-image: linear-gradient(to right, #cbd5e1 1px, transparent 1px),
-                              linear-gradient(to bottom, #cbd5e1 1px, transparent 1px);
+            background-image: linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
             background-size: 50px 50px;
             opacity: 0.5;
             position: absolute; inset: 0; z-index: -1;
@@ -30,34 +91,63 @@
         .view-btn.active {
             @apply bg-blue-50 border-blue-300 text-blue-700;
         }
+
+        /* Theme switcher active state */
+        .active-theme { background: var(--btn-bg-muted); outline: 2px solid #3b82f6; }
+
+        /* Mobile/tablet collapsible side panels */
+        .panel-toggle { display: none; }
+        @media (max-width: 768px) {
+            header h1 { font-size: 1rem; line-height: 1.2; }
+            header p { font-size: 0.7rem; }
+            .panel-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px; height: 44px;
+                background: var(--bg-panel-solid);
+                color: var(--text-primary);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+                cursor: pointer;
+                font-size: 18px;
+                font-weight: 700;
+            }
+            #left-panel, #right-panel { display: none; }
+            #left-panel.open { display: block; position: absolute; top: 56px; left: 8px; right: 8px; max-width: none; max-height: 75vh; overflow-y: auto; }
+            #right-panel.open { display: flex; position: absolute; top: 56px; left: 8px; right: 8px; flex-direction: column; gap: 8px; max-height: 75vh; overflow-y: auto; }
+            #right-panel.open > div { width: 100%; }
+        }
     </style>
 </head>
 <body class="w-screen h-screen flex flex-col">
     <!-- Header Panel -->
     <header class="bg-slate-900 text-white p-4 shadow-md z-10 flex justify-between items-center relative">
         <div>
-            <h1 class="text-xl font-bold tracking-wide">NaoDec: 3D Internal Edges LED Mapping and Tracing Rev 1.1</h1>
+            <h1 class="text-xl font-bold tracking-wide">NaoDec: 3D Internal Edges LED Mapping and Tracing Rev 1.2</h1>
             <p class="text-slate-400 text-sm">Interactive Dodecahedron Routing Guide</p>
-        </div>
-        <div class="flex gap-4 items-center">
-            <div class="flex flex-col gap-1 text-xs text-slate-300 mr-4">
-                <div class="flex items-center gap-2"><span class="w-4 h-1 bg-pink-500 block"></span> C1: 0-1&rarr;1-8&rarr;8-7&middot;&middot;8-9&rarr;9-18&rarr;18-17</div>
-                <div class="flex items-center gap-2"><span class="w-4 h-1 bg-red-500 block"></span> C2: 0-2&rarr;2-10&rarr;10-9&middot;&middot;10-11&rarr;11-19&rarr;19-18</div>
-                <div class="flex items-center gap-2"><span class="w-4 h-1 bg-yellow-500 block"></span> C3: 0-3&rarr;3-12&rarr;12-11&middot;&middot;12-13&rarr;13-20&rarr;20-19</div>
-                <div class="flex items-center gap-2"><span class="w-4 h-1 bg-cyan-500 block"></span> C4: 0-4&rarr;4-14&rarr;14-13&middot;&middot;14-15&rarr;15-16&rarr;16-20</div>
-                <div class="flex items-center gap-2"><span class="w-4 h-1 bg-orange-500 block"></span> C5: 0-5&rarr;5-6&rarr;6-15&middot;&middot;6-7&rarr;7-17&rarr;17-16</div>
-                <div class="flex items-center gap-2"><span class="w-4 h-1 bg-lime-500 block"></span> C6: 0-1&rarr;1-2&rarr;2-3&rarr;3-4&rarr;4-5&rarr;5-1</div>
-                <div class="text-[10px] text-slate-500 mt-1">&middot;&middot; = bypass (dashed line)</div>
-            </div>
         </div>
     </header>
     <!-- Main Workspace -->
     <main class="flex-grow relative overflow-hidden" id="canvas-wrapper">
         <div class="bg-grid pointer-events-none"></div>
 
+        <!-- Panel toggle buttons (mobile/tablet only) -->
+        <button class="panel-toggle absolute top-2 left-2 z-30" onclick="document.getElementById('left-panel').classList.toggle('open')" aria-label="Info">i</button>
+        <button class="panel-toggle absolute top-2 right-2 z-30" onclick="document.getElementById('right-panel').classList.toggle('open')" aria-label="Controls">&#9776;</button>
+
         <!-- View Controls (Top Right) -->
-        <div class="absolute top-6 right-6 z-20 flex flex-col gap-3">
-            <div class="bg-white/90 p-3 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-2 w-32">
+        <div id="right-panel" class="absolute top-6 right-6 z-20 flex flex-col gap-3">
+            <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-1 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-center" style="color:var(--text-muted)">Theme</h4>
+                <div class="flex gap-1">
+                    <button id="theme-light" onclick="setTheme('light')" class="flex-1 px-1 py-1.5 text-sm font-bold rounded transition-colors cursor-pointer" title="Light" aria-label="Light theme">&#9728;</button>
+                    <button id="theme-auto"  onclick="setTheme('auto')"  class="flex-1 px-1 py-1.5 text-[10px] font-bold rounded transition-colors cursor-pointer" title="Auto (match device)" aria-label="Auto theme">AUTO</button>
+                    <button id="theme-dark"  onclick="setTheme('dark')"  class="flex-1 px-1 py-1.5 text-sm font-bold rounded transition-colors cursor-pointer" title="Dark" aria-label="Dark theme">&#9790;</button>
+                </div>
+            </div>
+            <div class="themed-panel bg-white/90 p-3 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-2 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
                 <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 text-center">Standard Views</h4>
                 <button onclick="setView('iso', this)" class="view-btn active">Isometric</button>
                 <button onclick="setView('top', this)" class="view-btn">Top</button>
@@ -66,13 +156,13 @@
                 <button onclick="setView('right', this)" class="view-btn">Right-Side</button>
             </div>
 
-            <div class="bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex justify-between items-center">
+            <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex justify-between items-center" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
                 <button onclick="changeZoom(-0.2)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-lg">-</button>
                 <span class="text-xs font-bold text-slate-500">ZOOM</span>
                 <button onclick="changeZoom(0.2)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-lg">+</button>
             </div>
 
-            <div class="bg-white/90 p-3 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-2 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <div class="themed-panel bg-white/90 p-3 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-2 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
                 <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 text-center">Circuits</h4>
                 <button id="circuit-btn-1" onclick="toggleCircuit(1)" class="px-3 py-1.5 text-xs font-bold border-2 rounded transition-colors cursor-pointer" style="border-color: #ec4899; color: #ec4899; background-color: rgba(236,72,153,0.08);">C1: Pink</button>
                 <button id="circuit-btn-2" onclick="toggleCircuit(2)" class="px-3 py-1.5 text-xs font-bold border-2 rounded transition-colors cursor-pointer" style="border-color: #ef4444; color: #ef4444; background-color: rgba(239,68,68,0.08);">C2: Red</button>
@@ -87,7 +177,7 @@
             </div>
         </div>
         <!-- Instructions (Top Left) -->
-        <div class="absolute top-6 left-6 z-20 bg-white/90 p-4 rounded-lg shadow-lg border border-slate-200 max-w-sm" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+        <div id="left-panel" class="themed-panel absolute top-6 left-6 z-20 bg-white/90 p-4 rounded-lg shadow-lg border border-slate-200 max-w-sm" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
             <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">3D Controls & Routing</h3>
             <p class="text-xs text-slate-500 mb-3 border-b pb-2">
                 <strong>Left Click + Drag</strong> to Rotate<br>
@@ -105,6 +195,7 @@
                     <li><strong class="text-orange-500">C5:</strong> 0-5&rarr;5-6&rarr;6-15 &#x2504; 6-7&rarr;7-17&rarr;17-16</li>
                     <li><strong class="text-lime-500">C6:</strong> 0-1&rarr;1-2&rarr;2-3&rarr;3-4&rarr;4-5&rarr;5-1</li>
                 </ul>
+                <p class="text-[10px] text-slate-500 mt-1">&#x2504; = bypass (dashed line)</p>
             </div>
             <div class="mt-3 pt-2 border-t text-xs text-slate-600 space-y-1">
                 <h4 class="font-bold text-slate-700 mb-1">Node Rings</h4>
@@ -127,6 +218,7 @@
                 <ul class="space-y-0.5">
                     <li><strong class="text-slate-700">Rev 1.0</strong> &mdash; Initial release</li>
                     <li><strong class="text-slate-700">Rev 1.1</strong> &mdash; Revised from 5 circuits to 6 circuits</li>
+                    <li><strong class="text-slate-700">Rev 1.2</strong> &mdash; Added armchair to indicate user's orientation</li>
                 </ul>
             </div>
         </div>
@@ -185,8 +277,8 @@
         addRing([6, 8, 10, 12, 14],   [126, 54, 342, 270, 198], -Y2, R2, 'mid');
         // Bottom Face (-Y)
         addRing([5, 1, 2, 3, 4],      [126, 54, 342, 270, 198], -Y1, R1, 'base');
-        // Node 0: POWER IN at center of base ring
-        nodes3D[0] = { id: 0, x: 0, y: -Y1, z: 0, section: 'power' };
+        // Node 0: POWER IN below center of base ring (Rev 1.2: lowered 60u to depict feed entering from below)
+        nodes3D[0] = { id: 0, x: 0, y: -Y1 - 60, z: 0, section: 'power' };
         // --- Structural Edges ---
         const structuralEdges = [
             [1,2], [2,3], [3,4], [4,5], [5,1], // Bottom Pent
@@ -219,6 +311,63 @@
                 });
             }
         });
+        // --- Chair (Rev 1.2): zero-gravity recliner placed on ground, facing Node 1 ---
+        const CHAIR_HALF_W = 36;
+        const CHAIR_GROUND_Y = -Y1;
+        const CHAIR_BODY_COLOR  = '#c2854c';
+        const CHAIR_BODY_STROKE = '#8b5a2b';
+        const CHAIR_WOOD_COLOR  = '#7a4a2c';
+        const CHAIR_WOOD_STROKE = '#4a2a14';
+        const chairBodyOutline = [
+            [ 104,   8],
+            [ 104,  16],
+            [  60,  26],
+            [ -30,  26],
+            [ -50, 104],
+            [ -68, 104],
+            [ -68,   8]
+        ];
+        const chairWoodBox = { x0: -72, x1: 112, y0: -4, y1: 8, z0: -44, z1: 44 };
+        const _node1 = { x: nodes3D[1].x, z: nodes3D[1].z };
+        const _chairDir = Math.atan2(_node1.z, _node1.x);
+        const _cosD = Math.cos(_chairDir), _sinD = Math.sin(_chairDir);
+        function _chairLocalToWorld(lx, ly, lz) {
+            return {
+                x: lx * _cosD - lz * _sinD,
+                y: ly + CHAIR_GROUND_Y,
+                z: lx * _sinD + lz * _cosD
+            };
+        }
+        const chairVerts = [];
+        chairBodyOutline.forEach(([x, y]) => {
+            chairVerts.push(_chairLocalToWorld(x, y, -CHAIR_HALF_W));
+            chairVerts.push(_chairLocalToWorld(x, y,  CHAIR_HALF_W));
+        });
+        const _woodBase = chairVerts.length;
+        const _wb = chairWoodBox;
+        chairVerts.push(_chairLocalToWorld(_wb.x0, _wb.y0, _wb.z0));
+        chairVerts.push(_chairLocalToWorld(_wb.x1, _wb.y0, _wb.z0));
+        chairVerts.push(_chairLocalToWorld(_wb.x1, _wb.y1, _wb.z0));
+        chairVerts.push(_chairLocalToWorld(_wb.x0, _wb.y1, _wb.z0));
+        chairVerts.push(_chairLocalToWorld(_wb.x0, _wb.y0, _wb.z1));
+        chairVerts.push(_chairLocalToWorld(_wb.x1, _wb.y0, _wb.z1));
+        chairVerts.push(_chairLocalToWorld(_wb.x1, _wb.y1, _wb.z1));
+        chairVerts.push(_chairLocalToWorld(_wb.x0, _wb.y1, _wb.z1));
+        const chairFaces = [];
+        const _N = chairBodyOutline.length;
+        chairFaces.push({ verts: Array.from({length: _N}, (_, i) => 2*i),                color: CHAIR_BODY_COLOR, stroke: CHAIR_BODY_STROKE });
+        chairFaces.push({ verts: Array.from({length: _N}, (_, i) => 2*(_N - 1 - i) + 1), color: CHAIR_BODY_COLOR, stroke: CHAIR_BODY_STROKE });
+        for (let i = 0; i < _N; i++) {
+            const j = (i + 1) % _N;
+            chairFaces.push({ verts: [2*i, 2*j, 2*j + 1, 2*i + 1], color: CHAIR_BODY_COLOR, stroke: CHAIR_BODY_STROKE });
+        }
+        const _w = _woodBase;
+        chairFaces.push({ verts: [_w+0, _w+1, _w+2, _w+3], color: CHAIR_WOOD_COLOR, stroke: CHAIR_WOOD_STROKE });
+        chairFaces.push({ verts: [_w+5, _w+4, _w+7, _w+6], color: CHAIR_WOOD_COLOR, stroke: CHAIR_WOOD_STROKE });
+        chairFaces.push({ verts: [_w+4, _w+5, _w+1, _w+0], color: CHAIR_WOOD_COLOR, stroke: CHAIR_WOOD_STROKE });
+        chairFaces.push({ verts: [_w+3, _w+2, _w+6, _w+7], color: CHAIR_WOOD_COLOR, stroke: CHAIR_WOOD_STROKE });
+        chairFaces.push({ verts: [_w+0, _w+3, _w+7, _w+4], color: CHAIR_WOOD_COLOR, stroke: CHAIR_WOOD_STROKE });
+        chairFaces.push({ verts: [_w+1, _w+5, _w+6, _w+2], color: CHAIR_WOOD_COLOR, stroke: CHAIR_WOOD_STROKE });
         // --- Render State ---
         let targetRotX = 0.555;   // Pitch (31.8° - matches PDF isometric view)
         let targetRotY = -0.865;  // Yaw (-49.6° - matches PDF isometric view)
@@ -242,6 +391,12 @@
             const cosX = Math.cos(currentRotX), sinX = Math.sin(currentRotX);
             const cosY = Math.cos(currentRotY), sinY = Math.sin(currentRotY);
             const cosZ = Math.cos(currentRotZ), sinZ = Math.sin(currentRotZ);
+            // Theme-aware colors (re-read every frame so theme swap re-colors instantly)
+            const _css = getComputedStyle(document.documentElement);
+            const COL_EDGE  = (_css.getPropertyValue('--node-stroke-edge').trim() || '#94a3b8');
+            const COL_NFILL = (_css.getPropertyValue('--node-fill').trim()        || '#ffffff');
+            const COL_NTEXT = (_css.getPropertyValue('--node-text').trim()        || '#334155');
+            const COL_N0    = (_css.getPropertyValue('--node0-fill').trim()       || '#1e293b');
             const projNodes = {};
             // 1. Calculate 3D to 2D projections
             Object.values(nodes3D).forEach(node => {
@@ -263,6 +418,21 @@
                     z: z2 // Used for depth sorting (positive is closer to viewer)
                 };
             });
+            // 1b. Project chair vertices using same transform pipeline
+            const chairProj = chairVerts.map(v => {
+                let x0c = v.x * cosZ - v.y * sinZ;
+                let y0c = v.x * sinZ + v.y * cosZ;
+                let z0c = v.z;
+                let y1c = y0c * cosX - z0c * sinX;
+                let z1c = y0c * sinX + z0c * cosX;
+                let x2c = x0c * cosY + z1c * sinY;
+                let z2c = -x0c * sinY + z1c * cosY;
+                return {
+                    x: cx + currentPanX + x2c * currentScale,
+                    y: cy + currentPanY - y1c * currentScale,
+                    z: z2c
+                };
+            });
             // 2. Build Render Queue (for Painter's Algorithm Depth Sorting)
             let renderQueue = [];
             // A. Structural Edges
@@ -273,7 +443,19 @@
                 let width = zAvg > 0 ? 2 : 1;
                 renderQueue.push({
                     z: zAvg - 50, // Push structure slightly behind everything
-                    html: `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#94a3b8" stroke-width="${width}" opacity="${opacity}" />`
+                    html: `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${COL_EDGE}" stroke-width="${width}" opacity="${opacity}" />`
+                });
+            });
+            // A2. Chair faces (Rev 1.2)
+            chairFaces.forEach(face => {
+                const pts = face.verts.map(idx => `${chairProj[idx].x.toFixed(1)},${chairProj[idx].y.toFixed(1)}`).join(' ');
+                let zSum = 0;
+                for (const idx of face.verts) zSum += chairProj[idx].z;
+                const zAvg = zSum / face.verts.length;
+                const opacity = zAvg > 0 ? 0.95 : 0.55;
+                renderQueue.push({
+                    z: zAvg - 2,
+                    html: `<polygon points="${pts}" fill="${face.color}" stroke="${face.stroke}" stroke-width="0.7" stroke-linejoin="round" opacity="${opacity}" />`
                 });
             });
             // B. Wires (filtered by circuit selection)
@@ -302,14 +484,14 @@
             // C. Nodes
             Object.values(projNodes).forEach(p => {
                 if(p.origId === 0) {
-                    // Draw Node 0 (POWER IN) at center of base ring
+                    // Draw Node 0 (POWER IN) — now below ground level
                     let opacity0 = p.z > 0 ? 1.0 : 0.4;
                     renderQueue.push({
                         z: p.z + 10,
                         html: `<g class="node pointer-events-auto" transform="translate(${p.x}, ${p.y})" opacity="${opacity0}">
-                                <circle cx="0" cy="0" r="18" fill="#1e293b" stroke="#fbbf24" stroke-width="3" />
+                                <circle cx="0" cy="0" r="18" fill="${COL_N0}" stroke="#fbbf24" stroke-width="3" />
                                 <text x="0" y="5" font-size="13" font-weight="bold" text-anchor="middle" fill="#fbbf24">0</text>
-                                <rect x="-35" y="22" width="70" height="18" rx="4" fill="#1e293b" opacity="0.9" />
+                                <rect x="-35" y="22" width="70" height="18" rx="4" fill="${COL_N0}" opacity="0.9" />
                                 <text x="0" y="35" fill="#fbbf24" font-size="9" font-weight="bold" text-anchor="middle">POWER IN</text>
                                </g>`
                     });
@@ -324,8 +506,8 @@
                     z: p.z + 10, // Nodes always in front of their local wires
                     html: `
                     <g class="node pointer-events-auto" transform="translate(${p.x}, ${p.y})" opacity="${opacity}">
-                        <circle cx="0" cy="0" r="${r}" fill="white" stroke="${fillColor}" stroke-width="3" />
-                        <text x="0" y="${r/3}" font-size="${fs}" font-weight="600" text-anchor="middle" fill="#334155">${p.origId}</text>
+                        <circle cx="0" cy="0" r="${r}" fill="${COL_NFILL}" stroke="${fillColor}" stroke-width="3" />
+                        <text x="0" y="${r/3}" font-size="${fs}" font-weight="600" text-anchor="middle" fill="${COL_NTEXT}">${p.origId}</text>
                     </g>`
                 });
             });
@@ -512,6 +694,30 @@
         // Handle window resize gracefully
         window.addEventListener('resize', () => { render(); startAnimation(); });
         window.addEventListener('load', render); // Re-render after Tailwind/fonts fully loaded
+
+        // --- Theme Switcher (Rev 1.2): Light / Dark / Auto ---
+        function applyTheme(mode) {
+            const effective = mode === 'auto'
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : mode;
+            document.documentElement.setAttribute('data-theme', effective);
+            ['light', 'auto', 'dark'].forEach(m => {
+                const b = document.getElementById('theme-' + m);
+                if (b) b.classList.toggle('active-theme', m === mode);
+            });
+            render();
+        }
+        window.setTheme = function(mode) {
+            localStorage.setItem('naodec-theme', mode);
+            applyTheme(mode);
+        };
+        const _savedTheme = localStorage.getItem('naodec-theme') || 'auto';
+        applyTheme(_savedTheme);
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if ((localStorage.getItem('naodec-theme') || 'auto') === 'auto') applyTheme('auto');
+            });
+        }
     </script>
 </body>
 </html>

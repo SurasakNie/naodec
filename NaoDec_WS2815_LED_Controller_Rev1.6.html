@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NaoDec WS2815 LED Controller — 12VDC — Rev 1.5</title>
+<title>NaoDec WS2815 LED Controller — 12VDC — Rev 1.6</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
   :root {
@@ -157,7 +157,7 @@
        ================================================================ -->
   <g id="title-block">
     <text x="40" y="15" font-size="28" fill="var(--text-primary)" class="black-text" letter-spacing="4">N A O D E C</text>
-    <text x="40" y="38" font-size="14" fill="var(--accent)" class="bold-text" letter-spacing="1">NaoDec WS2815 LED Controller · Rev 1.5</text>
+    <text x="40" y="38" font-size="14" fill="var(--accent)" class="bold-text" letter-spacing="1">NaoDec WS2815 LED Controller · Rev 1.6</text>
     <text x="40" y="56" font-size="13" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">2× ESP32-S3 N16R8 (DDP) · 1× SN74AHCT245N</text>
     <!-- Legend Box -->
     <rect x="580" y="25" width="1420" height="46" rx="4" fill="var(--bg-panel)" stroke="var(--border)" stroke-width="1.5"/>
@@ -521,7 +521,7 @@
   <circle cx="934" cy="170" r="3.5" class="jgnd"/>
 
   <rect x="990" y="105" width="170" height="90" class="comp" rx="2"
-        data-info="PSU 12V 5A|60W AC-DC Supply|Strip #1 Vertex LED set|Max draw: ~0.9A|ISOLATED — V+ must not bridge"/>
+        data-info="PSU 12V 5A|60W AC-DC Supply|Strip #1 Vertex LED set|Max draw: ~0.9A|Optional injection upgrade: 2× 12V 5A — head + LED #31|ISOLATED — V+ must not bridge"/>
   <text x="1075" y="138" font-size="16" fill="var(--wire-12v)" text-anchor="middle" class="black-text" letter-spacing="1">PSU 12V 5A</text>
   <text x="1075" y="158" font-size="12" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">60W · Vertex Power Rail</text>
   <text x="1075" y="175" font-size="11" fill="var(--accent)" text-anchor="middle" class="black-text">⚡ ISOLATED</text>
@@ -880,8 +880,9 @@
   <text x="60" y="1360" font-size="12" fill="var(--wire-5v)" class="bold-text">PSU 5V 3A  → ESP32-S3 Master Vin, ESP32-S3 Slave Vin, U2 VCC (pin 20)</text>
   <text x="60" y="1378" font-size="12" fill="var(--wire-12v)" class="bold-text">PSU 12V 5A  → F1 7.5A → C1 1000µF → Strip #1</text>
   <text x="60" y="1396" font-size="12" fill="var(--wire-12v)" class="bold-text">PSU 12V 50A → NTC1 (10Ω) → FB1 (7.5A/branch) → C2–C6,C8 → #2–#7</text>
-  <text x="60" y="1414" font-size="12" fill="var(--wire-gnd)" class="bold-text">U2: DIR (pin 1) → VCC · OE (pin 19) → GND (A→B, all enabled)</text>
-  <text x="60" y="1432" font-size="12" fill="var(--wire-gnd)" class="bold-text">U2: A8(9) → GND (unused input) · B8(11) = N/C</text>
+  <text x="60" y="1414" font-size="12" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--warn)">Optional injection (Strip #1, 20m):</tspan> 2× PSU 12V/5A — head + LED #31 mid-point; separate +12V rails (never bridge); 14 AWG branch.</text>
+  <text x="60" y="1432" font-size="12" fill="var(--wire-gnd)" class="bold-text">U2: DIR (pin 1) → VCC · OE (pin 19) → GND (A→B, all enabled)</text>
+  <text x="60" y="1450" font-size="12" fill="var(--wire-gnd)" class="bold-text">U2: A8(9) → GND (unused input) · B8(11) = N/C</text>
 
   <!-- Power Calculations -->
   <text x="60" y="1475" font-size="14" fill="var(--accent)" class="black-text" letter-spacing="1">POWER CALCULATIONS</text>
@@ -930,7 +931,7 @@
   <text x="710" y="1305" font-size="12" fill="var(--text-primary)" class="bold-text">NTC1 — 10Ω / 10A Inrush Limiter <tspan fill="var(--text-secondary)">(series with 12V/50A rail)</tspan></text>
   <text x="710" y="1325" font-size="12" fill="var(--text-primary)" class="bold-text">FB1  — 6-ch ATC/ATO Fuse Block <tspan fill="var(--text-secondary)">+ 6× 7.5A fuses</tspan></text>
   <text x="710" y="1345" font-size="12" fill="var(--text-primary)" class="bold-text">LED  — WS2815 12V <tspan fill="var(--text-secondary)">60 + 6×280 = 1,740 total</tspan></text>
-  <text x="710" y="1365" font-size="12" fill="var(--text-primary)" class="bold-text">PSU  — 5V/3A + 12V/5A + 12V/50A <tspan fill="var(--text-secondary)">(3 isolated)</tspan></text>
+  <text x="710" y="1365" font-size="12" fill="var(--text-primary)" class="bold-text">PSU  — 5V/3A + 12V/5A + 12V/50A <tspan fill="var(--text-secondary)">(3 isolated; optional injection upgrade: 2× 12V/5A — head + LED #31)</tspan></text>
 
   <!-- GPIO Mapping -->
   <text x="710" y="1405" font-size="14" fill="var(--accent)" class="black-text" letter-spacing="1">GPIO MAPPING</text>
@@ -1018,11 +1019,12 @@
   <text x="1370" y="1307" font-size="12" fill="var(--warn)" class="bold-text"><tspan fill="var(--text-primary)">9.</tspan> ~4.2A/strip (WS2815 = 10–15mA/pixel @ 12V, 280 LEDs).</text>
   <text x="1370" y="1325" font-size="12" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">10.</tspan> GPIO 0,3,45,46 / 35–37 / 19–20 avoided.</text>
   <text x="1370" y="1343" font-size="12" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">11.</tspan> WLED: Master has 4 local outputs + 3 DDP destinations to Slave.</text>
-  <text x="1370" y="1361" font-size="12" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">12.</tspan> Power injection required if strip run exceeds ~10m.</text>
+  <text x="1370" y="1361" font-size="12" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">12.</tspan> Power injection if strip run exceeds ~10m — Strip #1 (20m) optional: 2× 12V/5A PSU at head + LED #31.</text>
   <text x="1370" y="1379" font-size="12" fill="var(--warn)" class="bold-text"><tspan fill="var(--text-primary)">13.</tspan> C7 (100nF) close to U2 VCC — prevents latch-up.</text>
   <text x="1370" y="1397" font-size="12" fill="var(--warn)" class="bold-text"><tspan fill="var(--text-primary)">14.</tspan> CH1 Vertex 20m run: single-ended 800kHz past reliable length. Shielded twisted pair; bench-verify waveform.</text>
   <text x="1370" y="1415" font-size="12" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">15.</tspan> R1–R7 on controller PCB ≤20mm from U2 B-outputs (source-end termination).</text>
   <text x="1370" y="1433" font-size="12" fill="var(--warn)" class="bold-text"><tspan fill="var(--text-primary)">16.</tspan> NTC1 (10Ω/10A) series 12V/50A rail — limits inrush from 7× 1000µF bypass caps.</text>
+  <text x="1370" y="1451" font-size="12" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">17.</tspan> Strip #1 inject (opt): 2× 12V/5A PSU — head + LED #31; separate V+ rails (no bridge); GND to common bus.</text>
 
   <!-- Revision History -->
   <text x="1370" y="1466" font-size="14" fill="var(--accent)" class="black-text" letter-spacing="1">REVISION HISTORY</text>
@@ -1031,7 +1033,8 @@
   <text x="1370" y="1534" font-size="13" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">Rev 1.2</tspan> — Revised resistors + added C7 decoupling cap.</text>
   <text x="1370" y="1554" font-size="13" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">Rev 1.3</tspan> — Replaced 2× SN74AHCT125N with 1× SN74HCT245N.</text>
   <text x="1370" y="1574" font-size="13" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">Rev 1.4</tspan> — Dual ESP32-S3 with DDP (Master/Slave); single SN74AHCT245N; BI re-routed to GND.</text>
-  <text x="1370" y="1594" font-size="13" fill="var(--accent)" class="bold-text"><tspan fill="var(--text-primary)">Rev 1.5</tspan> — 7 strips (280 LEDs each edge); CH7 via U2 A7/B7; Slave GPIO6;<tspan x="1430" dy="16">R7+C8+F7 added; NTC1 inrush limiter; PCB box expanded; C8 taps aligned;</tspan><tspan x="1430" dy="16">Notes #6/#14/#15/#16; R2–R7 corrected 100Ω → 47Ω (prototype parity).</tspan></text>
+  <text x="1370" y="1594" font-size="13" fill="var(--text-secondary)" class="bold-text"><tspan fill="var(--text-primary)">Rev 1.5</tspan> — 7 strips (280 LEDs each edge); CH7 via U2 A7/B7; Slave GPIO6;<tspan x="1430" dy="16">R7+C8+F7 added; NTC1 inrush limiter; PCB box expanded; C8 taps aligned;</tspan><tspan x="1430" dy="16">Notes #6/#14/#15/#16; R2–R7 corrected 100Ω → 47Ω (prototype parity).</tspan></text>
+  <text x="1370" y="1660" font-size="13" fill="var(--accent)" class="bold-text"><tspan fill="var(--text-primary)">Rev 1.6</tspan> — Upgrade the power supply from 5A to 10A.</tspan></text>
 
   </g>
 </svg>
