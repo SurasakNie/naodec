@@ -86,7 +86,7 @@ The master calculates all effects and streams pixel data to the slave over DDP/W
 
 ## Firmware
 
-Both controllers run **WLED** (https://github.com/Aircoookie/WLED).
+Both controllers run **WLED** .
 
 - Master: standard WLED instance, outputs CH1–CH4
 - Slave: WLED configured as DDP receiver, outputs CH5–CH7
