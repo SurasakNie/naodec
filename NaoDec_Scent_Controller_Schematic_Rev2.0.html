@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaoDec Scent Controller · Rev 2.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+  /* === THEME START — Cyberpunk (remapped to schematic contract) === */
+  :root {
+    --bg-dark:          #0A0A0F;
+    --bg-panel:         rgba(26, 26, 38, 0.95);
+    --wire-12v:         #FF6B2B;
+    --wire-5v:          #F5E642;
+    --wire-3v3:         #BF5FFF;
+    --wire-gnd:         #606080;
+    --wire-data:        #0FF0B3;
+    --wire-data2:       #E0E0F0;
+    --wire-data3:       #4DBBFF;
+    --wire-data4:       #FF2D78;
+    --wire-data5:       #FF9E6B;
+    --wire-data6:       #F8EE7A;
+    --wire-data7:       #D48FFF;
+    --wire-data8:       #AAFFDD;
+    --text-primary:     #E0E0F0;
+    --text-secondary:   #8888A0;
+    --accent:           #0FF0B3;
+    --border:           rgba(44, 44, 64, 0.6);
+    --comp-fill:        #14141F;
+    --comp-fill-hover:  #22222E;
+    --comp-stroke:      #2C2C40;
+    --pin-dot:          #0FF0B3;
+    --warn:             #FF2D78;
+    --warn-bg:          #1F0A14;
+  }
+  /* === THEME END === */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .schematic-container { width:100%; height:100vh; overflow:hidden; position:relative; cursor:grab; }
+  .schematic-container.grabbing { cursor: grabbing; }
+  .svg-wrapper { transform-origin:0 0; will-change:transform; position:absolute; top:0; left:0; }
+  .comp { fill:none; stroke:var(--comp-stroke); stroke-width:1.5; cursor:pointer; transition:all .2s ease; }
+  .comp:hover { fill:none; stroke:var(--accent); stroke-width:2; }
+  .sec-border-dash { fill:none; stroke:var(--comp-stroke); stroke-width:1.5; stroke-dasharray:6 6; opacity:0.8; }
+  .w12v     { stroke:var(--wire-12v); stroke-width:2.5; fill:none; }
+  .w12v-bus { stroke:var(--wire-12v); stroke-width:4;   fill:none; }
+  .wgnd     { stroke:var(--wire-gnd); stroke-width:2.5; fill:none; }
+  .wgnd-bus { stroke:var(--wire-gnd); stroke-width:4;   fill:none; }
+  .w5v      { stroke:var(--wire-5v);  stroke-width:2;   fill:none; }
+  .w5v-bus  { stroke:var(--wire-5v);  stroke-width:4;   fill:none; }
+  .w3v3     { stroke:var(--wire-3v3); stroke-width:2;   fill:none; }
+  .w3v3-bus { stroke:var(--wire-3v3); stroke-width:4;   fill:none; }
+  .wdata    { stroke:var(--wire-data);  stroke-width:2; fill:none; }
+  .wdata2   { stroke:var(--wire-data2); stroke-width:2; fill:none; }
+  .wdata3   { stroke:var(--wire-data3); stroke-width:2; fill:none; }
+  .wdata4   { stroke:var(--wire-data4); stroke-width:2; fill:none; }
+  .wdata5   { stroke:var(--wire-data5); stroke-width:2; fill:none; }
+  .wdata6   { stroke:var(--wire-data6); stroke-width:2; fill:none; }
+  .wdata7   { stroke:var(--wire-data7); stroke-width:2; fill:none; }
+  .wdata8   { stroke:var(--wire-data8); stroke-width:2; fill:none; }
+  .j12v   { fill:var(--wire-12v); }
+  .jgnd   { fill:var(--wire-gnd); }
+  .j5v    { fill:var(--wire-5v);  }
+  .j3v3   { fill:var(--wire-3v3); }
+  .jdata  { fill:var(--wire-data); }
+  .jdata2 { fill:var(--wire-data2); }
+  .jdata3 { fill:var(--wire-data3); }
+  .jdata4 { fill:var(--wire-data4); }
+  .jdata5 { fill:var(--wire-data5); }
+  .jdata6 { fill:var(--wire-data6); }
+  .jdata7 { fill:var(--wire-data7); }
+  .pin    { fill:var(--pin-dot); }
+  polyline[data-info], line[data-info], path[data-info] { cursor:pointer; pointer-events:visibleStroke; }
+  polyline[data-info]:hover, line[data-info]:hover, path[data-info]:hover { stroke-width:6; filter:brightness(1.4); }
+  text { font-family:'Roboto', sans-serif; font-weight:500; }
+  .bold-text { font-weight:700; }
+  .black-text { font-weight:900; }
+  .tip {
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+    background:var(--bg-dark); border:1px solid var(--accent);
+    border-radius:4px; padding:16px 24px;
+    font-size:15px; color:var(--text-primary);
+    opacity:0; pointer-events:none; z-index:100;
+    max-width:620px; text-align:center;
+    transition: opacity .2s, transform .2s;
+  }
+  .tip.on { opacity:1; transform:translateX(-50%) translateY(-8px); }
+  .tip .ttl { color:var(--accent); font-weight:900; margin-bottom:6px; font-size:16px; letter-spacing:1px; text-transform:uppercase; }
+  .tip .desc { line-height:1.5; color:var(--text-secondary); font-weight:500; }
+  #zoom-controls { position:fixed; bottom:30px; left:30px; display:flex; gap:6px; z-index:100; align-items:center; }
+  .zoom-btn {
+    background:var(--bg-panel); border:1px solid var(--border); color:var(--text-primary);
+    width:40px; height:40px; border-radius:4px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:700; transition:all 0.2s;
+    font-family:'Roboto', sans-serif;
+  }
+  .zoom-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .zoom-btn:active { transform:scale(0.95); }
+  .zoom-btn.fit-btn { width:auto; padding:0 14px; font-size:13px; letter-spacing:1px; font-weight:700; }
+  #zoom-level { color:var(--text-primary); font-size:13px; font-weight:700; min-width:52px; text-align:center; padding:0 6px; user-select:none; }
+  .zoom-shortcut-hint { position:fixed; bottom:75px; left:30px; font-size:11px; font-weight:500; color:var(--text-secondary); z-index:100; letter-spacing:0.5px; }
+</style>
+</head>
+<body>
+<div class="schematic-container" id="schematic-container">
+<div class="svg-wrapper" id="svg-wrapper">
+<svg width="2400" height="1800" viewBox="-185 -20 2430 1735" xmlns="http://www.w3.org/2000/svg" id="schematic-svg">
+
+  <!-- Background fill — 20 px larger than border on all sides -->
+  <rect id="bg-fill" x="-185" y="-20" width="2430" height="1735" fill="#0A0A0F"/>
+
+  <!-- ===== SCHEMATIC BORDER + CORNER REGISTRATION MARKS ===== -->
+  <g id="border" fill="none" stroke="var(--text-secondary)" stroke-width="1" opacity="0.55">
+
+    <!-- Border rectangle -->
+    <rect x="-165" y="0" width="2390" height="1695" rx="2"/>
+
+    <!-- Top-left + mark  (center: -165, 0) -->
+    <line x1="-180" y1="0"    x2="-148" y2="0"/>
+    <line x1="-165" y1="-15"  x2="-165" y2="17"/>
+
+    <!-- Top-right + mark (center: 2225, 0) -->
+    <line x1="2210" y1="0"    x2="2242" y2="0"/>
+    <line x1="2225" y1="-15"  x2="2225" y2="17"/>
+
+    <!-- Bottom-left + mark  (center: -165, 1695) -->
+    <line x1="-180" y1="1695" x2="-148" y2="1695"/>
+    <line x1="-165" y1="1678" x2="-165" y2="1712"/>
+
+    <!-- Bottom-right + mark (center: 2225, 1695) -->
+    <line x1="2210" y1="1695" x2="2242" y2="1695"/>
+    <line x1="2225" y1="1678" x2="2225" y2="1712"/>
+
+  </g>
+
+  <g transform="translate(80, 0)">
+
+    <!-- TITLE BLOCK -->
+    <g id="title-block">
+      <text x="40" y="35" font-size="28" fill="var(--text-primary)" class="black-text" letter-spacing="4">N A O D E C   S C E N T   C O N T R O L L E R</text>
+      <text x="40" y="58" font-size="14" fill="var(--accent)" class="bold-text" letter-spacing="1">Electronics Schematic · Rev 2.0 · 2026-05-19</text>
+      <text x="40" y="76" font-size="13" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">12V PSU → 4× custom-firmware-driven ultrasonic atomizers (113 kHz piezo · JY-M27AO) via ESP32-S3-Relay-6CH</text>
+
+      <rect x="860" y="25" width="660" height="46" rx="4" fill="var(--bg-panel)" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="880"  y="46" width="20" height="3" rx="1.5" fill="var(--wire-12v)"/>
+      <text x="904"  y="52" font-size="11" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">12V</text>
+      <rect x="942"  y="46" width="20" height="3" rx="1.5" fill="var(--wire-gnd)"/>
+      <text x="966"  y="52" font-size="11" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">GND</text>
+      <rect x="1004" y="46" width="20" height="3" rx="1.5" fill="var(--wire-data)"/>
+      <text x="1028" y="52" font-size="11" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH1 (GPIO1)</text>
+      <rect x="1130" y="46" width="20" height="3" rx="1.5" fill="var(--wire-data2)"/>
+      <text x="1154" y="52" font-size="11" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH2 (GPIO2)</text>
+      <rect x="1256" y="46" width="20" height="3" rx="1.5" fill="var(--wire-data3)"/>
+      <text x="1280" y="52" font-size="11" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH3 (GPIO41)</text>
+      <rect x="1390" y="46" width="20" height="3" rx="1.5" fill="var(--wire-data4)"/>
+      <text x="1414" y="52" font-size="11" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH4 (GPIO42)</text>
+    </g>
+
+    <!-- WARNING BANNER — JY-M27AO rear-pad power rule -->
+    <rect x="494" y="913" width="921" height="40" rx="2" fill="none" stroke="var(--warn)" stroke-width="2"/>
+    <text x="955" y="927" font-size="12" fill="var(--warn)" text-anchor="middle" class="black-text" letter-spacing="2">⚠ JY-M27AO POWER: USE REAR SOLDER PADS ONLY (PH2.0, UNPOPULATED FROM FACTORY)</text>
+    <text x="955" y="945" font-size="12" fill="var(--warn)" text-anchor="middle" class="black-text" letter-spacing="2">12V ON USB PORT = INSTANT BOARD DESTRUCTION ⚠</text>
+
+    <!-- ===========================
+         MAIN DIAGRAM (y 110…1010)
+         =========================== -->
+
+    <!-- ===== POWER SOURCE (Column A, x 60-510) ===== -->
+    <g id="PSU1">
+      <rect class="comp" rx="2" x="175" y="640" width="165" height="110"
+            data-info="PSU1|DC industrial PSU|12 V · 5 A · DIN rail|5× headroom over 1.0 A steady load"/>
+      <text x="250" y="665" font-size="18" fill="var(--accent)" text-anchor="middle" class="black-text">PSU1</text>
+      <text x="250" y="685" font-size="13" fill="var(--text-primary)" text-anchor="middle" class="bold-text">DC PSU 12 V</text>
+      <text x="250" y="704" font-size="11" fill="var(--text-secondary)" text-anchor="middle">5 A · DIN rail</text>
+      <text x="250" y="722" font-size="10" fill="var(--text-secondary)" text-anchor="middle">(5× margin over 1.0 A steady)</text>
+      <text x="345" y="676" font-size="10" fill="var(--wire-12v)" class="bold-text">V+</text>
+      <text x="345" y="744" font-size="10" fill="var(--wire-gnd)" class="bold-text">V−</text>
+      <circle cx="340" cy="680" r="3" class="pin"/>
+      <circle cx="340" cy="730" r="3" class="pin"/>
+    </g>
+
+    <g id="F_MAIN">
+      <rect class="comp" rx="2" x="440" y="670" width="70" height="20"
+            data-info="F_MAIN|Inline fuse 2 A slow-blow (T2A)|5×20 mm · 18 AWG RED|Protects ALL downstream"/>
+      <text x="475" y="684" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">F_MAIN · 2A</text>
+      <text x="475" y="708" font-size="9" fill="var(--text-secondary)" text-anchor="middle">slow-blow → all</text>
+    </g>
+
+    <g id="F1">
+      <rect class="comp" rx="2" x="540" y="624" width="70" height="20"
+            data-info="F1|Inline fuse 1 A slow-blow (T1A)|5×20 mm · 22 AWG RED|ESP sub-branch protection"/>
+      <text x="575" y="638" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">F1 · 1A</text>
+      <text x="575" y="662" font-size="9" fill="var(--text-secondary)" text-anchor="middle">slow-blow → ESP</text>
+    </g>
+
+    <!-- F2 and U2 (buck converter) DELETED in Rev 2.0 — 12V direct to COM bus -->
+
+    <!-- ===== ANT1 antenna =====
+         1.5× resize: w=270, h=52, centered on (575, 218).  Box: x=440..710, y=192..244.
+         Pigtail simplified to single horizontal dash at y=218 → lands on ANT node (803,218).
+         Clearance to U1 left edge (x=755.85): 46 px ✓ -->
+    <g id="ANT1">
+      <rect class="comp" rx="3" x="440" y="192" width="270" height="52"
+            data-info="ANT1|External 2.4 GHz SMA antenna|u.FL pigtail or direct SMA|For enclosed mounting"/>
+      <text x="575" y="215" font-size="16" fill="var(--accent)" text-anchor="middle" class="black-text">ANT1 · 2.4 GHz SMA</text>
+      <text x="575" y="234" font-size="14" fill="var(--text-secondary)" text-anchor="middle">u.FL → SMA pigtail</text>
+    </g>
+    <!-- ANT1 → U1.ANT pigtail stub: single horizontal dash at y=218 → ANT node (803,218) -->
+    <line x1="710" y1="218" x2="803" y2="218" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"/>
+
+    <!-- ===== U1 ESP32-S3-Relay-6CH (Column C) — Waveshare physical form factor SVG ===== -->
+    <g id="U1">
+      <!-- ── Physical board visual (user-provided SVG scaled to schematic space) ──────────── -->
+      <!-- Transform: translate(806.07,174) scale(0.8539,0.8)                                 -->
+      <!--   Horizontal: src cx=110 → sch 900 (left pins), src cx=555 → sch 1280 (right pins) -->
+      <!--   Vertical:   src CH1-COM cy=95  → sch 250 ; src CH4-COM cy=470 → sch 550          -->
+      <!-- RC1–RC4 are drawn after U1 in SVG order, so they naturally cover any right overflow -->
+      <g transform="translate(696.07,174) scale(0.8539,0.8)">
+
+        <!-- Board outline — comp-fill background, accent glow border (also U1 tooltip target) -->
+        <rect x="70" y="15" width="560" height="810"
+              fill="var(--comp-fill)" stroke="var(--accent)" stroke-width="1.76" rx="6" opacity="0.55"
+              style="cursor:pointer;"
+              data-info="U1|Waveshare ESP32-S3-Relay-6CH|7–36 V VIN · 6× SPDT relays (4 used)|Custom firmware · CH1/2/41/42 → CH1/2/3/4"/>
+        <!-- Inner silkscreen border (subtle accent line, matches other component inner borders) -->
+        <rect x="78" y="23" width="544" height="794"
+              fill="none" stroke="var(--accent)" stroke-width="0.7" rx="4" opacity="0.2"/>
+
+        <!-- ANT mounting hole (top-left) — accent glow to match theme -->
+        <circle cx="125" cy="55" r="11" fill="none" stroke="var(--accent)" stroke-width="1.17" opacity="0.55"/>
+        <circle cx="125" cy="55" r="4"  fill="none" stroke="var(--accent)" stroke-width="0.7" opacity="0.4"/>
+        <circle cx="125" cy="55" r="1.5" fill="var(--accent)" opacity="0.6"/>
+        <text x="125" y="88" text-anchor="middle" font-size="11" fill="var(--text-secondary)" opacity="0.7">ANT</text>
+
+
+        <!-- ── CH1 terminal block ── -->
+        <rect x="535" y="35"  width="90" height="125" rx="3"
+              fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+        <text x="540" y="49"  font-size="13" font-weight="bold" fill="var(--wire-data)">CH1 · GPIO1</text>
+        <!-- NC (top, unused) -->
+        <circle cx="615" cy="60"  r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.45"/>
+        <text x="605" y="64"  font-size="11" fill="var(--text-secondary)" opacity="0.45" text-anchor="end">NC</text>
+        <!-- COM (mid, PSU+ bus) -->
+        <circle cx="615" cy="95"  r="7" fill="var(--comp-fill)" stroke="var(--wire-12v)" stroke-width="1.4"/>
+        <text x="605" y="99"  font-size="11" fill="var(--wire-12v)" text-anchor="end">COM</text>
+        <!-- NO (bot, switched) -->
+        <circle cx="615" cy="130" r="7" fill="var(--comp-fill)" stroke="var(--wire-data)" stroke-width="1.4"/>
+        <text x="605" y="134" font-size="11" fill="var(--wire-data)" text-anchor="end">NO</text>
+
+        <!-- ── CH2 terminal block ── -->
+        <rect x="535" y="160" width="90" height="125" rx="3"
+              fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+        <text x="540" y="174" font-size="13" font-weight="bold" fill="var(--wire-data2)">CH2 · GPIO2</text>
+        <circle cx="615" cy="185" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.45"/>
+        <text x="605" y="189" font-size="11" fill="var(--text-secondary)" opacity="0.45" text-anchor="end">NC</text>
+        <circle cx="615" cy="220" r="7" fill="var(--comp-fill)" stroke="var(--wire-12v)" stroke-width="1.4"/>
+        <text x="605" y="224" font-size="11" fill="var(--wire-12v)" text-anchor="end">COM</text>
+        <circle cx="615" cy="255" r="7" fill="var(--comp-fill)" stroke="var(--wire-data2)" stroke-width="1.4"/>
+        <text x="605" y="259" font-size="11" fill="var(--wire-data2)" text-anchor="end">NO</text>
+
+        <!-- ── CH3 terminal block ── -->
+        <rect x="535" y="285" width="90" height="125" rx="3"
+              fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+        <text x="540" y="299" font-size="13" font-weight="bold" fill="var(--wire-data3)">CH3 · GPIO41</text>
+        <circle cx="615" cy="310" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.45"/>
+        <text x="605" y="314" font-size="11" fill="var(--text-secondary)" opacity="0.45" text-anchor="end">NC</text>
+        <circle cx="615" cy="345" r="7" fill="var(--comp-fill)" stroke="var(--wire-12v)" stroke-width="1.4"/>
+        <text x="605" y="349" font-size="11" fill="var(--wire-12v)" text-anchor="end">COM</text>
+        <circle cx="615" cy="380" r="7" fill="var(--comp-fill)" stroke="var(--wire-data3)" stroke-width="1.4"/>
+        <text x="605" y="384" font-size="11" fill="var(--wire-data3)" text-anchor="end">NO</text>
+
+        <!-- ── CH4 terminal block ── -->
+        <rect x="535" y="410" width="90" height="125" rx="3"
+              fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+        <text x="540" y="424" font-size="13" font-weight="bold" fill="var(--wire-data4)">CH4 · GPIO42</text>
+        <circle cx="615" cy="435" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.45"/>
+        <text x="605" y="439" font-size="11" fill="var(--text-secondary)" opacity="0.45" text-anchor="end">NC</text>
+        <circle cx="615" cy="470" r="7" fill="var(--comp-fill)" stroke="var(--wire-12v)" stroke-width="1.4"/>
+        <text x="605" y="474" font-size="11" fill="var(--wire-12v)" text-anchor="end">COM</text>
+        <circle cx="615" cy="505" r="7" fill="var(--comp-fill)" stroke="var(--wire-data4)" stroke-width="1.4"/>
+        <text x="605" y="509" font-size="11" fill="var(--wire-data4)" text-anchor="end">NO</text>
+
+        <!-- ── CH5 (unused) terminal block ── -->
+        <rect x="535" y="535" width="90" height="125" rx="3"
+              fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94" opacity="0.45"/>
+        <text x="540" y="549" font-size="13" font-weight="bold" fill="var(--text-secondary)" opacity="0.5">CH5</text>
+        <circle cx="615" cy="560" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+        <text x="605" y="564" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">NC</text>
+        <circle cx="615" cy="595" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+        <text x="605" y="599" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">COM</text>
+        <circle cx="615" cy="630" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+        <text x="605" y="634" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">NO</text>
+
+        <!-- ── CH6 (unused) terminal block ── -->
+        <rect x="535" y="660" width="90" height="125" rx="3"
+              fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94" opacity="0.45"/>
+        <text x="540" y="674" font-size="13" font-weight="bold" fill="var(--text-secondary)" opacity="0.5">CH6</text>
+        <circle cx="615" cy="685" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+        <text x="605" y="689" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">NC</text>
+        <circle cx="615" cy="720" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+        <text x="605" y="724" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">COM</text>
+        <circle cx="615" cy="755" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+        <text x="605" y="759" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">NO</text>
+
+        <!-- ── DC 7–36 V power input (left side, lower board) ── -->
+        <rect x="80" y="540" width="115" height="80" rx="3"
+              fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+        <text x="93"  y="565" font-size="13" fill="var(--wire-12v)">+</text>
+        <circle cx="110" cy="575" r="7" fill="var(--comp-fill)" stroke="var(--wire-12v)" stroke-width="1.4"/>
+        <text x="93"  y="600" font-size="13" fill="var(--text-secondary)">−</text>
+        <circle cx="110" cy="610" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4"/>
+        <text x="130" y="595" font-size="11" font-weight="bold" fill="var(--wire-12v)">DC 7–36V</text>
+
+        <!-- ── RS485 (left side, lower board) ── -->
+        <rect x="80" y="640" width="115" height="115" rx="3"
+              fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+        <text x="89"  y="667" font-size="11" fill="var(--text-secondary)">A+</text>
+        <circle cx="110" cy="677" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.5"/>
+        <text x="89"  y="702" font-size="11" fill="var(--text-secondary)">B−</text>
+        <circle cx="110" cy="712" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.5"/>
+        <text x="84"  y="738" font-size="11" font-weight="bold" fill="var(--warn)">GND</text>
+        <circle cx="110" cy="747" r="7" fill="var(--warn)" opacity="0.25" stroke="var(--warn)" stroke-width="1.4"/>
+        <!-- X over GND terminal -->
+        <line x1="103" y1="740" x2="117" y2="754" stroke="var(--warn)" stroke-width="1.76"/>
+        <line x1="117" y1="740" x2="103" y2="754" stroke="var(--warn)" stroke-width="1.76"/>
+        <text x="130" y="705" font-size="11" font-weight="bold" fill="var(--text-secondary)">RS485</text>
+        <text x="130" y="735" font-size="9" font-weight="bold" fill="var(--warn)">DO NOT</text>
+        <text x="130" y="747" font-size="9" font-weight="bold" fill="var(--warn)">CONNECT</text>
+        <text x="130" y="759" font-size="8" fill="var(--warn)" opacity="0.8">GND pin</text>
+      </g>
+      <!-- ── End board visual ── -->
+
+      <!-- ── U1 identifier label (inside board, top-center) ── -->
+      <!-- Fonts upsized: title 14→16, subtitle 10→14.  Baseline spacing 22 px → bbox gap ≥6 px ✓ -->
+      <text x="995" y="210" font-size="16" fill="var(--accent)"
+            text-anchor="middle" class="black-text">U1 · ESP32-S3-RELAY-6CH</text>
+      <text x="995" y="232" font-size="14" fill="var(--text-secondary)"
+            text-anchor="middle" class="bold-text">WAVESHARE · CUSTOM FIRMWARE · 7–36 V</text>
+
+      <!-- ── VIN / GND pin labels & circles (schematic connection points, left edge) ── -->
+      <!-- VR8: baselines spaced 22 px (VIN→(12V)) and 25 px ((12V)→GND); bbox gaps ≥5 px ✓ -->
+      <text x="718" y="628" font-size="13" fill="var(--wire-12v)" class="bold-text" text-anchor="end">VIN</text>
+      <text x="718" y="650" font-size="11" fill="var(--wire-12v)" text-anchor="end">(12V)</text>
+      <circle cx="790" cy="634" r="3" class="pin"/>
+      <text x="718" y="675" font-size="13" fill="var(--wire-gnd)" class="bold-text" text-anchor="end">GND</text>
+      <circle cx="790" cy="662" r="3" class="pin"/>
+
+      <!-- ── Channel screw-terminal pin circles (schematic connection points, right edge) ── -->
+      <!-- CH1: NC(unused)·COM(PSU+)·NO(ATZ1+) -->
+      <circle cx="1221" cy="220" r="2.5" class="pin" opacity="0.35"/>
+      <circle cx="1221" cy="250" r="3"   class="pin"/>
+      <circle cx="1221" cy="280" r="3"   class="pin"/>
+      <!-- CH2 -->
+      <circle cx="1221" cy="320" r="2.5" class="pin" opacity="0.35"/>
+      <circle cx="1221" cy="350" r="3"   class="pin"/>
+      <circle cx="1221" cy="380" r="3"   class="pin"/>
+      <!-- CH3 -->
+      <circle cx="1221" cy="420" r="2.5" class="pin" opacity="0.35"/>
+      <circle cx="1221" cy="450" r="3"   class="pin"/>
+      <circle cx="1221" cy="480" r="3"   class="pin"/>
+      <!-- CH4 -->
+      <circle cx="1221" cy="520" r="2.5" class="pin" opacity="0.35"/>
+      <circle cx="1221" cy="550" r="3"   class="pin"/>
+      <circle cx="1221" cy="580" r="3"   class="pin"/>
+      <!-- (CH5/CH6 unused — terminals shown by board visual; no schematic pin circles needed) -->
+
+      <!-- COM daisy-chain jumper visualization removed in Rev 2.0 — see Note 2: use 4 separate pigtails, not daisy-chain -->
+
+      <!-- ── Signal net annotations — placed clear of wire centerlines (VR3/VR8 ≥10 px to non-labeled wires) ──
+           PSU+ sits above CH1.COM (y=250); ATZn+ sits BELOW its CHn.NO wire in the inter-channel gap. -->
+      <text x="1245" y="240" font-size="9" fill="var(--wire-12v)"  text-anchor="middle">PSU+</text>
+      <text x="1245" y="300" font-size="9" fill="var(--wire-data)"  text-anchor="middle">ATZ1+</text>
+      <text x="1245" y="400" font-size="9" fill="var(--wire-data2)" text-anchor="middle">ATZ2+</text>
+      <text x="1245" y="500" font-size="9" fill="var(--wire-data3)" text-anchor="middle">ATZ3+</text>
+      <text x="1245" y="600" font-size="9" fill="var(--wire-data4)" text-anchor="middle">ATZ4+</text>
+
+      <!-- (RS485 callout is now part of the board visual — DO NOT CONNECT shown inside the RS485 block) -->
+    </g>
+
+    <!-- ===== PER-CHANNEL OUTPUT STAGES (Column D) ===== -->
+    <!-- CH1 row — RC1 deleted in Rev 2.0 -->
+    <g id="F3">
+      <rect class="comp" rx="2" x="1385" y="295" width="70" height="20"
+            data-info="F3|Inline fuse T500 mA slow-blow|Atomizer CH1 protection|5×20 mm · 22 AWG · 3.3× inrush margin"/>
+      <text x="1420" y="309" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">F3 · T500mA</text>
+    </g>
+    <g id="A1">
+      <rect class="comp" rx="2" x="1550" y="255" width="160" height="95"
+            data-info="A1|JY-M27AO atomizer driver #1|12 V · ~150 mA · 113 kHz|Rear-pad input (6–24 V)"/>
+      <text x="1630" y="295" font-size="16" fill="var(--accent)" text-anchor="middle" class="black-text">A1</text>
+      <text x="1630" y="315" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">Atomizer Drv</text>
+      <text x="1630" y="331" font-size="9" fill="var(--text-secondary)" text-anchor="middle">12V · ~150 mA · 113 kHz</text>
+      <text x="1545" y="301" font-size="9" fill="var(--wire-data)" class="bold-text" text-anchor="end">V+</text>
+      <text x="1715" y="301" font-size="9" fill="var(--wire-data)" class="bold-text">OUT+</text>
+      <text x="1715" y="348" font-size="9" fill="var(--wire-data)" class="bold-text">OUT−</text>
+      <text x="1545" y="323" font-size="9" fill="var(--wire-gnd)" text-anchor="end" class="bold-text">GND</text>
+      <circle cx="1550" cy="305" r="3" class="pin"/>
+      <circle cx="1710" cy="305" r="3" class="pin"/>
+      <circle cx="1710" cy="335" r="3" class="pin"/>
+      <circle cx="1550" cy="327" r="3" class="pin"/>
+    </g>
+    <g id="Z1">
+      <rect class="comp" rx="2" x="1750" y="290" width="120" height="50"
+            data-info="Z1|113 kHz piezo transducer #1|Microporous disc|Pair with wick + reservoir"/>
+      <text x="1810" y="310" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text">Z1</text>
+      <text x="1810" y="327" font-size="9" fill="var(--text-secondary)" text-anchor="middle">113 kHz piezo</text>
+      <circle cx="1750" cy="305" r="3" class="pin"/>
+      <circle cx="1750" cy="335" r="3" class="pin"/>
+    </g>
+
+    <!-- CH2 row — RC2 deleted in Rev 2.0 -->
+    <g id="F4">
+      <rect class="comp" rx="2" x="1385" y="395" width="70" height="20"
+            data-info="F4|Inline fuse T500 mA slow-blow|Atomizer CH2 protection|5×20 mm · 22 AWG · 3.3× inrush margin"/>
+      <text x="1420" y="409" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">F4 · T500mA</text>
+    </g>
+    <g id="A2">
+      <rect class="comp" rx="2" x="1550" y="355" width="160" height="95"
+            data-info="A2|JY-M27AO atomizer driver #2|12 V · ~150 mA · 113 kHz|Rear-pad input (6–24 V)"/>
+      <text x="1630" y="395" font-size="16" fill="var(--accent)" text-anchor="middle" class="black-text">A2</text>
+      <text x="1630" y="415" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">Atomizer Drv</text>
+      <text x="1630" y="431" font-size="9" fill="var(--text-secondary)" text-anchor="middle">12V · ~150 mA · 113 kHz</text>
+      <text x="1545" y="401" font-size="9" fill="var(--wire-data2)" class="bold-text" text-anchor="end">V+</text>
+      <text x="1715" y="401" font-size="9" fill="var(--wire-data2)" class="bold-text">OUT+</text>
+      <text x="1715" y="448" font-size="9" fill="var(--wire-data2)" class="bold-text">OUT−</text>
+      <text x="1545" y="423" font-size="9" fill="var(--wire-gnd)" text-anchor="end" class="bold-text">GND</text>
+      <circle cx="1550" cy="405" r="3" class="pin"/>
+      <circle cx="1710" cy="405" r="3" class="pin"/>
+      <circle cx="1710" cy="435" r="3" class="pin"/>
+      <circle cx="1550" cy="427" r="3" class="pin"/>
+    </g>
+    <g id="Z2">
+      <rect class="comp" rx="2" x="1750" y="390" width="120" height="50"
+            data-info="Z2|113 kHz piezo transducer #2|Microporous disc|Pair with wick + reservoir"/>
+      <text x="1810" y="410" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text">Z2</text>
+      <text x="1810" y="427" font-size="9" fill="var(--text-secondary)" text-anchor="middle">113 kHz piezo</text>
+      <circle cx="1750" cy="405" r="3" class="pin"/>
+      <circle cx="1750" cy="435" r="3" class="pin"/>
+    </g>
+
+    <!-- CH3 row — RC3 deleted in Rev 2.0 -->
+    <g id="F5">
+      <rect class="comp" rx="2" x="1385" y="495" width="70" height="20"
+            data-info="F5|Inline fuse T500 mA slow-blow|Atomizer CH3 protection|5×20 mm · 22 AWG · 3.3× inrush margin"/>
+      <text x="1420" y="509" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">F5 · T500mA</text>
+    </g>
+    <g id="A3">
+      <rect class="comp" rx="2" x="1550" y="455" width="160" height="95"
+            data-info="A3|JY-M27AO atomizer driver #3|12 V · ~150 mA · 113 kHz|Rear-pad input (6–24 V)"/>
+      <text x="1630" y="495" font-size="16" fill="var(--accent)" text-anchor="middle" class="black-text">A3</text>
+      <text x="1630" y="515" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">Atomizer Drv</text>
+      <text x="1630" y="531" font-size="9" fill="var(--text-secondary)" text-anchor="middle">12V · ~150 mA · 113 kHz</text>
+      <text x="1545" y="501" font-size="9" fill="var(--wire-data3)" class="bold-text" text-anchor="end">V+</text>
+      <text x="1715" y="501" font-size="9" fill="var(--wire-data3)" class="bold-text">OUT+</text>
+      <text x="1715" y="548" font-size="9" fill="var(--wire-data3)" class="bold-text">OUT−</text>
+      <text x="1545" y="523" font-size="9" fill="var(--wire-gnd)" text-anchor="end" class="bold-text">GND</text>
+      <circle cx="1550" cy="505" r="3" class="pin"/>
+      <circle cx="1710" cy="505" r="3" class="pin"/>
+      <circle cx="1710" cy="535" r="3" class="pin"/>
+      <circle cx="1550" cy="527" r="3" class="pin"/>
+    </g>
+    <g id="Z3">
+      <rect class="comp" rx="2" x="1750" y="490" width="120" height="50"
+            data-info="Z3|113 kHz piezo transducer #3|Microporous disc|Pair with wick + reservoir"/>
+      <text x="1810" y="510" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text">Z3</text>
+      <text x="1810" y="527" font-size="9" fill="var(--text-secondary)" text-anchor="middle">113 kHz piezo</text>
+      <circle cx="1750" cy="505" r="3" class="pin"/>
+      <circle cx="1750" cy="535" r="3" class="pin"/>
+    </g>
+
+    <!-- CH4 row — RC4 deleted in Rev 2.0 -->
+    <g id="F6">
+      <rect class="comp" rx="2" x="1385" y="595" width="70" height="20"
+            data-info="F6|Inline fuse T500 mA slow-blow|Atomizer CH4 protection|5×20 mm · 22 AWG · 3.3× inrush margin"/>
+      <text x="1420" y="609" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">F6 · T500mA</text>
+    </g>
+    <g id="A4">
+      <rect class="comp" rx="2" x="1550" y="555" width="160" height="95"
+            data-info="A4|JY-M27AO atomizer driver #4|12 V · ~150 mA · 113 kHz|Rear-pad input (6–24 V)"/>
+      <text x="1630" y="595" font-size="16" fill="var(--accent)" text-anchor="middle" class="black-text">A4</text>
+      <text x="1630" y="615" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">Atomizer Drv</text>
+      <text x="1630" y="631" font-size="9" fill="var(--text-secondary)" text-anchor="middle">12V · ~150 mA · 113 kHz</text>
+      <text x="1545" y="601" font-size="9" fill="var(--wire-data4)" class="bold-text" text-anchor="end">V+</text>
+      <text x="1715" y="601" font-size="9" fill="var(--wire-data4)" class="bold-text">OUT+</text>
+      <text x="1715" y="648" font-size="9" fill="var(--wire-data4)" class="bold-text">OUT−</text>
+      <text x="1545" y="623" font-size="9" fill="var(--wire-gnd)" text-anchor="end" class="bold-text">GND</text>
+      <circle cx="1550" cy="605" r="3" class="pin"/>
+      <circle cx="1710" cy="605" r="3" class="pin"/>
+      <circle cx="1710" cy="635" r="3" class="pin"/>
+      <circle cx="1550" cy="627" r="3" class="pin"/>
+    </g>
+    <g id="Z4">
+      <rect class="comp" rx="2" x="1750" y="590" width="120" height="50"
+            data-info="Z4|113 kHz piezo transducer #4|Microporous disc|Pair with wick + reservoir"/>
+      <text x="1810" y="610" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text">Z4</text>
+      <text x="1810" y="627" font-size="9" fill="var(--text-secondary)" text-anchor="middle">113 kHz piezo</text>
+      <circle cx="1750" cy="605" r="3" class="pin"/>
+      <circle cx="1750" cy="635" r="3" class="pin"/>
+    </g>
+
+    <!-- =========================================
+         WIRING
+         ========================================= -->
+
+    <!-- 12V trunk: PSU.V+ → F_MAIN input (x=390) → F_MAIN → J_12V (x=470) -->
+    <line x1="340" y1="680" x2="440" y2="680" class="w12v-bus" data-info="12V_MAIN|PSU.V+ → F_MAIN input|18 AWG RED · 1.18 A"/>
+    <!-- 12V_BUS: J_12V split → F1 -->
+    <line x1="520" y1="634" x2="540" y2="634" class="w12v-bus" data-info="12V_BUS|J_12V → F1|18 AWG RED"/>
+    <!-- 12V_ESP: F1 out → rise at x=510 → horizontal run to U1.VIN (790,634) -->
+    <!-- F1 riser removed — F1 now sits at VIN level y=634 -->
+    <line x1="610" y1="634" x2="790" y2="634" class="w12v" data-info="12V_ESP|F1 → U1.VIN|22 AWG RED · 0.40 A"/>
+
+    <!-- 12V_BUCK path DELETED in Rev 2.0 (F2 and U2 removed) -->
+
+    <!-- J_12V junction dot — 3-way: post-F_MAIN in (left) + F1 right + bus tap down -->
+    <circle cx="520" cy="680" r="4.5" class="j12v" data-info="12V|J_12V 3-way|post-F_MAIN: F1 right + bus tap down"/>
+
+    <!-- F_MAIN output → J_12V (F_MAIN inline horizontal at y=680) -->
+    <line x1="510" y1="680" x2="520" y2="680" class="w12v-bus" stroke-width="2" data-info="12V|F_MAIN out → J_12V|18 AWG RED"/>
+
+    <!-- ===== J_12V bus tap → +12V reference bus (y=890) — post-F_MAIN ===== -->
+    <!-- Tap goes straight down from J_12V (arc-hop over GND bus at y=850) -->
+    <line x1="520" y1="634" x2="520" y2="845" class="w12v-bus" stroke-width="2" data-info="12V|J_12V → +12V ref bus|post-F_MAIN distribution rail"/>
+    <path class="arc w12v-bus" d="M 520,845 a 5,5 0 0,1 0,10" fill="none" stroke-width="2" data-info="ARC_HOP|12V crosses GND bus at x=520|arc clearance"/>
+    <line x1="520" y1="855" x2="520" y2="890" class="w12v-bus" stroke-width="2" data-info="12V|J_12V → +12V ref bus landing|post-F_MAIN distribution rail"/>
+    <circle cx="520" cy="890" r="3.5" class="j12v" data-info="12V|J_12V → +12V bus landing|post-F_MAIN: COM distribution feeds from here"/>
+
+    <!-- U2 VOUT/GND stubs DELETED in Rev 2.0 (U2 removed) -->
+    <!-- 5V trunk DELETED in Rev 2.0 (no 5V rail) -->
+
+    <!-- CH COM taps: 12V spine (x=1280) → CHn.COM (Rev 2.0: was 5V bus) -->
+    <line x1="1221" y1="250" x2="1280" y2="250" class="w12v" data-info="12V_COM_CH1|→ CH1.COM|22 AWG pigtail"/>
+    <line x1="1221" y1="350" x2="1280" y2="350" class="w12v" data-info="12V_COM_CH2|→ CH2.COM|22 AWG pigtail"/>
+    <line x1="1221" y1="450" x2="1280" y2="450" class="w12v" data-info="12V_COM_CH3|→ CH3.COM|22 AWG pigtail"/>
+    <line x1="1221" y1="550" x2="1280" y2="550" class="w12v" data-info="12V_COM_CH4|→ CH4.COM|22 AWG pigtail"/>
+
+    <!-- J_12V spine junction at CH2, CH3, CH4 branch points (3-way: spine continues up + stub left) -->
+    <circle cx="1280" cy="350" r="3.5" class="j12v" data-info="12V_COM_CH2|12V spine CH2 tap|3-way junction"/>
+    <circle cx="1280" cy="450" r="3.5" class="j12v" data-info="12V_COM_CH3|12V spine CH3 tap|3-way junction"/>
+    <circle cx="1280" cy="550" r="3.5" class="j12v" data-info="12V_COM_CH4|12V spine CH4 tap|3-way junction"/>
+
+    <!-- RC top stubs DELETED in Rev 2.0 (RC1-RC4 removed) -->
+    <!-- 5V COM return path DELETED in Rev 2.0 (no 5V bus) -->
+
+    <!-- NEW: 12V COM feed spine — taps +12V bus at (1280,890), runs UP to CH1.COM at (1280,250) -->
+    <!-- Arc-hop over GND bus at y=850; bottom → arc → main spine -->
+    <!-- Bottom segment: +12V bus up to just below GND bus -->
+    <line x1="1280" y1="890" x2="1280" y2="855" class="w12v" stroke-width="2.5" data-info="12V_COM_FEED|+12V bus → CH COMs bottom segment|22 AWG pigtail"/>
+    <!-- Arc hop over GND bus (bump right, clockwise) -->
+    <path class="arc w12v" d="M 1280,855 a 5,5 0 0,1 0,-10" fill="none" stroke-width="2.5" data-info="ARC_HOP|12V COM feed crosses GND bus at x=1280|arc clearance"/>
+    <!-- Main spine: from above GND bus up through CH4/CH3/CH2 junction dots to CH1 level -->
+    <line x1="1280" y1="845" x2="1280" y2="250" class="w12v" stroke-width="2.5" data-info="12V_COM_FEED|+12V bus → CH COMs main spine|22 AWG pigtail"/>
+    <!-- Source junction dot on +12V bus -->
+    <circle cx="1280" cy="890" r="3.5" class="j12v" data-info="12V_COM_FEED|+12V bus → CH COMs tap|post-F_MAIN source"/>
+
+    <!-- CH NO out → F → driver V+ (RC stubs removed in Rev 2.0) -->
+    <!-- CH1 NO: y=280 -->
+    <line x1="1221" y1="280" x2="1310" y2="280"
+          class="wdata" data-info="SW_A1|CH1.NO → F3 tap|switched 12V to A1"/>
+    <line x1="1310" y1="280" x2="1310" y2="305" class="wdata" data-info="SW_A1|junction → F3 level|22 AWG switched"/>
+    <line x1="1310" y1="305" x2="1385" y2="305" class="wdata" data-info="SW_A1|→ F3 in|22 AWG RED"/>
+    <line x1="1455" y1="305" x2="1550" y2="305" class="wdata" data-info="SW_A1|F3 out → A1.V+|22 AWG RED"/>
+    <!-- CH2 NO: y=380 -->
+    <line x1="1221" y1="380" x2="1310" y2="380"
+          class="wdata2" data-info="SW_A2|CH2.NO → F4 tap|switched 12V to A2"/>
+    <line x1="1310" y1="380" x2="1310" y2="405" class="wdata2" data-info="SW_A2|junction → F4 level|22 AWG switched"/>
+    <line x1="1310" y1="405" x2="1385" y2="405" class="wdata2" data-info="SW_A2|→ F4 in|22 AWG RED"/>
+    <line x1="1455" y1="405" x2="1515" y2="405" class="wdata2" data-info="SW_A2|F4 out → A2.V+|22 AWG RED"/>
+    <path class="arc wdata2" d="M 1515,405 a 5,5 0 0,0 10,0" fill="none" data-info="ARC_HOP|SW_A2 crosses GND collector at x=1520|arc clearance"/>
+    <line x1="1525" y1="405" x2="1550" y2="405" class="wdata2" data-info="SW_A2|F4 out → A2.V+ landing|22 AWG RED"/>
+    <!-- CH3 NO: y=480 -->
+    <line x1="1221" y1="480" x2="1310" y2="480"
+          class="wdata3" data-info="SW_A3|CH3.NO → F5 tap|switched 12V to A3"/>
+    <line x1="1310" y1="480" x2="1310" y2="505" class="wdata3" data-info="SW_A3|junction → F5 level|22 AWG switched"/>
+    <line x1="1310" y1="505" x2="1385" y2="505" class="wdata3" data-info="SW_A3|→ F5 in|22 AWG RED"/>
+    <line x1="1455" y1="505" x2="1515" y2="505" class="wdata3" data-info="SW_A3|F5 out → A3.V+|22 AWG RED"/>
+    <path class="arc wdata3" d="M 1515,505 a 5,5 0 0,0 10,0" fill="none" data-info="ARC_HOP|SW_A3 crosses GND collector at x=1520|arc clearance"/>
+    <line x1="1525" y1="505" x2="1550" y2="505" class="wdata3" data-info="SW_A3|F5 out → A3.V+ landing|22 AWG RED"/>
+    <!-- CH4 NO: y=580 -->
+    <line x1="1221" y1="580" x2="1310" y2="580"
+          class="wdata4" data-info="SW_A4|CH4.NO → F6 tap|switched 12V to A4"/>
+    <line x1="1310" y1="580" x2="1310" y2="605" class="wdata4" data-info="SW_A4|junction → F6 level|22 AWG switched"/>
+    <line x1="1310" y1="605" x2="1385" y2="605" class="wdata4" data-info="SW_A4|→ F6 in|22 AWG RED"/>
+    <line x1="1455" y1="605" x2="1515" y2="605" class="wdata4" data-info="SW_A4|F6 out → A4.V+|22 AWG RED"/>
+    <path class="arc wdata4" d="M 1515,605 a 5,5 0 0,0 10,0" fill="none" data-info="ARC_HOP|SW_A4 crosses GND collector at x=1520|arc clearance"/>
+    <line x1="1525" y1="605" x2="1550" y2="605" class="wdata4" data-info="SW_A4|F6 out → A4.V+ landing|22 AWG RED"/>
+
+
+    <!-- RC tap-junction dots DELETED in Rev 2.0 (RC1-RC4 removed) -->
+    <!-- CH NO-side T-junctions (L-bend to Fn level) -->
+    <circle cx="1310" cy="280" r="2.5" class="jdata"  data-info="SW_A1|CH1.NO T-junction → F3|switching node"/>
+    <circle cx="1310" cy="380" r="2.5" class="jdata2" data-info="SW_A2|CH2.NO T-junction → F4|switching node"/>
+    <circle cx="1310" cy="480" r="2.5" class="jdata3" data-info="SW_A3|CH3.NO T-junction → F5|switching node"/>
+    <circle cx="1310" cy="580" r="2.5" class="jdata4" data-info="SW_A4|CH4.NO T-junction → F6|switching node"/>
+
+    <!-- Piezo signal: A_n OUT± → Z_n pins (same color class per channel) -->
+    <line x1="1710" y1="305" x2="1750" y2="305" class="wdata" data-info="PIEZO_1+|A1.OUT+ → Z1|113 kHz piezo drive"/>
+    <line x1="1710" y1="335" x2="1750" y2="335" class="wdata" data-info="PIEZO_1−|A1.OUT− → Z1|113 kHz piezo return"/>
+    <line x1="1710" y1="405" x2="1750" y2="405" class="wdata2" data-info="PIEZO_2+|A2.OUT+ → Z2|113 kHz piezo drive"/>
+    <line x1="1710" y1="435" x2="1750" y2="435" class="wdata2" data-info="PIEZO_2−|A2.OUT− → Z2|113 kHz piezo return"/>
+    <line x1="1710" y1="505" x2="1750" y2="505" class="wdata3" data-info="PIEZO_3+|A3.OUT+ → Z3|113 kHz piezo drive"/>
+    <line x1="1710" y1="535" x2="1750" y2="535" class="wdata3" data-info="PIEZO_3−|A3.OUT− → Z3|113 kHz piezo return"/>
+    <line x1="1710" y1="605" x2="1750" y2="605" class="wdata4" data-info="PIEZO_4+|A4.OUT+ → Z4|113 kHz piezo drive"/>
+    <line x1="1710" y1="635" x2="1750" y2="635" class="wdata4" data-info="PIEZO_4−|A4.OUT− → Z4|113 kHz piezo return"/>
+
+    <!-- ===== GND wiring ===== -->
+    <!-- PSU.V− → common GND bus (stub + trunk offset 15 px from PSU right edge) -->
+    <line x1="340" y1="730" x2="365" y2="730" class="wgnd-bus" data-info="GND|PSU V− pin stub|18 AWG BLACK"/>
+    <line x1="365" y1="730" x2="365" y2="850" class="wgnd-bus" data-info="GND|PSU return trunk|18 AWG BLACK"/>
+    <!-- U2.GND wire DELETED in Rev 2.0 (U2 removed) -->
+    <!-- ESP.GND → common GND bus (connects to DC power − terminal at inner cx=110 cy=610) -->
+    <line x1="725" y1="662" x2="725" y2="850" class="wgnd" data-info="GND|U1.GND → star bus|22 AWG BLACK"/>
+    <!-- Jog right to reach U1 GND terminal circle at schematic x≈790 -->
+    <line x1="725" y1="662" x2="790" y2="662" class="wgnd" data-info="GND|U1 GND terminal jog|22 AWG BLACK"/>
+
+    <!-- A1–A4 GND → direct stub to left-side GND collector at x=1530 -->
+    <line x1="1550" y1="327" x2="1520" y2="327" class="wgnd" data-info="GND|A1.GND → collector|22 AWG BLACK"/>
+    <line x1="1550" y1="427" x2="1520" y2="427" class="wgnd" data-info="GND|A2.GND → collector|22 AWG BLACK"/>
+    <line x1="1550" y1="527" x2="1520" y2="527" class="wgnd" data-info="GND|A3.GND → collector|22 AWG BLACK"/>
+    <line x1="1550" y1="627" x2="1520" y2="627" class="wgnd" data-info="GND|A4.GND → collector|22 AWG BLACK"/>
+    <!-- Left-side GND collector down to common bus -->
+    <line x1="1520" y1="327" x2="1520" y2="850" class="wgnd-bus" data-info="GND collector|A1–A4 returns → star bus|merge"/>
+
+    <!-- Junction dots on left-side GND collector at each A_n entry -->
+    <circle cx="1520" cy="327" r="3.5" class="jgnd" data-info="GND|A1.GND → collector|junction"/>
+    <circle cx="1520" cy="427" r="3.5" class="jgnd" data-info="GND|A2.GND → collector|junction"/>
+    <circle cx="1520" cy="527" r="3.5" class="jgnd" data-info="GND|A3.GND → collector|junction"/>
+    <circle cx="1520" cy="627" r="3.5" class="jgnd" data-info="GND|A4.GND → collector|junction"/>
+
+    <!-- Junction dots on common GND bus -->
+    <circle cx="365"  cy="850" r="4.5" class="jgnd" data-info="GND|PSU.V− → GND bus|star point landing"/>
+    <!-- U2.GND bus dot DELETED in Rev 2.0 -->
+    <circle cx="725"  cy="850" r="3.5" class="jgnd" data-info="GND|U1.GND → GND bus|star bus tap"/>
+    <circle cx="1520" cy="850" r="4.5" class="jgnd" data-info="GND|A1–A4 GND → GND bus|star point landing"/>
+
+    <!-- ===========================
+         COMMON GROUND BUS
+         =========================== -->
+    <line x1="-165" y1="850" x2="2040" y2="850" class="wgnd-bus" data-info="GND_BUS|Common star ground return bus|Chassis earth reference"/>
+    <text x="2030" y="840" font-size="15" fill="var(--wire-gnd)" text-anchor="end" class="black-text" letter-spacing="3">── COMMON GROUND BUS (STAR) ──</text>
+
+    <!-- ===========================
+         +12V BUS (reference rail, below GND)
+         =========================== -->
+    <line x1="-165" y1="890" x2="2040" y2="890" class="w12v-bus" data-info="12V_BUS|+12V reference rail|Visual reference only — unfused tap"/>
+    <text x="2030" y="880" font-size="15" fill="var(--wire-12v)" text-anchor="end" class="black-text" letter-spacing="3">── +12V BUS ──</text>
+
+    <!-- +5V BUS DELETED in Rev 2.0 (no 5V rail) -->
+
+    <!-- ===========================
+         BOTTOM PANELS (y 1080…1700)
+         =========================== -->
+
+    <!-- ===== BOM Panel ===== -->
+    <g id="bom-panel" class="bom-panel" transform="translate(0,-100)">
+    <rect x="40" y="1080" width="620" height="198" rx="4" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+    <text x="350" y="1100" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="2">BILL OF MATERIALS  ·  9 LINE ITEMS</text>
+    <line x1="40" y1="1108" x2="660" y2="1108" stroke="var(--comp-stroke)" stroke-width="1"/>
+
+    <!-- Column headers -->
+    <rect x="40" y="1108" width="620" height="18" fill="var(--bg-panel)" stroke="none"/>
+    <text x="60"  y="1121" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">#</text>
+    <text x="105" y="1121" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">QTY</text>
+    <text x="195" y="1121" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">REF</text>
+    <text x="455" y="1121" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">DESCRIPTION</text>
+    <line x1="40"  y1="1126" x2="660" y2="1126" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+    <!-- Vertical column dividers -->
+    <line x1="80"  y1="1108" x2="80"  y2="1274" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+    <line x1="130" y1="1108" x2="130" y2="1274" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+    <line x1="260" y1="1108" x2="260" y2="1274" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+
+    <!-- Row 1 --><text x="60"  y="1138" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+    <text x="105" y="1138" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+    <text x="195" y="1138" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">U1</text>
+    <text x="268" y="1138" font-size="10" fill="var(--text-primary)">Waveshare ESP32-S3-Relay-6CH</text>
+    <line x1="80" y1="1143" x2="655" y2="1143" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    <!-- Row 2 --><text x="60"  y="1152" font-size="10" fill="var(--text-primary)" text-anchor="middle">2</text>
+    <text x="105" y="1152" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+    <text x="195" y="1152" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">ANT1</text>
+    <text x="268" y="1152" font-size="10" fill="var(--text-primary)">2.4 GHz SMA antenna, u.FL pigtail</text>
+    <line x1="80" y1="1157" x2="655" y2="1157" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    <!-- Row 3 --><text x="60"  y="1166" font-size="10" fill="var(--text-primary)" text-anchor="middle">3</text>
+    <text x="105" y="1166" font-size="10" fill="var(--text-primary)" text-anchor="middle">4</text>
+    <text x="195" y="1166" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">A1–A4</text>
+    <text x="268" y="1166" font-size="10" fill="var(--text-primary)">JY-M27AO atomizer driver · 12 V rear pads · 6–24 V</text>
+    <line x1="80" y1="1171" x2="655" y2="1171" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    <!-- Row 4 --><text x="60"  y="1180" font-size="10" fill="var(--text-primary)" text-anchor="middle">4</text>
+    <text x="105" y="1180" font-size="10" fill="var(--text-primary)" text-anchor="middle">4</text>
+    <text x="195" y="1180" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">Z1–Z4</text>
+    <text x="268" y="1180" font-size="10" fill="var(--text-primary)">113 kHz piezo transducer, microporous disc</text>
+    <line x1="80" y1="1185" x2="655" y2="1185" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    <!-- Row 5 --><text x="60"  y="1194" font-size="10" fill="var(--text-primary)" text-anchor="middle">5</text>
+    <text x="105" y="1194" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+    <text x="195" y="1194" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">PSU1</text>
+    <text x="268" y="1194" font-size="10" fill="var(--text-primary)">DC PSU 12 V · 5 A · DIN rail (5× margin over 1.0 A steady)</text>
+    <line x1="80" y1="1199" x2="655" y2="1199" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    <!-- Row 6 --><text x="60"  y="1208" font-size="10" fill="var(--text-primary)" text-anchor="middle">6</text>
+    <text x="105" y="1208" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+    <text x="195" y="1208" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">F_MAIN</text>
+    <text x="268" y="1208" font-size="10" fill="var(--text-primary)">Inline fuse T2A · 2 A slow-blow · 5×20 mm</text>
+    <line x1="80" y1="1213" x2="655" y2="1213" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    <!-- Row 7 --><text x="60"  y="1222" font-size="10" fill="var(--text-primary)" text-anchor="middle">7</text>
+    <text x="105" y="1222" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+    <text x="195" y="1222" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">F1</text>
+    <text x="268" y="1222" font-size="10" fill="var(--text-primary)">Inline fuse T1A · 1 A slow-blow · 5×20 mm</text>
+    <line x1="80" y1="1227" x2="655" y2="1227" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    <!-- Row 8 --><text x="60"  y="1236" font-size="10" fill="var(--text-primary)" text-anchor="middle">8</text>
+    <text x="105" y="1236" font-size="10" fill="var(--text-primary)" text-anchor="middle">4</text>
+    <text x="195" y="1236" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">F3–F6</text>
+    <text x="268" y="1236" font-size="10" fill="var(--text-primary)">Inline fuse T500mA · 500 mA slow-blow · 5×20 mm</text>
+    <line x1="80" y1="1241" x2="655" y2="1241" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    <!-- Row 9 --><text x="60"  y="1250" font-size="10" fill="var(--text-primary)" text-anchor="middle">9</text>
+    <text x="105" y="1250" font-size="10" fill="var(--text-primary)" text-anchor="middle">6</text>
+    <text x="195" y="1250" font-size="10" fill="var(--text-primary)" text-anchor="middle">—</text>
+    <text x="268" y="1250" font-size="10" fill="var(--text-primary)">Inline fuse holder 5×20 mm (F_MAIN, F1, F3–F6)</text>
+    <line x1="80" y1="1255" x2="655" y2="1255" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    </g>
+
+    <!-- ===== Wire-Gauge Table ===== -->
+    <g class="wire-gauge-table" transform="translate(690,980)" data-info="Wire gauge|AWG and current rating per run|per net">
+      <rect x="0" y="0" width="320" height="240" rx="2" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="160" y="20" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1.5">WIRE-GAUGE / AMPACITY</text>
+      <line x1="0" y1="28" x2="320" y2="28" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <text x="38"  y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">CH</text>
+      <text x="100" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">AWG</text>
+      <text x="180" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">A · max</text>
+      <text x="270" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">RUN</text>
+      <line x1="0" y1="50" x2="320" y2="50" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+
+      <rect x="20" y="60" width="36" height="4" rx="1" class="j12v"/>
+      <text x="100" y="65" font-size="10" fill="var(--text-primary)" text-anchor="middle">18</text>
+      <text x="180" y="65" font-size="10" fill="var(--text-secondary)" text-anchor="middle">~1.0 A / 21 %</text>
+      <text x="270" y="65" font-size="10" fill="var(--text-secondary)" text-anchor="middle">PSU→F_MAIN</text>
+      <line x1="6" y1="71" x2="314" y2="71" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="78" width="36" height="4" rx="1" class="j12v"/>
+      <text x="100" y="83" font-size="10" fill="var(--text-primary)" text-anchor="middle">22</text>
+      <text x="180" y="83" font-size="10" fill="var(--text-secondary)" text-anchor="middle">0.40 A / 43 %</text>
+      <text x="270" y="83" font-size="10" fill="var(--text-secondary)" text-anchor="middle">F1→ESP</text>
+      <line x1="6" y1="89" x2="314" y2="89" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="96" width="36" height="4" rx="1" class="j12v"/>
+      <text x="100" y="101" font-size="10" fill="var(--text-primary)" text-anchor="middle">18</text>
+      <text x="180" y="101" font-size="10" fill="var(--text-secondary)" text-anchor="middle">~0.6 A / 12 %</text>
+      <text x="270" y="101" font-size="10" fill="var(--text-secondary)" text-anchor="middle">F_MAIN→COM splice</text>
+      <line x1="6" y1="107" x2="314" y2="107" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="114" width="36" height="4" rx="1" class="j12v"/>
+      <text x="100" y="119" font-size="10" fill="var(--text-primary)" text-anchor="middle">22</text>
+      <text x="180" y="119" font-size="10" fill="var(--text-secondary)" text-anchor="middle">~0.15 A / 16 %</text>
+      <text x="270" y="119" font-size="10" fill="var(--text-secondary)" text-anchor="middle">splice→CHn.COM</text>
+      <line x1="6" y1="125" x2="314" y2="125" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="132" width="36" height="4" rx="1" class="jdata"/>
+      <text x="100" y="137" font-size="10" fill="var(--text-primary)" text-anchor="middle">22</text>
+      <text x="180" y="137" font-size="10" fill="var(--text-secondary)" text-anchor="middle">~0.15 A / 16 %</text>
+      <text x="270" y="137" font-size="10" fill="var(--text-secondary)" text-anchor="middle">CHn.NO→driver</text>
+      <line x1="6" y1="143" x2="314" y2="143" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="150" width="36" height="4" rx="1" class="jgnd"/>
+      <text x="100" y="155" font-size="10" fill="var(--text-primary)" text-anchor="middle">22</text>
+      <text x="180" y="155" font-size="10" fill="var(--text-secondary)" text-anchor="middle">~0.15 A / 16 %</text>
+      <text x="270" y="155" font-size="10" fill="var(--text-secondary)" text-anchor="middle">A_n.GND return</text>
+      <line x1="6" y1="161" x2="314" y2="161" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="168" width="36" height="4" rx="1" class="jgnd"/>
+      <text x="100" y="173" font-size="10" fill="var(--text-primary)" text-anchor="middle">18</text>
+      <text x="180" y="173" font-size="10" fill="var(--text-secondary)" text-anchor="middle">~1.0 A / 21 %</text>
+      <text x="270" y="173" font-size="10" fill="var(--text-secondary)" text-anchor="middle">GND trunk star</text>
+      <line x1="0" y1="182" x2="320" y2="182" stroke="var(--comp-stroke)" stroke-width="1"/>
+
+      <text x="160" y="198" font-size="9" fill="var(--text-secondary)" text-anchor="middle">All 12 V trunks 18 AWG; all sub-branches 22 AWG</text>
+      <text x="160" y="212" font-size="9" fill="var(--text-secondary)" text-anchor="middle">(all loads under 50 % ampacity)</text>
+    </g>
+
+    <!-- ===== Fuse-Margin Table ===== -->
+    <g class="fuse-margin-table" transform="translate(690,1240)" data-info="Fuse margin summary|Steady load vs fuse rating|safety margin">
+      <rect x="0" y="0" width="320" height="155" rx="2" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="160" y="20" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1.5">FUSE MARGIN (§4.6)</text>
+      <line x1="0" y1="28" x2="320" y2="28" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <!-- Column headers: FUSE | SIZE | LOAD | RATING | MARGIN -->
+      <text x="40"  y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">FUSE</text>
+      <text x="113" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">SIZE</text>
+      <text x="170" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">LOAD</text>
+      <text x="222" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">RATING</text>
+      <text x="282" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">MARGIN</text>
+      <line x1="0" y1="50" x2="320" y2="50" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+      <!-- Vertical dividers — stop at separator (y=120), not in footer text area -->
+      <line x1="80"  y1="28" x2="80"  y2="120" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      <line x1="145" y1="28" x2="145" y2="120" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      <line x1="195" y1="28" x2="195" y2="120" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      <line x1="250" y1="28" x2="250" y2="120" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <!-- Row 1: F_MAIN -->
+      <text x="40"  y="68" font-size="10" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">F_MAIN · T2A</text>
+      <text x="113" y="68" font-size="10" fill="var(--text-secondary)" text-anchor="middle">5×20 mm</text>
+      <text x="170" y="68" font-size="10" fill="var(--text-secondary)" text-anchor="middle">~1.0 A</text>
+      <text x="222" y="68" font-size="10" fill="var(--text-secondary)" text-anchor="middle">2.0 A</text>
+      <text x="282" y="68" font-size="10" fill="var(--accent)"         text-anchor="middle" class="bold-text">2.0×</text>
+      <line x1="6" y1="74" x2="314" y2="74" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      <!-- Row 2: F1 -->
+      <text x="40"  y="90" font-size="10" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">F1 · T1A</text>
+      <text x="113" y="90" font-size="10" fill="var(--text-secondary)" text-anchor="middle">5×20 mm</text>
+      <text x="170" y="90" font-size="10" fill="var(--text-secondary)" text-anchor="middle">0.40 A</text>
+      <text x="222" y="90" font-size="10" fill="var(--text-secondary)" text-anchor="middle">1.0 A</text>
+      <text x="282" y="90" font-size="10" fill="var(--accent)"         text-anchor="middle" class="bold-text">2.5×</text>
+      <line x1="6" y1="96" x2="314" y2="96" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      <!-- Row 3: F3–F6 (F2 deleted in Rev 2.0) -->
+      <text x="40"  y="112" font-size="10" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">F3–F6 · T500mA</text>
+      <text x="113" y="112" font-size="10" fill="var(--text-secondary)" text-anchor="middle">5×20 mm</text>
+      <text x="170" y="112" font-size="10" fill="var(--text-secondary)" text-anchor="middle">~0.15 A</text>
+      <text x="222" y="112" font-size="10" fill="var(--text-secondary)" text-anchor="middle">0.25 A</text>
+      <text x="282" y="112" font-size="10" fill="var(--accent)"         text-anchor="middle" class="bold-text">3.3×</text>
+      <line x1="0" y1="120" x2="320" y2="120" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <text x="160" y="135" font-size="9" fill="var(--text-secondary)" text-anchor="middle">All slow-blow. F3–F6 at T500 mA (3.3×) — selected for JY-M27AO inrush.</text>
+      <text x="160" y="149" font-size="9" fill="var(--text-secondary)" text-anchor="middle">T250 mA caused inrush trips on cold-start. T500 mA confirmed adequate.</text>
+    </g>
+
+    <!-- ===== Harness Tables ===== -->
+    <!-- U1 harness — only used pins, 10 rows -->
+    <g class="harness-table" transform="translate(1040,980)" data-info="U1 harness|ESP32-S3-Relay-6CH wire map|connector pinout">
+      <rect x="0" y="0" width="300" height="270" rx="2" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <line x1="0" y1="28" x2="300" y2="28" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <text x="150" y="19" font-size="12" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1.5">U1 · HARNESS (used)</text>
+      <line x1="42"  y1="28" x2="42"  y2="270" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <line x1="150" y1="28" x2="150" y2="270" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <line x1="258" y1="28" x2="258" y2="270" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <text x="21"  y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">PIN</text>
+      <text x="96"  y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">NAME</text>
+      <text x="204" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">NET</text>
+      <text x="279" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">CH</text>
+      <line x1="0" y1="50" x2="300" y2="50" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+      <!-- rows: VIN, GND, CH1 COM/NO, CH2 COM/NO, CH3 COM/NO, CH4 COM/NO -->
+      <g transform="translate(0,50)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">P1</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">VIN (12V)</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">12V_ESP</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="j12v"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">12V</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,72)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">P2</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">GND</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">GND</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jgnd"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">GND</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,94)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">CH1</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">COM (GPIO1)</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">12V_COM</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="j12v"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">A1</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,116)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">CH1</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">NO</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">SW_A1</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jdata"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">A1</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,138)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">CH2</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">COM (GPIO2)</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">12V_COM</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="j12v"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">A2</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,160)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">CH2</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">NO</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">SW_A2</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jdata2"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">A2</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,182)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">CH3</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">COM (GPIO41)</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">12V_COM</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="j12v"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">A3</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,204)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">CH3</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">NO</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">SW_A3</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jdata3"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">A3</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,226)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">CH4</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">COM (GPIO42)</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">12V_COM</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="j12v"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">A4</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,248)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">CH4</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">NO</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">SW_A4</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jdata4"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">A4</text>
+      </g>
+    </g>
+
+    <!-- U2 harness DELETED in Rev 2.0 -->
+
+    <!-- A_n harness (representative for A1) — moved up from 1530 to 1380 -->
+    <g class="harness-table" transform="translate(1040,1280)" data-info="A_n harness|Atomizer driver wire map (representative)|connector pinout">
+      <rect x="0" y="0" width="300" height="138" rx="2" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <line x1="0" y1="28" x2="300" y2="28" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <text x="150" y="19" font-size="12" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1.5">A_n · ATOMIZER DRV (A1 shown)</text>
+      <line x1="42"  y1="28" x2="42"  y2="138" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <line x1="150" y1="28" x2="150" y2="138" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <line x1="258" y1="28" x2="258" y2="138" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <text x="21"  y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">PIN</text>
+      <text x="96"  y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">NAME</text>
+      <text x="204" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">NET</text>
+      <text x="279" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">CH</text>
+      <line x1="0" y1="50" x2="300" y2="50" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+      <g transform="translate(0,50)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">1</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">V+</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">SW_A1</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jdata"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">CH1</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,72)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">2</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">GND</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">GND</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jgnd"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">GND</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,94)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">3</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">OUT+</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">PIEZO_1+</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jdata"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">CH1</text>
+        <line x1="6" y1="22" x2="294" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g transform="translate(0,116)">
+        <text x="21" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">4</text>
+        <text x="96" y="14" font-size="10" fill="var(--text-primary)" text-anchor="middle">OUT−</text>
+        <text x="204" y="14" font-size="10" fill="var(--text-secondary)" text-anchor="middle">PIEZO_1−</text>
+        <rect x="263" y="9" width="20" height="4" rx="1" class="jdata"/>
+        <text x="296" y="14" font-size="8" fill="var(--text-secondary)" text-anchor="end">CH1</text>
+      </g>
+    </g>
+
+    <!-- ===== Notes / Revision Panel ===== -->
+    <g transform="translate(0,-100)">
+    <rect x="1350" y="1080" width="650" height="600" rx="4" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+    <text x="1675" y="1102" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="2">NOTES</text>
+    <line x1="1350" y1="1112" x2="2000" y2="1112" stroke="var(--comp-stroke)" stroke-width="1"/>
+
+    <text x="1365" y="1135" font-size="12" fill="var(--text-secondary)" class="bold-text">
+      <tspan fill="var(--text-primary)">1.</tspan> Fuse topology: F_MAIN (T2A) protects all downstream; F1 (T1A) only the ESP/relay-coil
+      <tspan x="1380" dy="14">sub-branch; F3–F6 (T500mA) per-channel atomizer protection.</tspan>
+      <tspan x="1380" dy="14">T500 mA selected — handles cold-start inrush from JY-M27AO piezo driver.</tspan>
+    </text>
+    <text x="1365" y="1190" font-size="12" fill="var(--text-secondary)" class="bold-text">
+      <tspan fill="var(--text-primary)">2.</tspan> 12 V relay COM: the four CHn.COM screw terminals are INDEPENDENT — not internally
+      <tspan x="1380" dy="14">tied. Splice the post-F_MAIN 12 V trunk through a ferrule into four short pigtails,</tspan>
+      <tspan x="1380" dy="14">one per CH1.COM…CH4.COM. Do NOT rely solely on the daisy-chain jumper.</tspan>
+    </text>
+    <text x="1365" y="1245" font-size="12" fill="var(--text-secondary)" class="bold-text">
+      <tspan fill="var(--text-primary)">3.</tspan> GND topology: single star bus. 18 AWG trunk from PSU to a screw-terminal block;
+      <tspan x="1380" dy="14">22 AWG spurs from each atomizer driver return to that same block.</tspan>
+      <tspan x="1380" dy="14">A1–A4 returns merge on a right-side collector before the trunk.</tspan>
+    </text>
+    <text x="1365" y="1300" font-size="12" fill="var(--text-secondary)" class="bold-text">
+      <tspan fill="var(--text-primary)">4.</tspan> EMI hygiene: piezo drivers run at 113 kHz. Keep atomizer feed runs short
+      <tspan x="1380" dy="14">(&lt; 30 cm) and twist each 12V+ / GND pair to minimize loop area and 2.4 GHz coupling.</tspan>
+    </text>
+    <text x="1365" y="1340" font-size="12" fill="var(--warn)" class="bold-text">
+      <tspan fill="var(--text-primary)">5.</tspan> Custom firmware rule: relay GPIO switching rate must not exceed 1 Hz.
+      <tspan x="1380" dy="14">Minimum ON-time ≥ 500 ms. Never auto-cycle channels faster than ~1 Hz —</tspan>
+      <tspan x="1380" dy="14">mechanical relays will not survive audio-rate switching.</tspan>
+    </text>
+    <text x="1365" y="1395" font-size="12" fill="var(--warn)" class="bold-text">
+      <tspan fill="var(--text-primary)">6.</tspan> Custom firmware init: ensure relay GPIOs (1, 2, 41, 42) start LOW on boot
+      <tspan x="1380" dy="14">to prevent simultaneous channel firing on power-up.</tspan>
+    </text>
+
+    <text x="1675" y="1538" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="2">REVISION HISTORY</text>
+    <line x1="1350" y1="1548" x2="2000" y2="1548" stroke="var(--comp-stroke)" stroke-width="1"/>
+    <text x="1365" y="1570" font-size="13" fill="var(--accent)" class="bold-text">
+      <tspan fill="var(--text-primary)">Rev 1.0</tspan> · 2026-05-14 — Initial release.
+      <tspan x="1430" dy="16" fill="var(--text-secondary)">Corrected fuse topology (F_MAIN + F2 added); 18 AWG upsize on trunk runs.</tspan>
+    </text>
+    <text x="1365" y="1606" font-size="13" fill="var(--accent)" class="bold-text">
+      <tspan fill="var(--text-primary)">Rev 2.0</tspan> · 2026-05-19 — 5 V rail removed (U2, F2, RC1–RC4 deleted). COM bus 5 V→12 V.
+      <tspan x="1430" dy="16" fill="var(--text-secondary)">JY-M27AO rear-pad power. Custom firmware. F3–F6 T500 mA (inrush fix). Rear-pad warning added.</tspan>
+    </text>
+    </g>
+
+  </g>
+</svg>
+</div>
+</div>
+
+<div id="zoom-controls">
+  <button class="zoom-btn" id="zoom-in" title="Zoom In (Ctrl+Shift++)">+</button>
+  <button class="zoom-btn" id="zoom-out" title="Zoom Out (Ctrl+Shift+−)">−</button>
+  <span id="zoom-level">100%</span>
+  <button class="zoom-btn fit-btn" id="zoom-fit" title="Fit to Screen (Ctrl+Shift+0)">FIT</button>
+  <button class="zoom-btn fit-btn" id="export-svg" title="Export as Standalone SVG" style="margin-left:12px; color:var(--wire-data);">Export SVG</button>
+  <button class="zoom-btn fit-btn" id="export-png" title="Export as High-Res PNG" style="color:var(--wire-5v);">Export PNG</button>
+</div>
+<div class="zoom-shortcut-hint">Ctrl+Shift+ +/−/0 · Scroll to zoom · Drag to pan</div>
+
+<div class="tip" id="tip">
+  <div class="ttl" id="tipTtl">Component Name</div>
+  <div class="desc" id="tipDesc">Description</div>
+</div>
+
+<script>
+  const tip = document.getElementById('tip');
+  const tipTtl = document.getElementById('tipTtl');
+  const tipDesc = document.getElementById('tipDesc');
+  document.querySelectorAll('[data-info]').forEach(el => {
+    el.addEventListener('mouseenter', (e) => {
+      const t = e.target.closest('[data-info]') || e.target;
+      const info = t.getAttribute('data-info');
+      if (info) {
+        const parts = info.split('|');
+        tipTtl.textContent = parts[0];
+        tipDesc.textContent = '';
+        parts.slice(1).forEach((seg, i) => {
+          if (i > 0) tipDesc.appendChild(document.createElement('br'));
+          tipDesc.appendChild(document.createTextNode(seg));
+        });
+        tip.classList.add('on');
+      }
+    });
+    el.addEventListener('mouseleave', () => tip.classList.remove('on'));
+  });
+  const container = document.getElementById('schematic-container');
+  const wrapper = document.getElementById('svg-wrapper');
+  const zoomLevelEl = document.getElementById('zoom-level');
+  let scale = 1, panX = 0, panY = 0, isPanning = false, startX, startY;
+  const MIN_SCALE = 0.1, MAX_SCALE = 4, ZOOM_STEP = 0.15;
+  const SVG_W = 2400, SVG_H = 1800;
+  function updateTransform() {
+    wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    zoomLevelEl.textContent = Math.round(scale * 100) + '%';
+  }
+  function zoomTo(ns, cx, cy) {
+    ns = Math.max(MIN_SCALE, Math.min(MAX_SCALE, ns));
+    if (cx !== undefined && cy !== undefined) {
+      const r = ns / scale;
+      panX = cx - (cx - panX) * r;
+      panY = cy - (cy - panY) * r;
+    }
+    scale = ns;
+    updateTransform();
+  }
+  function zoomIn()  { const r = container.getBoundingClientRect(); zoomTo(scale * (1 + ZOOM_STEP), r.width / 2, r.height / 2); }
+  function zoomOut() { const r = container.getBoundingClientRect(); zoomTo(scale * (1 - ZOOM_STEP), r.width / 2, r.height / 2); }
+  function fitToScreen() {
+    const r = container.getBoundingClientRect();
+    scale = Math.min(r.width / SVG_W, r.height / SVG_H) * 0.95;
+    panX = (r.width - SVG_W * scale) / 2;
+    panY = (r.height - SVG_H * scale) / 2;
+    updateTransform();
+  }
+  document.getElementById('zoom-in').addEventListener('click', zoomIn);
+  document.getElementById('zoom-out').addEventListener('click', zoomOut);
+  document.getElementById('zoom-fit').addEventListener('click', fitToScreen);
+  container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const r = container.getBoundingClientRect();
+    zoomTo(scale * (e.deltaY > 0 ? (1 - ZOOM_STEP) : (1 + ZOOM_STEP)), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+  container.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.comp') || e.target.closest('#zoom-controls')) return;
+    isPanning = true; startX = e.clientX - panX; startY = e.clientY - panY;
+    container.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove', (e) => { if (!isPanning) return; panX = e.clientX - startX; panY = e.clientY - startY; updateTransform(); });
+  window.addEventListener('mouseup', () => { isPanning = false; container.classList.remove('grabbing'); });
+  let lastTouchDist = 0;
+  container.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) { isPanning = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY; }
+    else if (e.touches.length === 2) { e.preventDefault(); isPanning = false; const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY; lastTouchDist = Math.sqrt(dx*dx+dy*dy); }
+  }, { passive: false });
+  container.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isPanning) { panX = e.touches[0].clientX - startX; panY = e.touches[0].clientY - startY; updateTransform(); }
+    else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx+dy*dy), r = container.getBoundingClientRect();
+      const cx = (e.touches[0].clientX + e.touches[1].clientX)/2 - r.left, cy = (e.touches[0].clientY + e.touches[1].clientY)/2 - r.top;
+      zoomTo(scale * (dist / lastTouchDist), cx, cy); lastTouchDist = dist;
+    }
+  }, { passive: false });
+  container.addEventListener('touchend', () => { isPanning = false; });
+  window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey) {
+      if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomIn(); }
+      else if (e.key === '-' || e.key === '_') { e.preventDefault(); zoomOut(); }
+      else if (e.key === '0' || e.key === ')') { e.preventDefault(); fitToScreen(); }
+    }
+  });
+  window.addEventListener('load', () => { (document.fonts?.ready || Promise.resolve()).then(fitToScreen); });
+  function getSvgStringThemed() {
+    const clone = document.getElementById('schematic-svg').cloneNode(true);
+    const styleTag = document.querySelector('style');
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = styleTag ? styleTag.innerHTML : '';
+    defs.appendChild(style);
+    clone.insertBefore(defs, clone.firstChild);
+    if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    return new XMLSerializer().serializeToString(clone);
+  }
+  function getSvgStringPrint() {
+    const clone = document.getElementById('schematic-svg').cloneNode(true);
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = `
+      svg { background: transparent !important; }
+      .comp, .sec-border-dash,
+      .w12v, .w12v-bus, .wgnd, .wgnd-bus, .w5v, .w5v-bus, .w3v3, .w3v3-bus,
+      [class*="wdata"] {
+        stroke: #000 !important;
+      }
+      .comp, .sec-border-dash,
+      .w12v, .w12v-bus, .wgnd, .wgnd-bus, .w5v, .w5v-bus, .w3v3, .w3v3-bus,
+      [class*="wdata"] {
+        fill: none !important;
+      }
+      .j12v, .jgnd, .j5v, .j3v3,
+      [class*="jdata"],
+      .pin {
+        fill: #000 !important;
+        stroke: none !important;
+      }
+      text { fill: #000 !important; }
+      line[stroke], path[stroke], polyline[stroke], rect[stroke], circle[stroke] {
+        stroke: #000 !important;
+      }
+      [fill]:not(text):not(.j12v):not(.jgnd):not(.j5v):not(.j3v3):not([class*="jdata"]):not(.pin) {
+        fill: none !important;
+      }
+    `;
+    defs.appendChild(style);
+    clone.insertBefore(defs, clone.firstChild);
+    if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    return new XMLSerializer().serializeToString(clone);
+  }
+  function exportFilename(ext) {
+    const title = document.title.replace(/[\\/:*?"<>|]/g, '_') || 'Schematic_Export';
+    return title + '.' + ext;
+  }
+  document.getElementById('export-svg').addEventListener('click', () => {
+    const blob = new Blob([getSvgStringPrint()], {type: "image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a"); link.href = url; link.download = exportFilename('svg');
+    document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+  });
+  document.getElementById('export-png').addEventListener('click', () => {
+    const btn = document.getElementById('export-png');
+    const origText = btn.textContent; btn.textContent = "WAIT..."; btn.style.opacity = "0.5";
+    const canvas = document.createElement("canvas"); canvas.width = SVG_W; canvas.height = SVG_H;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    const url = URL.createObjectURL(new Blob([getSvgStringThemed()], {type: "image/svg+xml;charset=utf-8"}));
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0); URL.revokeObjectURL(url);
+      try {
+        const link = document.createElement("a"); link.href = canvas.toDataURL("image/png", 1.0);
+        link.download = exportFilename('png');
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      } catch (e) {
+        console.error("PNG export error:", e.message);
+      } finally { btn.textContent = origText; btn.style.opacity = "1"; }
+    };
+    img.onerror = function() {
+      btn.textContent = origText; btn.style.opacity = "1";
+      URL.revokeObjectURL(url);
+      console.error("PNG export: SVG image failed to load");
+    };
+    img.src = url;
+  });
+</script>
+</body>
+</html>
