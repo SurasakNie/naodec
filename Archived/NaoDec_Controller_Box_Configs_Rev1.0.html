@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaoDec Controller Box Configurations — Rev 1.1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+  :root {
+    --bg-dark:        #060a0b;
+    --bg-panel:       rgba(10,18,20,0.95);
+    --wire-12v:       #eaddaa;
+    --wire-5v:        #c9a86a;
+    --wire-gnd:       #4a6b6d;
+    --wire-data:      #88e2d6;
+    --wire-ac:        #c084fc;
+    --text-primary:   #ffffff;
+    --text-secondary: #8eb5b8;
+    --accent:         #eaddaa;
+    --border:         rgba(74,107,109,0.6);
+    --comp-fill:      #0f1a1c;
+    --comp-stroke:    #4a6b6d;
+    --warn:           #ff5555;
+    --ok:             #66bb6a;
+    --box1:           #0d1f22;
+    --box2:           #0f1d14;
+    --box-border1:    rgba(100,160,170,0.5);
+    --box-border2:    rgba(80,150,100,0.5);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .schematic-container {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+  }
+  .schematic-container.grabbing { cursor: grabbing; }
+  .svg-wrapper {
+    transform-origin: 0 0;
+    will-change: transform;
+    position: absolute;
+    top: 0; left: 0;
+  }
+  .comp {
+    fill: var(--comp-fill);
+    stroke: var(--comp-stroke);
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .comp:hover { stroke: var(--accent); stroke-width: 2; }
+  .comp:hover ~ .comp-label { fill: var(--accent); }
+  .bold-text { font-weight: 700; }
+  .black-text { font-weight: 900; }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 320px;
+    display: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  .tooltip-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .tooltip-line {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: 2px 0;
+    line-height: 1.4;
+  }
+
+  /* Controls */
+  .controls {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 100;
+  }
+  .ctrl-btn {
+    width: 36px; height: 36px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .ctrl-btn:hover { background: rgba(74,107,109,0.4); }
+
+  /* Legend */
+  .legend {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 11px;
+    z-index: 100;
+  }
+  .legend-row { display:flex; align-items:center; gap:8px; margin:3px 0; color:var(--text-secondary); }
+  .legend-line { width:28px; height:3px; border-radius:2px; }
+</style>
+</head>
+<body>
+<div class="schematic-container" id="container">
+<div class="svg-wrapper" id="wrapper">
+<svg id="schematic" viewBox="0 0 2000 2780"
+     xmlns="http://www.w3.org/2000/svg"
+     width="2000" height="2780">
+
+<defs>
+  <marker id="arr12v" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+    <path d="M0,0 L7,3.5 L0,7 Z" fill="#eaddaa"/>
+  </marker>
+  <marker id="arr5v" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+    <path d="M0,0 L7,3.5 L0,7 Z" fill="#c9a86a"/>
+  </marker>
+  <marker id="arrac" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+    <path d="M0,0 L7,3.5 L0,7 Z" fill="#c084fc"/>
+  </marker>
+  <marker id="arrdata" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+    <path d="M0,0 L7,3.5 L0,7 Z" fill="#88e2d6"/>
+  </marker>
+  <filter id="glow">
+    <feGaussianBlur stdDeviation="3" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  GLOBAL HEADER                                                      -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<text x="1000" y="32" text-anchor="middle" font-size="22" fill="#eaddaa" font-family="Roboto" font-weight="900" letter-spacing="4">NAODEC — CONTROLLER BOX CONFIGURATIONS</text>
+<text x="1000" y="54" text-anchor="middle" font-size="12" fill="#8eb5b8" font-family="Roboto" letter-spacing="3">REV 1.0 · WS2815 LED + SCENT CONTROLLER · 220V AC SINGLE INPUT</text>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  CONFIG 1 — ELECTRICAL ENCLOSURE                                    -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- Config 1 section label -->
+<text x="1000" y="86" text-anchor="middle" font-size="16" fill="#64b5f6" font-family="Roboto" font-weight="700" letter-spacing="3">CONFIG 1 — ELECTRICAL ENCLOSURE</text>
+<text x="1000" y="104" text-anchor="middle" font-size="11" fill="#8eb5b8" font-family="Roboto" letter-spacing="2">DIN RAIL SYSTEM · 3× INDUSTRIAL PSUs · ISOLATED RAILS</text>
+
+<!-- Outer enclosure -->
+<rect x="50" y="112" width="1900" height="1150" rx="10"
+      fill="#0d1f22" stroke="rgba(100,160,170,0.5)" stroke-width="2.5"
+      class="comp"
+      data-info="Electrical Enclosure|Steel DIN-rail enclosure|Recommended: ~450×350×200 mm IP65 box|Accommodates 3 PSUs + 2 controller boards|Add forced-air 80mm fan for cooling"/>
+<text x="76" y="134" font-size="10" fill="#4a6b6d" font-family="Roboto" letter-spacing="2">STEEL ENCLOSURE  ·  ≈450 × 350 × 200 mm  ·  IP54+</text>
+
+<!-- ── AC INPUT SECTION ───────────────────────────────────────────── -->
+<rect x="70" y="140" width="1860" height="90" rx="4"
+      fill="#0a1214" stroke="rgba(74,107,109,0.4)" stroke-width="1"/>
+<text x="88" y="158" font-size="9" fill="#4a6b6d" font-family="Roboto" letter-spacing="3">AC INPUT / MAINS PROTECTION</text>
+
+<!-- IEC C14 socket -->
+<rect x="100" y="163" width="110" height="54" rx="3"
+      class="comp"
+      data-info="IEC C14 Socket|Mains inlet 220V AC|Panel-mount on enclosure rear wall|Rated ≥ 10A · with integrated fuse holder|Male plug on inlet (kettle-type cable)"/>
+<text x="155" y="183" text-anchor="middle" font-size="11" fill="#c084fc" font-family="Roboto" font-weight="700">IEC C14</text>
+<text x="155" y="198" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">220V AC IN</text>
+<text x="155" y="211" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">panel-mount rear</text>
+
+<!-- MCB -->
+<rect x="280" y="163" width="100" height="54" rx="3"
+      class="comp"
+      data-info="MCB — Miniature Circuit Breaker|2-pole 10A trip|Protects ALL downstream loads|DIN-rail mount · breaks both L and N|Use C-curve (capacitive inrush tolerance)"/>
+<text x="330" y="183" text-anchor="middle" font-size="11" fill="#eaddaa" font-family="Roboto" font-weight="700">MCB</text>
+<text x="330" y="198" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">10A · 2-pole</text>
+<text x="330" y="211" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">C-curve DIN</text>
+
+<!-- AC line IEC → MCB -->
+<line x1="210" y1="190" x2="280" y2="190" stroke="#c084fc" stroke-width="2.5" marker-end="url(#arrac)"/>
+
+<!-- SMA antenna note -->
+<rect x="1600" y="163" width="310" height="54" rx="3"
+      fill="#0a1214" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="1755" y="183" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto">3× SMA female glands</text>
+<text x="1755" y="198" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">2.4 GHz external antennas</text>
+<text x="1755" y="211" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Master ESP · Slave ESP · Scent ESP</text>
+
+<!-- AC vertical drop to DIN rail -->
+<line x1="330" y1="217" x2="330" y2="940" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="8,4"/>
+<line x1="330" y1="940" x2="1820" y2="940" stroke="#c084fc" stroke-width="1.5" stroke-dasharray="8,4"/>
+<text x="1200" y="935" text-anchor="middle" font-size="9" fill="#c084fc" font-family="Roboto" letter-spacing="2">──── 220V AC DISTRIBUTION BUS ────</text>
+<!-- drops to PSUs -->
+<line x1="440"  y1="940" x2="440"  y2="968" stroke="#c084fc" stroke-width="1.5"/>
+<line x1="760"  y1="940" x2="760"  y2="968" stroke="#c084fc" stroke-width="1.5"/>
+<line x1="1250" y1="940" x2="1250" y2="968" stroke="#c084fc" stroke-width="1.5"/>
+
+<!-- ── DIN RAIL ──────────────────────────────────────────────────── -->
+<rect x="70" y="948" width="1860" height="240" rx="4"
+      fill="#080e0f" stroke="rgba(74,107,109,0.4)" stroke-width="1"/>
+<text x="88" y="966" font-size="9" fill="#4a6b6d" font-family="Roboto" letter-spacing="3">DIN RAIL — POWER SUPPLIES</text>
+<!-- rail bar -->
+<rect x="90" y="970" width="1820" height="9" rx="2" fill="#2a3a3c" stroke="#4a6b6d" stroke-width="1"/>
+
+<!-- PSU-A: 5V / 3A -->
+<rect x="110" y="979" width="200" height="185" rx="4"
+      class="comp"
+      data-info="PSU-A · 5V / 3A|Mean Well RS-15-5 (15W DIN rail)|Powers: ESP32-S3 Master + Slave + SN74AHCT245N|Actual load: ~0.82A · Margin: 3.7×|Output: 5V ±1%|Isolated from 12V rails — V+ must NOT be bridged"/>
+<text x="210" y="1002" text-anchor="middle" font-size="13" fill="#c9a86a" font-family="Roboto" font-weight="900">PSU-A</text>
+<text x="210" y="1022" text-anchor="middle" font-size="15" fill="#eaddaa" font-family="Roboto" font-weight="700">5V / 3A</text>
+<text x="210" y="1040" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto">15W · DIN rail</text>
+<line x1="210" y1="1048" x2="210" y2="1060" stroke="#4a6b6d" stroke-width="1"/>
+<text x="210" y="1074" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">Mean Well</text>
+<text x="210" y="1088" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">RS-15-5</text>
+<line x1="210" y1="1096" x2="210" y2="1108" stroke="#4a6b6d" stroke-width="1"/>
+<text x="210" y="1122" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">LED logic only</text>
+<text x="210" y="1138" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">ESP32×2 + U2</text>
+
+<!-- PSU-B: 12V / 5A -->
+<rect x="380" y="979" width="220" height="185" rx="4"
+      class="comp"
+      data-info="PSU-B · 12V / 5A|Mean Well RS-60-12 (60W DIN rail)|Powers: Strip #1 Vertex (60px, 0.9A) + Scent Controller (~1.0A steady)|Total load: ~1.90A · Margin: 2.6×|Note: 1.18A is the design-margin wire rating in the source schematic, not steady-state load|Output: 12V ±1%|V+ rail ISOLATED from PSU-A and PSU-C"/>
+<text x="490" y="1002" text-anchor="middle" font-size="13" fill="#eaddaa" font-family="Roboto" font-weight="900">PSU-B</text>
+<text x="490" y="1022" text-anchor="middle" font-size="15" fill="#eaddaa" font-family="Roboto" font-weight="700">12V / 5A</text>
+<text x="490" y="1040" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto">60W · DIN rail</text>
+<line x1="490" y1="1048" x2="490" y2="1060" stroke="#4a6b6d" stroke-width="1"/>
+<text x="490" y="1074" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">Mean Well</text>
+<text x="490" y="1088" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">RS-60-12</text>
+<line x1="490" y1="1096" x2="490" y2="1108" stroke="#4a6b6d" stroke-width="1"/>
+<text x="490" y="1122" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">Strip #1 (Vertex)</text>
+<text x="490" y="1138" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">+ Scent Controller</text>
+
+<!-- PSU-C: 12V / 30-50A -->
+<rect x="680" y="979" width="600" height="185" rx="4"
+      class="comp"
+      data-info="PSU-C · 12V / 30–50A|Mean Well SE-600-12 (600W) — preferred|Alt: SE-350-12 (350W/29A) — only 1.15× headroom; safe only with WLED ABL brightness cap|Powers: LED Strips #2–#7 (6× Edge sets)|Max load: 25.2A (280px × 6 × 15mA — source schematic spec)|Margin (600W / 50A): 2.0× · V+ rail ISOLATED from PSU-A/B"/>
+<text x="980" y="1002" text-anchor="middle" font-size="13" fill="#eaddaa" font-family="Roboto" font-weight="900">PSU-C</text>
+<text x="980" y="1022" text-anchor="middle" font-size="16" fill="#eaddaa" font-family="Roboto" font-weight="700">12V / 30–50A</text>
+<text x="980" y="1040" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto">360–600W · enclosed switching</text>
+<line x1="980" y1="1048" x2="980" y2="1060" stroke="#4a6b6d" stroke-width="1"/>
+<text x="980" y="1074" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">Mean Well SE-600-12 (preferred)</text>
+<text x="980" y="1088" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">Alt: SE-350-12 (350W / 29A)</text>
+<line x1="980" y1="1096" x2="980" y2="1108" stroke="#4a6b6d" stroke-width="1"/>
+<text x="980" y="1122" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">LED Strips #2–#7 · 6× Edge sets</text>
+<text x="980" y="1138" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">280 LEDs each · max ~25.2A total</text>
+
+<!-- PSU isolation warning -->
+<rect x="1360" y="990" width="540" height="80" rx="3"
+      fill="#1a0808" stroke="rgba(255,85,85,0.5)" stroke-width="1.5"/>
+<text x="1630" y="1010" text-anchor="middle" font-size="11" fill="#ff5555" font-family="Roboto" font-weight="700">⚠  RAIL ISOLATION RULE</text>
+<text x="1630" y="1028" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">Never bridge PSU-A, PSU-B, PSU-C positive terminals</text>
+<text x="1630" y="1044" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">5V ≠ 12V/5A ≠ 12V/50A — each rail fully isolated</text>
+<text x="1630" y="1060" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">GND (–) of all 3 PSUs may share a star point</text>
+
+<!-- ── POWER OUTPUT LINES FROM PSUs UP INTO CONTROLLER AREA ─────── -->
+<!-- 5V from PSU-A -->
+<line x1="210" y1="979" x2="210" y2="840" stroke="#c9a86a" stroke-width="3" marker-end="url(#arr5v)"/>
+<circle cx="210" cy="840" r="5" fill="#c9a86a"/>
+<text x="222" y="896" font-size="9" fill="#c9a86a" font-family="Roboto" font-weight="700">5V → LED logic</text>
+
+<!-- 12V from PSU-B -->
+<line x1="490" y1="979" x2="490" y2="840" stroke="#eaddaa" stroke-width="3" marker-end="url(#arr12v)"/>
+<circle cx="490" cy="840" r="5" fill="#eaddaa"/>
+<text x="502" y="896" font-size="9" fill="#eaddaa" font-family="Roboto" font-weight="700">12V/5A → Strip #1 + Scent</text>
+
+<!-- 12V from PSU-C -->
+<line x1="980" y1="979" x2="980" y2="840" stroke="#eaddaa" stroke-width="5" marker-end="url(#arr12v)"/>
+<circle cx="980" cy="840" r="6" fill="#eaddaa"/>
+<text x="995" y="896" font-size="9" fill="#eaddaa" font-family="Roboto" font-weight="700">12V/50A → FB1 → Strips #2–#7</text>
+
+<!-- ── HORIZONTAL POWER BUS LINES ─────────────────────────────────── -->
+<!-- 5V bus -->
+<line x1="90" y1="840" x2="1000" y2="840" stroke="#c9a86a" stroke-width="2" stroke-dasharray="1,0"/>
+<text x="90" y="834" font-size="8" fill="#c9a86a" font-family="Roboto">5V BUS</text>
+<!-- 12V/5A bus -->
+<line x1="90" y1="852" x2="1000" y2="852" stroke="#eaddaa" stroke-width="2" stroke-dasharray="6,3"/>
+<text x="90" y="870" font-size="8" fill="#eaddaa" font-family="Roboto">12V/5A BUS</text>
+<!-- 12V/50A bus -->
+<line x1="90" y1="862" x2="1000" y2="862" stroke="#eaddaa" stroke-width="4" stroke-dasharray="4,3" opacity="0.6"/>
+
+<!-- ── LED CONTROLLER BLOCK ───────────────────────────────────────── -->
+<rect x="70" y="240" width="1000" height="580" rx="6"
+      fill="#0a181a" stroke="rgba(88,160,170,0.6)" stroke-width="2"/>
+<text x="90" y="262" font-size="12" fill="#64b5f6" font-family="Roboto" font-weight="700" letter-spacing="2">WS2815 LED CONTROLLER  ·  Rev 1.6</text>
+
+<!-- ESP32-S3 Master -->
+<rect x="90" y="278" width="220" height="130" rx="4"
+      class="comp"
+      data-info="ESP32-S3-WROOM-1 N16R8 — MASTER|Runs WLED firmware (standard mode)|Outputs CH1–CH4: GPIO1, 4, 5, 6|Calculates all FX, streams DDP to Slave|USB-C/UART → Mac mini for Art-Net|5V Vin from PSU-A"/>
+<text x="200" y="299" text-anchor="middle" font-size="11" fill="#64b5f6" font-family="Roboto" font-weight="700">ESP32-S3</text>
+<text x="200" y="315" text-anchor="middle" font-size="10" fill="#eaddaa" font-family="Roboto" font-weight="700">MASTER</text>
+<text x="200" y="332" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">WLED · CH1–CH4</text>
+<text x="200" y="347" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">GPIO 1, 4, 5, 6</text>
+<text x="200" y="362" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">USB-C → Mac mini</text>
+<text x="200" y="377" text-anchor="middle" font-size="8" fill="#c9a86a" font-family="Roboto">5V Vin · ~400mA</text>
+<text x="200" y="392" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">N16R8 · 16MB flash</text>
+
+<!-- ESP32-S3 Slave -->
+<rect x="330" y="278" width="220" height="130" rx="4"
+      class="comp"
+      data-info="ESP32-S3-WROOM-1 N16R8 — SLAVE|Runs WLED firmware (DDP receiver mode)|Outputs CH5–CH7: GPIO4, 5, 6|Receives pixel data from Master via Wi-Fi DDP|No local FX computation|5V Vin from PSU-A"/>
+<text x="440" y="299" text-anchor="middle" font-size="11" fill="#64b5f6" font-family="Roboto" font-weight="700">ESP32-S3</text>
+<text x="440" y="315" text-anchor="middle" font-size="10" fill="#eaddaa" font-family="Roboto" font-weight="700">SLAVE</text>
+<text x="440" y="332" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">DDP · CH5–CH7</text>
+<text x="440" y="347" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">GPIO 4, 5, 6</text>
+<text x="440" y="362" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Wi-Fi from Master</text>
+<text x="440" y="377" text-anchor="middle" font-size="8" fill="#c9a86a" font-family="Roboto">5V Vin · ~400mA</text>
+<text x="440" y="392" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">N16R8 · 16MB flash</text>
+
+<!-- U2 + passives -->
+<rect x="570" y="278" width="200" height="130" rx="4"
+      class="comp"
+      data-info="U2 — SN74AHCT245N|Octal bus transceiver · 3.3V → 5V|7 channels used (CH1–CH7)|R1–R7: 47Ω ¼W source termination (≤20mm from U2)|C7: 100nF VCC decoupling|5V Vcc from PSU-A"/>
+<text x="670" y="299" text-anchor="middle" font-size="11" fill="#eaddaa" font-family="Roboto" font-weight="700">U2 · SN74AHCT245</text>
+<text x="670" y="315" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">3.3V → 5V · 7 ch</text>
+<text x="670" y="332" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">R1–R7: 47Ω ¼W</text>
+<text x="670" y="347" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">source termination</text>
+<text x="670" y="362" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">C7: 100nF decoup.</text>
+<text x="670" y="377" text-anchor="middle" font-size="8" fill="#c9a86a" font-family="Roboto">5V Vcc · ~20mA</text>
+
+<!-- Caps & NTC -->
+<rect x="790" y="278" width="260" height="130" rx="4"
+      fill="#080e10" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="920" y="297" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto" font-weight="700">PASSIVES</text>
+<text x="810" y="315" font-size="8" fill="#4a6b6d" font-family="Roboto">C1: 1000µF/25V — 12V/5A rail smooth</text>
+<text x="810" y="330" font-size="8" fill="#4a6b6d" font-family="Roboto">C2–C8: 1000µF/25V — strip inputs</text>
+<text x="810" y="345" font-size="8" fill="#4a6b6d" font-family="Roboto">NTC1: 10Ω/10A — 12V/50A inrush</text>
+<text x="810" y="370" font-size="8" fill="#eaddaa" font-family="Roboto" font-weight="700">FUSES (LED):</text>
+<text x="810" y="385" font-size="8" fill="#8eb5b8" font-family="Roboto">F1: 7.5A ATC/ATO — Strip #1</text>
+<text x="810" y="400" font-size="8" fill="#8eb5b8" font-family="Roboto">FB1: 6-ch 7.5A block — Strips #2–#7</text>
+
+<!-- LED strip output area -->
+<rect x="90" y="430" width="960" height="360" rx="4"
+      fill="#060c0e" stroke="rgba(74,107,109,0.25)" stroke-width="1" stroke-dasharray="6,4"/>
+<text x="570" y="450" text-anchor="middle" font-size="10" fill="#4a6b6d" font-family="Roboto" letter-spacing="2">OUTPUT CABLES — LED STRIPS</text>
+
+<!-- Strip #1 -->
+<rect x="110" y="462" width="430" height="82" rx="3"
+      class="comp"
+      data-info="Strip #1 — Vertex Set|60 × WS2815 12V (20 positions × 3 LEDs)|Cable: 20m run · 18AWG power pair|V-drop @ 0.9A: 0.9 × (40m × 20.95mΩ/m) = 754mV → 11.25V at strip ✓|WS2815 min 9V — 11.25V is safe · upgrade to 16AWG for 474mV drop → 11.52V|Single power feed sufficient (short cluster segments at each vertex)|Signal: CH1 data cable 20m"/>
+<text x="325" y="481" text-anchor="middle" font-size="10" fill="#eaddaa" font-family="Roboto" font-weight="700">STRIP #1 — VERTEX  (20m run)</text>
+<text x="325" y="498" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">60 LEDs · 0.9A · PSU-B · F1 7.5A</text>
+<text x="325" y="514" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">18AWG power · 22AWG data</text>
+<text x="325" y="530" text-anchor="middle" font-size="8" fill="#66bb6a" font-family="Roboto">✓  Single-end feed sufficient at 0.9A</text>
+
+<!-- Strips #2-#7 -->
+<rect x="560" y="462" width="470" height="82" rx="3"
+      class="comp"
+      data-info="Strips #2–#7 — Edge Sets|6× strips · 280 LEDs each (5 sections × 56 LEDs)|Cable to strip start: 4m · 12AWG|Mid-inject cable to section 2/3 joint: 6m · 12AWG|Feed cable drop (12AWG 8m loop, 4.2A): 4.2 × 8 × 5.21mΩ = 175mV → strip input 11.83V|In-strip drop: depends on PCB trace R — see injection diagram (estimate uses typ. 60mΩ/m)|PSU-C via FB1 (F2–F7 · 7.5A each)"/>
+<text x="795" y="481" text-anchor="middle" font-size="10" fill="#eaddaa" font-family="Roboto" font-weight="700">STRIPS #2–#7 — EDGES  (6× strips)</text>
+<text x="795" y="498" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">280 LEDs each · 4.2A max · PSU-C · FB1</text>
+<text x="795" y="514" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">HEAD: 4m 12AWG · MID-INJECT: 6m 12AWG</text>
+<text x="795" y="530" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">⚠  Mid-strip injection required (sec 2/3 joint)</text>
+
+<!-- Power injection diagram -->
+<rect x="110" y="558" width="920" height="210" rx="3"
+      fill="#05080a" stroke="rgba(74,107,109,0.2)" stroke-width="1"/>
+<text x="570" y="576" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto" letter-spacing="2">MID-STRIP POWER INJECTION DIAGRAM (per edge strip)</text>
+
+<!-- Strip diagram -->
+<rect x="280" y="590" width="600" height="30" rx="2" fill="#0d1a1c" stroke="#4a6b6d" stroke-width="1.5"/>
+<!-- sections markers -->
+<line x1="400" y1="590" x2="400" y2="620" stroke="#2a4a4e" stroke-width="1"/>
+<line x1="520" y1="590" x2="520" y2="620" stroke="#2a4a4e" stroke-width="1"/>
+<line x1="640" y1="590" x2="640" y2="620" stroke="#ff5555" stroke-width="2"/>
+<line x1="760" y1="590" x2="760" y2="620" stroke="#2a4a4e" stroke-width="1"/>
+<text x="340" y="610" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">S1</text>
+<text x="460" y="610" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">S2</text>
+<text x="580" y="610" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">S3</text>
+<text x="700" y="610" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">S4</text>
+<text x="830" y="610" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">S5</text>
+<text x="280" y="640" font-size="8" fill="#4a6b6d" font-family="Roboto">Start</text>
+<text x="876" y="640" font-size="8" fill="#4a6b6d" font-family="Roboto">End</text>
+<text x="635" y="640" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">↑ inject here</text>
+<text x="635" y="652" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">1.87m from start</text>
+
+<!-- Feed arrow -->
+<line x1="200" y1="605" x2="280" y2="605" stroke="#eaddaa" stroke-width="2.5" marker-end="url(#arr12v)"/>
+<text x="195" y="595" text-anchor="end" font-size="8" fill="#eaddaa" font-family="Roboto">Head</text>
+<text x="195" y="607" text-anchor="end" font-size="8" fill="#4a6b6d" font-family="Roboto">4m</text>
+<text x="195" y="619" text-anchor="end" font-size="8" fill="#4a6b6d" font-family="Roboto">12AWG</text>
+
+<!-- Inject arrow -->
+<line x1="640" y1="670" x2="640" y2="622" stroke="#eaddaa" stroke-width="2.5" marker-end="url(#arr12v)"/>
+<text x="640" y="688" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto">Inject</text>
+<text x="640" y="700" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">6m · 12AWG</text>
+
+<!-- V-drop annotation -->
+<text x="430" y="728" text-anchor="middle" font-size="8" fill="#66bb6a" font-family="Roboto">1st half: 1.68A · ≈188mV drop (est. 60mΩ/m trace)</text>
+<text x="760" y="728" text-anchor="middle" font-size="8" fill="#66bb6a" font-family="Roboto">2nd half: 2.52A · ≈423mV drop (est. 60mΩ/m trace)</text>
+<text x="570" y="746" text-anchor="middle" font-size="9" fill="#66bb6a" font-family="Roboto" font-weight="700">Est. strip end ≈11.23V ✓  — measure strip trace R to confirm</text>
+<text x="570" y="760" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">56 LEDs/section · 0.933m/section · inject at S2/S3 junction · 60mΩ/m is typical; actual varies by brand</text>
+
+<!-- ── SCENT CONTROLLER BLOCK ─────────────────────────────────────── -->
+<rect x="1090" y="240" width="840" height="580" rx="6"
+      fill="#0a180e" stroke="rgba(80,150,100,0.6)" stroke-width="2"/>
+<text x="1110" y="262" font-size="12" fill="#66bb6a" font-family="Roboto" font-weight="700" letter-spacing="2">SCENT CONTROLLER  ·  Rev 2.0</text>
+
+<!-- Waveshare board -->
+<rect x="1110" y="278" width="380" height="130" rx="4"
+      class="comp"
+      data-info="Waveshare ESP32-S3-Relay-6CH|Main controller board|Input: 7–36V DC (fed 12V from PSU-B)|6× SPDT relays — 4 channels used (CH1–CH4)|GPIO1→CH1 · GPIO2→CH2 · GPIO41→CH3 · GPIO42→CH4|Runs WLED firmware · ~0.40A @ 12V (ESP sub-branch per schematic F1 T1A fuse)|Rev 2.0: NO 5V buck — 12V direct to relay COM bus"/>
+<text x="1300" y="299" text-anchor="middle" font-size="10" fill="#66bb6a" font-family="Roboto" font-weight="700">ESP32-S3-RELAY-6CH</text>
+<text x="1300" y="315" text-anchor="middle" font-size="9" fill="#eaddaa" font-family="Roboto" font-weight="700">Waveshare</text>
+<text x="1300" y="332" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">7–36V in · 6× SPDT relays</text>
+<text x="1300" y="347" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">CH1–CH4 · GPIO1,2,41,42</text>
+<text x="1300" y="362" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto">12V direct · ~0.40A (ESP)</text>
+<text x="1300" y="377" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">Rev 2.0: no buck converter</text>
+<text x="1300" y="392" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">WLED firmware · SMA 2.4GHz</text>
+
+<!-- Scent fuses -->
+<rect x="1510" y="278" width="400" height="130" rx="4"
+      fill="#0a100c" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="1710" y="297" text-anchor="middle" font-size="10" fill="#eaddaa" font-family="Roboto" font-weight="700">FUSING — SCENT</text>
+<text x="1530" y="316" font-size="8" fill="#8eb5b8" font-family="Roboto">F_MAIN T2A  · 5×20mm · 18AWG · ~1.0A steady</text>
+<text x="1530" y="332" font-size="8" fill="#8eb5b8" font-family="Roboto">F1      T1A  · 5×20mm · 22AWG · 0.40A ESP</text>
+<text x="1530" y="348" font-size="8" fill="#8eb5b8" font-family="Roboto">F3–F6  T500mA · 5×20mm · 22AWG · per atomizer</text>
+<text x="1530" y="368" font-size="8" fill="#4a6b6d" font-family="Roboto">RC1–RC4: 100nF + 100Ω snubbers</text>
+<text x="1530" y="383" font-size="8" fill="#4a6b6d" font-family="Roboto">across each relay COM–NO pair</text>
+<text x="1530" y="400" font-size="8" fill="#4a6b6d" font-family="Roboto">⚠  Pre-calibrated in Rev 2.0 — N/A</text>
+
+<!-- Atomizer outputs -->
+<rect x="1110" y="430" width="800" height="360" rx="4"
+      fill="#060c08" stroke="rgba(74,107,109,0.25)" stroke-width="1" stroke-dasharray="6,4"/>
+<text x="1510" y="450" text-anchor="middle" font-size="10" fill="#4a6b6d" font-family="Roboto" letter-spacing="2">OUTPUT — SCENT ATOMIZERS (4 channels)</text>
+
+<rect x="1130" y="462" width="360" height="170" rx="3"
+      class="comp"
+      data-info="Atomizer Drivers A1–A4|JY-M27AO ultrasonic driver module|Input: 6–24V DC (fed 12V via relay COM)|Output: 113kHz drive to piezo disc|Each: 12V · ~150mA · keep wires &lt;30cm|Relay NO → F3/F4/F5/F6 → driver input|Total atomizer current: 4 × 150mA = 600mA"/>
+<text x="1310" y="482" text-anchor="middle" font-size="10" fill="#66bb6a" font-family="Roboto" font-weight="700">A1–A4 · JY-M27AO</text>
+<text x="1310" y="499" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">Ultrasonic atomizer drivers</text>
+<text x="1310" y="515" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">12V · ~150mA each · 113kHz</text>
+<text x="1310" y="530" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Relay COM–NO switched 12V</text>
+<text x="1310" y="545" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Z1–Z4: piezo disc transducers</text>
+<text x="1310" y="562" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto">Total: 600mA · 7.2W</text>
+<text x="1310" y="580" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">⚠  Mount in vented sub-chamber</text>
+<text x="1310" y="595" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">⚠  Twist 12V+/GND · keep &lt;30cm</text>
+<text x="1310" y="610" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">⚠  WLED: solid effects only</text>
+<text x="1310" y="625" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Outputs exit box via 4× glands</text>
+
+<rect x="1510" y="462" width="380" height="90" rx="3"
+      fill="#0a100c" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="1700" y="480" text-anchor="middle" font-size="9" fill="#eaddaa" font-family="Roboto" font-weight="700">PSU-B LOAD SUMMARY</text>
+<text x="1530" y="498" font-size="8" fill="#8eb5b8" font-family="Roboto">ESP32-S3-Relay-6CH:  ~0.40A</text>
+<text x="1530" y="513" font-size="8" fill="#8eb5b8" font-family="Roboto">4× atomizer drivers:  ~0.60A</text>
+<text x="1530" y="528" font-size="8" fill="#8eb5b8" font-family="Roboto">Strip #1 (Vertex):    ~0.90A</text>
+<line x1="1530" y1="534" x2="1880" y2="534" stroke="#4a6b6d" stroke-width="1"/>
+<text x="1530" y="547" font-size="8" fill="#eaddaa" font-family="Roboto" font-weight="700">Total PSU-B:         ~1.90A / 5A</text>
+
+<!-- 12V from PSU-B into scent block -->
+<line x1="490" y1="840" x2="490" y2="820" stroke="#eaddaa" stroke-width="2"/>
+<line x1="490" y1="820" x2="1510" y2="820" stroke="#eaddaa" stroke-width="2" stroke-dasharray="5,3"/>
+<line x1="1510" y1="820" x2="1510" y2="408" stroke="#eaddaa" stroke-width="2" marker-end="url(#arr12v)"/>
+
+<!-- ── CABLE EXIT LABEL BOX (Config 1) ─────────────────────────────── -->
+<rect x="70" y="840" width="1910" height="60" rx="0"
+      fill="#080e10" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="140" y="858" font-size="9" fill="#88e2d6" font-family="Roboto">DATA: 7× 22AWG (4m each — data signal to strip starts)</text>
+<text x="140" y="876" font-size="9" fill="#eaddaa" font-family="Roboto">12V POWER: 7× 12AWG head feeds · 6× 12AWG inject (6m) · 1× 18AWG 20m (Strip #1)</text>
+<text x="900" y="858" font-size="9" fill="#66bb6a" font-family="Roboto">SCENT: 4× 22AWG twisted pairs (atomizers)</text>
+<text x="900" y="876" font-size="9" fill="#4a6b6d" font-family="Roboto">USB-C: 1× rear-panel extender (Mac mini) · SMA: 3× antenna glands</text>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!--  DIVIDER                                                            -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<line x1="50" y1="1290" x2="1950" y2="1290" stroke="rgba(74,107,109,0.3)" stroke-width="1" stroke-dasharray="10,5"/>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  CONFIG 2 — PC CASE + ATX PSU                                      -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+
+<text x="1000" y="1330" text-anchor="middle" font-size="16" fill="#64b5f6" font-family="Roboto" font-weight="700" letter-spacing="3">CONFIG 2 — PC CASE + ATX PSU</text>
+<text x="1000" y="1350" text-anchor="middle" font-size="11" fill="#8eb5b8" font-family="Roboto" letter-spacing="2">SINGLE 1000W ATX · SHARED 12V RAIL · RETAIN ALL INLINE FUSES</text>
+
+<!-- Outer PC case -->
+<rect x="50" y="1360" width="1900" height="1160" rx="10"
+      fill="#0d1520" stroke="rgba(100,150,200,0.4)" stroke-width="2.5"
+      class="comp"
+      data-info="ATX PC Case|Mid-tower or full-tower ATX case|~45×20×45 cm · Fractal, Lian Li, be quiet! etc.|Built-in fan mounts: front intake + rear exhaust|Drive bays used for controller mounting|I/O panel slots used for cable exit"/>
+<text x="76" y="1382" font-size="10" fill="#4a6b6d" font-family="Roboto" letter-spacing="2">ATX PC CASE  ·  MID/FULL TOWER  ·  ≈450 × 200 × 450 mm</text>
+
+<!-- ── ATX PSU BLOCK (right rear) ──────────────────────────────────── -->
+<rect x="1450" y="1390" width="460" height="520" rx="6"
+      fill="#0a1018" stroke="rgba(100,150,200,0.5)" stroke-width="2"
+      class="comp"
+      data-info="ATX PSU — 1000W|Recommended: Seasonic Prime TX-1000|or be quiet! Dark Power Pro 13 1000W|12V single rail: 83A continuous (996W)|5V rail: 20A continuous (100W)|80+ Platinum efficiency|Standard ATX mount — rear of case"/>
+<text x="1680" y="1415" text-anchor="middle" font-size="14" fill="#64b5f6" font-family="Roboto" font-weight="900">ATX PSU</text>
+<text x="1680" y="1437" text-anchor="middle" font-size="18" fill="#eaddaa" font-family="Roboto" font-weight="700">1000W</text>
+<text x="1680" y="1458" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto">Seasonic Prime TX-1000</text>
+<text x="1680" y="1474" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">or be quiet! P13 1000W</text>
+
+<!-- Rail specs -->
+<rect x="1470" y="1490" width="420" height="120" rx="3"
+      fill="#080c14" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="1490" y="1508" font-size="9" fill="#eaddaa" font-family="Roboto" font-weight="700">RAIL OUTPUT (continuous):</text>
+<text x="1490" y="1524" font-size="9" fill="#c9a86a" font-family="Roboto">5V  ·  20A   (100W)   — available</text>
+<text x="1490" y="1540" font-size="9" fill="#eaddaa" font-family="Roboto">12V ·  83A   (996W)  — available</text>
+<text x="1490" y="1560" font-size="9" fill="#66bb6a" font-family="Roboto" font-weight="700">REQUIRED:</text>
+<text x="1490" y="1576" font-size="9" fill="#c9a86a" font-family="Roboto">5V  ·  ~0.82A  → 4.1% load   ✓</text>
+<text x="1490" y="1592" font-size="9" fill="#eaddaa" font-family="Roboto">12V · ~27.1A → 38.3% (850W) / 32.7% (1000W)  ✓</text>
+<text x="1490" y="1606" font-size="8" fill="#4a6b6d" font-family="Roboto">27.1A = source max (15mA/px) · sweet-spot efficiency</text>
+
+<!-- PS_ON# -->
+<rect x="1470" y="1626" width="420" height="100" rx="3"
+      fill="#1a0808" stroke="rgba(255,85,85,0.5)" stroke-width="1.5"
+      class="comp"
+      data-info="PS_ON# — ATX Enable Circuit|ATX PSUs do NOT auto-start|Pin 16 (PS_ON#) must be pulled LOW to GND|Option A: Latching push-button on case front panel (wired to 24-pin connector pin 16 + any GND)|Option B: 1kΩ resistor from pin 16 to GND (always-on — use MCB on AC side for power control)|Option C: Arduino/ESP relay if remote control needed"/>
+<text x="1680" y="1648" text-anchor="middle" font-size="11" fill="#ff5555" font-family="Roboto" font-weight="700">⚠  PS_ON# CIRCUIT REQUIRED</text>
+<text x="1680" y="1664" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">Pin 16 → GND via latching switch</text>
+<text x="1680" y="1680" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">OR: 1kΩ resistor (always-on)</text>
+<text x="1680" y="1696" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">24-pin ATX header pins 16 + any GND</text>
+<text x="1680" y="1712" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">ATX will NOT power up without this</text>
+
+<!-- ATX Rail distribution arrows -->
+<!-- 5V rail out -->
+<line x1="1450" y1="1560" x2="1180" y2="1560" stroke="#c9a86a" stroke-width="3" marker-end="url(#arr5v)"/>
+<text x="1310" y="1553" text-anchor="middle" font-size="9" fill="#c9a86a" font-family="Roboto" font-weight="700">5V → LED logic</text>
+
+<!-- 12V rail out -->
+<line x1="1450" y1="1590" x2="1180" y2="1590" stroke="#eaddaa" stroke-width="5" marker-end="url(#arr12v)"/>
+<text x="1310" y="1610" text-anchor="middle" font-size="9" fill="#eaddaa" font-family="Roboto" font-weight="700">12V → ALL strips + scent</text>
+
+<!-- Grounding note -->
+<rect x="1470" y="1742" width="420" height="110" rx="3"
+      fill="#08100c" stroke="rgba(74,150,80,0.4)" stroke-width="1"/>
+<text x="1680" y="1762" text-anchor="middle" font-size="10" fill="#66bb6a" font-family="Roboto" font-weight="700">GROUNDING ADVANTAGE</text>
+<text x="1490" y="1780" font-size="8" fill="#8eb5b8" font-family="Roboto">Single GND plane — no isolated PSU</text>
+<text x="1490" y="1795" font-size="8" fill="#8eb5b8" font-family="Roboto">ground loops to manage</text>
+<text x="1490" y="1813" font-size="8" fill="#8eb5b8" font-family="Roboto">5V and 12V V+ rails naturally</text>
+<text x="1490" y="1828" font-size="8" fill="#8eb5b8" font-family="Roboto">isolated (different voltages)</text>
+<text x="1490" y="1843" font-size="8" fill="#66bb6a" font-family="Roboto">Still use star-point GND wiring</text>
+
+<!-- ── CONTROLLER TRAY (left + center) ──────────────────────────────── -->
+<rect x="70" y="1390" width="1360" height="520" rx="6"
+      fill="#0a1218" stroke="rgba(80,120,160,0.5)" stroke-width="2"/>
+<text x="90" y="1412" font-size="10" fill="#8eb5b8" font-family="Roboto" letter-spacing="2">CONTROLLER TRAY  ·  5.25" BAY BRACKETS OR CUSTOM LASER-CUT PLATE</text>
+
+<!-- LED Controller (ATX, left) -->
+<rect x="90" y="1425" width="640" height="460" rx="4"
+      fill="#0a151a" stroke="rgba(88,160,170,0.4)" stroke-width="1.5"/>
+<text x="110" y="1445" font-size="11" fill="#64b5f6" font-family="Roboto" font-weight="700">WS2815 LED CONTROLLER</text>
+
+<rect x="110" y="1458" width="180" height="100" rx="3" class="comp"
+      data-info="ESP32-S3 Master|WLED firmware · CH1–CH4|5V from ATX 5V rail|USB-C bracket to rear I/O panel for Mac mini"/>
+<text x="200" y="1476" text-anchor="middle" font-size="9" fill="#64b5f6" font-family="Roboto" font-weight="700">ESP32-S3</text>
+<text x="200" y="1491" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto">MASTER · CH1–CH4</text>
+<text x="200" y="1505" text-anchor="middle" font-size="8" fill="#c9a86a" font-family="Roboto">5V ATX · ~400mA</text>
+<text x="200" y="1520" text-anchor="middle" font-size="7" fill="#4a6b6d" font-family="Roboto">USB-C → rear bracket</text>
+<text x="200" y="1534" text-anchor="middle" font-size="7" fill="#4a6b6d" font-family="Roboto">SMA → rear panel</text>
+
+<rect x="305" y="1458" width="180" height="100" rx="3" class="comp"
+      data-info="ESP32-S3 Slave|WLED DDP receiver · CH5–CH7|5V from ATX 5V rail|Wi-Fi link from Master only"/>
+<text x="395" y="1476" text-anchor="middle" font-size="9" fill="#64b5f6" font-family="Roboto" font-weight="700">ESP32-S3</text>
+<text x="395" y="1491" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto">SLAVE · CH5–CH7</text>
+<text x="395" y="1505" text-anchor="middle" font-size="8" fill="#c9a86a" font-family="Roboto">5V ATX · ~400mA</text>
+<text x="395" y="1520" text-anchor="middle" font-size="7" fill="#4a6b6d" font-family="Roboto">DDP over Wi-Fi</text>
+<text x="395" y="1534" text-anchor="middle" font-size="7" fill="#4a6b6d" font-family="Roboto">SMA → rear panel</text>
+
+<rect x="500" y="1458" width="200" height="100" rx="3"
+      fill="#080e10" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="600" y="1476" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">U2 · R1–R7 · C1–C8</text>
+<text x="600" y="1491" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">74AHCT245N · NTC1</text>
+<text x="600" y="1505" text-anchor="middle" font-size="7" fill="#4a6b6d" font-family="Roboto">Mount on proto board</text>
+<text x="600" y="1520" text-anchor="middle" font-size="7" fill="#4a6b6d" font-family="Roboto">or custom PCB</text>
+
+<!-- FUSE BLOCK — ATX critical warning -->
+<rect x="110" y="1578" width="600" height="120" rx="4"
+      fill="#140808" stroke="rgba(255,85,85,0.7)" stroke-width="2"
+      class="comp"
+      data-info="FUSING — CRITICAL FOR ATX CONFIG|ATX PSU provides NO per-branch overcurrent protection|All original fuses MUST be retained inside the case|F1: 7.5A ATC/ATO blade — Strip #1 branch|FB1: 6-channel 7.5A block — Strips #2–#7|F_MAIN T2A · F1 T1A · F3–F6 T500mA — scent controller|Without these, a short on any strip = ATX crowbar + possible fire"/>
+<text x="410" y="1598" text-anchor="middle" font-size="12" fill="#ff5555" font-family="Roboto" font-weight="900">⚠  RETAIN ALL INLINE FUSES  ⚠</text>
+<text x="410" y="1616" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">F1: 7.5A ATC/ATO (Strip #1)  ·  FB1: 6-ch 7.5A block (Strips #2–#7)</text>
+<text x="410" y="1632" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">F_MAIN T2A  ·  F1-scent T1A  ·  F3–F6 T500mA  (scent)</text>
+<text x="410" y="1650" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">ATX has no per-branch protection — fuses are the ONLY fault protection</text>
+<text x="410" y="1666" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Add 10A MCB on AC input for whole-system protection</text>
+<text x="410" y="1682" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">NTC1 (10Ω/10A inrush) still required on 12V bus</text>
+
+<!-- Strip injection note (ATX) -->
+<rect x="110" y="1718" width="600" height="130" rx="3"
+      fill="#060c0e" stroke="rgba(74,107,109,0.25)" stroke-width="1"/>
+<text x="410" y="1737" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto" letter-spacing="2">SAME INJECTION WIRING AS CONFIG 1</text>
+<text x="130" y="1755" font-size="8" fill="#eaddaa" font-family="Roboto">Strips #2–#7: 4m head feed + 6m mid-inject per strip</text>
+<text x="130" y="1770" font-size="8" fill="#eaddaa" font-family="Roboto">Strip #1 (Vertex): 18AWG · 20m run · single feed</text>
+<text x="130" y="1785" font-size="8" fill="#88e2d6" font-family="Roboto">Data CH1–CH7: 22AWG · 4m to strip starts</text>
+<text x="130" y="1803" font-size="8" fill="#4a6b6d" font-family="Roboto">Cables exit via rear I/O panel slots with rubber grommets</text>
+<text x="130" y="1820" font-size="8" fill="#4a6b6d" font-family="Roboto">or blank PCIe brackets drilled for cable pass-through</text>
+<text x="130" y="1838" font-size="8" fill="#4a6b6d" font-family="Roboto">Total exits: ~24 cables — use 2× PCIe brackets + side gland plate</text>
+
+<!-- Scent controller (ATX, right) -->
+<rect x="750" y="1425" width="660" height="460" rx="4"
+      fill="#0a1510" stroke="rgba(80,150,100,0.4)" stroke-width="1.5"/>
+<text x="770" y="1445" font-size="11" fill="#66bb6a" font-family="Roboto" font-weight="700">SCENT CONTROLLER  (Rev 2.0)</text>
+
+<rect x="770" y="1458" width="360" height="100" rx="3" class="comp"
+      data-info="Waveshare ESP32-S3-Relay-6CH|12V from ATX 12V rail (7–36V input range)|Rev 2.0: no buck converter — 12V direct to relay COM|4 relays switch 12V to atomizer drivers|F_MAIN T2A protects whole scent branch|~1.0A steady load at 12V (1.18A is wire design-margin rating in source schematic)"/>
+<text x="950" y="1476" text-anchor="middle" font-size="9" fill="#66bb6a" font-family="Roboto" font-weight="700">ESP32-S3-RELAY-6CH</text>
+<text x="950" y="1491" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">12V direct (no buck) · ~0.40A (ESP)</text>
+<text x="950" y="1505" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">4× relays → 12V atomizer</text>
+<text x="950" y="1520" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">F_MAIN T2A + F3–F6 T500mA</text>
+<text x="950" y="1534" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">RC snubbers RC1–RC4</text>
+
+<rect x="1150" y="1458" width="240" height="100" rx="3"
+      fill="#080e0a" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="1270" y="1476" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">LOAD ON 12V</text>
+<text x="1270" y="1493" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Scent:     1.0A</text>
+<text x="1270" y="1508" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Strip #1:  0.90A</text>
+<text x="1270" y="1523" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Strips 2–7: 25.2A</text>
+<line x1="1165" y1="1530" x2="1385" y2="1530" stroke="#4a6b6d" stroke-width="1"/>
+<text x="1270" y="1545" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto" font-weight="700">Total: ~27.1A</text>
+
+<!-- Atomizers (ATX) -->
+<rect x="770" y="1578" width="620" height="270" rx="3"
+      fill="#060c08" stroke="rgba(74,107,109,0.25)" stroke-width="1" stroke-dasharray="6,4"/>
+<text x="1080" y="1598" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto" letter-spacing="2">SCENT OUTPUT (same wiring as Config 1)</text>
+<text x="790" y="1616" font-size="8" fill="#66bb6a" font-family="Roboto">A1–A4: JY-M27AO · 12V · ~150mA · 113kHz each</text>
+<text x="790" y="1632" font-size="8" fill="#4a6b6d" font-family="Roboto">Relay COM–NO  → F3/4/5/6 → driver in · 22AWG twisted pairs</text>
+<text x="790" y="1648" font-size="8" fill="#4a6b6d" font-family="Roboto">Z1–Z4: piezo disc transducers connected to each driver</text>
+<text x="790" y="1672" font-size="8" fill="#ff5555" font-family="Roboto">⚠  In PC case: moisture from atomizers can damage components</text>
+<text x="790" y="1688" font-size="8" fill="#ff5555" font-family="Roboto">⚠  Mount atomizer drivers in separate sealed sub-box or</text>
+<text x="790" y="1704" font-size="8" fill="#ff5555" font-family="Roboto">    external enclosure — run 12V relay output outside case</text>
+<text x="790" y="1724" font-size="8" fill="#8eb5b8" font-family="Roboto">Config 2 NOTE: Atomizer moisture hazard is more critical in</text>
+<text x="790" y="1740" font-size="8" fill="#8eb5b8" font-family="Roboto">enclosed PC case than open steel enclosure with vented zones.</text>
+<text x="790" y="1758" font-size="8" fill="#66bb6a" font-family="Roboto">Recommendation: relay output cables exit case immediately,</text>
+<text x="790" y="1774" font-size="8" fill="#66bb6a" font-family="Roboto">drivers located externally near atomizer positions.</text>
+<text x="790" y="1794" font-size="8" fill="#4a6b6d" font-family="Roboto">SMA antenna → 2× case rear panel mounts (LED ESPs)</text>
+<text x="790" y="1810" font-size="8" fill="#4a6b6d" font-family="Roboto">             + 1× scent ESP SMA → rear panel mount</text>
+
+<!-- ── CABLE EXITS (Config 2 same as Config 1) ─────────────────────── -->
+<rect x="70" y="1930" width="1360" height="65" rx="0"
+      fill="#080e10" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<text x="140" y="1950" font-size="9" fill="#88e2d6" font-family="Roboto">DATA: 7× 22AWG · 4m to strip starts · exit via drilled PCIe bracket</text>
+<text x="140" y="1968" font-size="9" fill="#eaddaa" font-family="Roboto">12V POWER: 7× head + 6× inject (12AWG) + 1× 18AWG 20m → rubber-grommet cutouts</text>
+<text x="900" y="1950" font-size="9" fill="#66bb6a" font-family="Roboto">SCENT RELAY OUTPUT: exit to external atomizer sub-box</text>
+<text x="900" y="1968" font-size="9" fill="#4a6b6d" font-family="Roboto">USB-C: rear bracket · SMA: 3× rear panel holes</text>
+
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  COMPARISON TABLE                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<rect x="50" y="2020" width="1900" height="340" rx="8"
+      fill="#0a1014" stroke="rgba(74,107,109,0.4)" stroke-width="1.5"/>
+<text x="1000" y="2044" text-anchor="middle" font-size="14" fill="#eaddaa" font-family="Roboto" font-weight="700" letter-spacing="3">CONFIGURATION COMPARISON</text>
+
+<!-- Table headers -->
+<line x1="70" y1="2056" x2="1940" y2="2056" stroke="rgba(74,107,109,0.5)" stroke-width="1"/>
+<text x="300"  y="2072" text-anchor="middle" font-size="10" fill="#4a6b6d" font-family="Roboto" letter-spacing="1">PARAMETER</text>
+<text x="820"  y="2072" text-anchor="middle" font-size="10" fill="#64b5f6" font-family="Roboto" font-weight="700" letter-spacing="1">CONFIG 1 — ELECTRICAL ENCLOSURE</text>
+<text x="1560" y="2072" text-anchor="middle" font-size="10" fill="#64b5f6" font-family="Roboto" font-weight="700" letter-spacing="1">CONFIG 2 — PC CASE + ATX PSU</text>
+<line x1="70" y1="2080" x2="1940" y2="2080" stroke="rgba(74,107,109,0.5)" stroke-width="1"/>
+<line x1="570" y1="2056" x2="570" y2="2350" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+<line x1="1140" y1="2056" x2="1140" y2="2350" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
+
+<!-- Row 1 -->
+<text x="90"   y="2100" font-size="9" fill="#8eb5b8" font-family="Roboto">Box size</text>
+<text x="590"  y="2100" font-size="9" fill="#8eb5b8" font-family="Roboto">~450 × 350 × 200 mm steel IP54+</text>
+<text x="1160" y="2100" font-size="9" fill="#8eb5b8" font-family="Roboto">~450 × 200 × 450 mm PC case</text>
+<!-- Row 2 -->
+<text x="90"   y="2118" font-size="9" fill="#8eb5b8" font-family="Roboto">PSU count</text>
+<text x="590"  y="2118" font-size="9" fill="#8eb5b8" font-family="Roboto">3× DIN rail (5V/3A · 12V/5A · 12V/50A)</text>
+<text x="1160" y="2118" font-size="9" fill="#8eb5b8" font-family="Roboto">1× ATX 1000W</text>
+<!-- Row 3 -->
+<text x="90"   y="2136" font-size="9" fill="#8eb5b8" font-family="Roboto">Rail isolation</text>
+<text x="590"  y="2136" font-size="9" fill="#66bb6a" font-family="Roboto">✓ Fully isolated V+ rails (3 separate PSUs)</text>
+<text x="1160" y="2136" font-size="9" fill="#66bb6a" font-family="Roboto">✓ 5V ≠ 12V naturally (single GND plane)</text>
+<!-- Row 4 -->
+<text x="90"   y="2154" font-size="9" fill="#8eb5b8" font-family="Roboto">Cooling</text>
+<text x="590"  y="2154" font-size="9" fill="#8eb5b8" font-family="Roboto">Add 80mm forced-air fan (not included)</text>
+<text x="1160" y="2154" font-size="9" fill="#66bb6a" font-family="Roboto">✓ Case fans built-in (front + rear)</text>
+<!-- Row 5 -->
+<text x="90"   y="2172" font-size="9" fill="#8eb5b8" font-family="Roboto">Cost (PSU)</text>
+<text x="590"  y="2172" font-size="9" fill="#8eb5b8" font-family="Roboto">Higher — industrial PSUs ~$80–$180 total</text>
+<text x="1160" y="2172" font-size="9" fill="#66bb6a" font-family="Roboto">Lower — single ATX ~$150–$200</text>
+<!-- Row 6 -->
+<text x="90"   y="2190" font-size="9" fill="#8eb5b8" font-family="Roboto">Inline fuses</text>
+<text x="590"  y="2190" font-size="9" fill="#66bb6a" font-family="Roboto">✓ Matched to PSU topology — cleanest</text>
+<text x="1160" y="2190" font-size="9" fill="#ff5555" font-family="Roboto">⚠ CRITICAL — must retain all fuses</text>
+<!-- Row 7 -->
+<text x="90"   y="2208" font-size="9" fill="#8eb5b8" font-family="Roboto">Atomizer moisture</text>
+<text x="590"  y="2208" font-size="9" fill="#66bb6a" font-family="Roboto">✓ Vented zones — mount drivers near exit</text>
+<text x="1160" y="2208" font-size="9" fill="#ff5555" font-family="Roboto">⚠ Keep drivers OUTSIDE case / sub-box</text>
+<!-- Row 8 -->
+<text x="90"   y="2226" font-size="9" fill="#8eb5b8" font-family="Roboto">Cable management</text>
+<text x="590"  y="2226" font-size="9" fill="#8eb5b8" font-family="Roboto">Terminal blocks + cable glands — professional</text>
+<text x="1160" y="2226" font-size="9" fill="#66bb6a" font-family="Roboto">ATX modular cables + PCIe bracket exit</text>
+<!-- Row 9 -->
+<text x="90"   y="2244" font-size="9" fill="#8eb5b8" font-family="Roboto">Repair / access</text>
+<text x="590"  y="2244" font-size="9" fill="#66bb6a" font-family="Roboto">✓ Each PSU replaceable independently</text>
+<text x="1160" y="2244" font-size="9" fill="#8eb5b8" font-family="Roboto">Single PSU replacement — all-or-nothing</text>
+<!-- Row 10 -->
+<text x="90"   y="2262" font-size="9" fill="#8eb5b8" font-family="Roboto">Recommended for</text>
+<text x="590"  y="2262" font-size="9" fill="#66bb6a" font-family="Roboto">Permanent installation · max reliability</text>
+<text x="1160" y="2262" font-size="9" fill="#66bb6a" font-family="Roboto">Portable / cost-sensitive builds</text>
+
+<line x1="70" y1="2275" x2="1940" y2="2275" stroke="rgba(74,107,109,0.5)" stroke-width="1"/>
+
+<!-- Final recommendation -->
+<text x="1000" y="2300" text-anchor="middle" font-size="11" fill="#eaddaa" font-family="Roboto" font-weight="700">RECOMMENDATION</text>
+<text x="1000" y="2320" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto">Config 1 for permanent indoor installation · Config 2 for touring / cost-first builds.</text>
+<text x="1000" y="2338" text-anchor="middle" font-size="10" fill="#ff5555" font-family="Roboto" font-weight="700">Both configs: mid-strip power injection is required on all 6 edge strips.</text>
+<text x="1000" y="2356" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">Click any component for details · Scroll to zoom · Drag to pan</text>
+
+</svg>
+</div><!-- wrapper -->
+</div><!-- container -->
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-title" id="tt-title"></div>
+  <div id="tt-body"></div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div style="font-size:10px;color:#8eb5b8;letter-spacing:2px;margin-bottom:6px">WIRE COLOURS</div>
+  <div class="legend-row"><div class="legend-line" style="background:#c084fc"></div>220V AC</div>
+  <div class="legend-row"><div class="legend-line" style="background:#eaddaa"></div>12V DC</div>
+  <div class="legend-row"><div class="legend-line" style="background:#c9a86a"></div>5V DC</div>
+  <div class="legend-row"><div class="legend-line" style="background:#88e2d6"></div>Data signal</div>
+  <div class="legend-row"><div class="legend-line" style="background:#4a6b6d"></div>GND</div>
+  <div style="font-size:9px;color:#4a6b6d;margin-top:8px;letter-spacing:1px">Click component for info</div>
+  <div style="font-size:9px;color:#4a6b6d;letter-spacing:1px">Scroll = zoom · Drag = pan</div>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <button class="ctrl-btn" id="zoomIn" title="Zoom in">+</button>
+  <button class="ctrl-btn" id="zoomOut" title="Zoom out">−</button>
+  <button class="ctrl-btn" id="zoomFit" title="Fit to screen" style="font-size:12px">⊞</button>
+</div>
+
+<script>
+  const container = document.getElementById('container');
+  const wrapper   = document.getElementById('wrapper');
+  const tooltip   = document.getElementById('tooltip');
+  const ttTitle   = document.getElementById('tt-title');
+  const ttBody    = document.getElementById('tt-body');
+
+  let scale = 0.42, tx = 0, ty = 0;
+  let isDragging = false, startX, startY, startTx, startTy;
+
+  function applyTransform() {
+    wrapper.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+  }
+
+  function fitToScreen() {
+    const W = container.clientWidth, H = container.clientHeight;
+    const svgW = 2000, svgH = 2780;
+    scale = Math.min(W/svgW, H/svgH) * 0.96;
+    tx = (W - svgW*scale) / 2;
+    ty = (H - svgH*scale) / 2;
+    applyTransform();
+  }
+  fitToScreen();
+
+  container.addEventListener('wheel', e => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.12 : 0.89;
+    const rect = container.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    tx = mx - (mx - tx) * factor;
+    ty = my - (my - ty) * factor;
+    scale *= factor;
+    scale = Math.max(0.1, Math.min(8, scale));
+    applyTransform();
+  }, {passive: false});
+
+  container.addEventListener('mousedown', e => {
+    isDragging = true;
+    startX = e.clientX; startY = e.clientY;
+    startTx = tx; startTy = ty;
+    container.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    tx = startTx + (e.clientX - startX);
+    ty = startTy + (e.clientY - startY);
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    container.classList.remove('grabbing');
+  });
+
+  document.getElementById('zoomIn').addEventListener('click', () => {
+    const W = container.clientWidth, H = container.clientHeight;
+    tx = W/2 - (W/2 - tx)*1.2; ty = H/2 - (H/2 - ty)*1.2;
+    scale = Math.min(scale*1.2, 8); applyTransform();
+  });
+  document.getElementById('zoomOut').addEventListener('click', () => {
+    const W = container.clientWidth, H = container.clientHeight;
+    tx = W/2 - (W/2 - tx)*0.83; ty = H/2 - (H/2 - ty)*0.83;
+    scale = Math.max(scale*0.83, 0.1); applyTransform();
+  });
+  document.getElementById('zoomFit').addEventListener('click', fitToScreen);
+
+  // Tooltip
+  document.getElementById('schematic').addEventListener('click', e => {
+    const el = e.target.closest('[data-info]');
+    if (!el) { tooltip.style.display = 'none'; return; }
+    const parts = el.getAttribute('data-info').split('|');
+    ttTitle.textContent = parts[0] || '';
+    ttBody.innerHTML = parts.slice(1).map(l =>
+      `<div class="tooltip-line">${l}</div>`).join('');
+    tooltip.style.display = 'block';
+    tooltip.style.left = Math.min(e.clientX + 14, window.innerWidth - 340) + 'px';
+    tooltip.style.top  = Math.min(e.clientY + 14, window.innerHeight - 200) + 'px';
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('[data-info]') && !e.target.closest('.tooltip'))
+      tooltip.style.display = 'none';
+  });
+</script>
+</body>
+</html>

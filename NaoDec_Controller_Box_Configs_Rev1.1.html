@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NaoDec Controller Box Configurations — Rev 1.0</title>
+<title>NaoDec Controller Box Configurations — Rev 1.1</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
   :root {
@@ -240,7 +240,7 @@
 <!-- PSU-B: 12V / 5A -->
 <rect x="380" y="979" width="220" height="185" rx="4"
       class="comp"
-      data-info="PSU-B · 12V / 5A|Mean Well RS-60-12 (60W DIN rail)|Powers: Strip #1 Vertex (60px, 0.9A) + Scent Controller (1.18A)|Total load: ~2.08A · Margin: 2.4×|Output: 12V ±1%|V+ rail ISOLATED from PSU-A and PSU-C"/>
+      data-info="PSU-B · 12V / 5A|Mean Well RS-60-12 (60W DIN rail)|Powers: Strip #1 Vertex (60px, 0.9A) + Scent Controller (~1.0A steady)|Total load: ~1.90A · Margin: 2.6×|Note: 1.18A is the design-margin wire rating in the source schematic, not steady-state load|Output: 12V ±1%|V+ rail ISOLATED from PSU-A and PSU-C"/>
 <text x="490" y="1002" text-anchor="middle" font-size="13" fill="#eaddaa" font-family="Roboto" font-weight="900">PSU-B</text>
 <text x="490" y="1022" text-anchor="middle" font-size="15" fill="#eaddaa" font-family="Roboto" font-weight="700">12V / 5A</text>
 <text x="490" y="1040" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto">60W · DIN rail</text>
@@ -254,7 +254,7 @@
 <!-- PSU-C: 12V / 30-50A -->
 <rect x="680" y="979" width="600" height="185" rx="4"
       class="comp"
-      data-info="PSU-C · 12V / 30–50A|Mean Well SE-600-12 (600W) — preferred|Alt: SE-350-12 (350W/29A) for ~30% brightness cap|Powers: LED Strips #2–#7 (6× Edge sets)|Max load: 26.6A @ full white (280px × 6 × 15.8mA)|Margin (600W): 1.9× · V+ rail ISOLATED from PSU-A/B"/>
+      data-info="PSU-C · 12V / 30–50A|Mean Well SE-600-12 (600W) — preferred|Alt: SE-350-12 (350W/29A) — only 1.15× headroom; safe only with WLED ABL brightness cap|Powers: LED Strips #2–#7 (6× Edge sets)|Max load: 25.2A (280px × 6 × 15mA — source schematic spec)|Margin (600W / 50A): 2.0× · V+ rail ISOLATED from PSU-A/B"/>
 <text x="980" y="1002" text-anchor="middle" font-size="13" fill="#eaddaa" font-family="Roboto" font-weight="900">PSU-C</text>
 <text x="980" y="1022" text-anchor="middle" font-size="16" fill="#eaddaa" font-family="Roboto" font-weight="700">12V / 30–50A</text>
 <text x="980" y="1040" text-anchor="middle" font-size="10" fill="#8eb5b8" font-family="Roboto">360–600W · enclosed switching</text>
@@ -263,7 +263,7 @@
 <text x="980" y="1088" text-anchor="middle" font-size="9" fill="#4a6b6d" font-family="Roboto">Alt: SE-350-12 (350W / 29A)</text>
 <line x1="980" y1="1096" x2="980" y2="1108" stroke="#4a6b6d" stroke-width="1"/>
 <text x="980" y="1122" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">LED Strips #2–#7 · 6× Edge sets</text>
-<text x="980" y="1138" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">280 LEDs each · max ~26.6A total</text>
+<text x="980" y="1138" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">280 LEDs each · max ~25.2A total</text>
 
 <!-- PSU isolation warning -->
 <rect x="1360" y="990" width="540" height="80" rx="3"
@@ -358,7 +358,7 @@
 <!-- Strip #1 -->
 <rect x="110" y="462" width="430" height="82" rx="3"
       class="comp"
-      data-info="Strip #1 — Vertex Set|60 × WS2815 12V (20 positions × 3 LEDs)|Cable: 20m run · 18AWG power pair|V-drop @ 0.9A: 230mV → 11.77V at strip ✓|Single power feed from PSU-B (no injection needed)|Signal: CH1 data cable 20m"/>
+      data-info="Strip #1 — Vertex Set|60 × WS2815 12V (20 positions × 3 LEDs)|Cable: 20m run · 18AWG power pair|V-drop @ 0.9A: 0.9 × (40m × 20.95mΩ/m) = 754mV → 11.25V at strip ✓|WS2815 min 9V — 11.25V is safe · upgrade to 16AWG for 474mV drop → 11.52V|Single power feed sufficient (short cluster segments at each vertex)|Signal: CH1 data cable 20m"/>
 <text x="325" y="481" text-anchor="middle" font-size="10" fill="#eaddaa" font-family="Roboto" font-weight="700">STRIP #1 — VERTEX  (20m run)</text>
 <text x="325" y="498" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">60 LEDs · 0.9A · PSU-B · F1 7.5A</text>
 <text x="325" y="514" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">18AWG power · 22AWG data</text>
@@ -367,7 +367,7 @@
 <!-- Strips #2-#7 -->
 <rect x="560" y="462" width="470" height="82" rx="3"
       class="comp"
-      data-info="Strips #2–#7 — Edge Sets|6× strips · 280 LEDs each (5 sections × 56 LEDs)|Cable to strip start: 4m · 12AWG|Mid-inject cable to section 2/3 joint: 6m · 12AWG|V-drop with injection: 329mV max → 11.62V ✓|PSU-C via FB1 (F2–F7 · 7.5A each)"/>
+      data-info="Strips #2–#7 — Edge Sets|6× strips · 280 LEDs each (5 sections × 56 LEDs)|Cable to strip start: 4m · 12AWG|Mid-inject cable to section 2/3 joint: 6m · 12AWG|Feed cable drop (12AWG 8m loop, 4.2A): 4.2 × 8 × 5.21mΩ = 175mV → strip input 11.83V|In-strip drop: depends on PCB trace R — see injection diagram (estimate uses typ. 60mΩ/m)|PSU-C via FB1 (F2–F7 · 7.5A each)"/>
 <text x="795" y="481" text-anchor="middle" font-size="10" fill="#eaddaa" font-family="Roboto" font-weight="700">STRIPS #2–#7 — EDGES  (6× strips)</text>
 <text x="795" y="498" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">280 LEDs each · 4.2A max · PSU-C · FB1</text>
 <text x="795" y="514" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">HEAD: 4m 12AWG · MID-INJECT: 6m 12AWG</text>
@@ -407,10 +407,10 @@
 <text x="640" y="700" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">6m · 12AWG</text>
 
 <!-- V-drop annotation -->
-<text x="430" y="728" text-anchor="middle" font-size="8" fill="#66bb6a" font-family="Roboto">1st half: 1.68A · 329mV drop</text>
-<text x="760" y="728" text-anchor="middle" font-size="8" fill="#66bb6a" font-family="Roboto">2nd half: 2.52A · 423mV drop</text>
-<text x="570" y="746" text-anchor="middle" font-size="9" fill="#66bb6a" font-family="Roboto" font-weight="700">Strip end voltage ≥ 11.52V  ✓  (WS2815 min 9V)</text>
-<text x="570" y="760" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">56 LEDs/section · 0.933m/section · inject at S2/S3 junction</text>
+<text x="430" y="728" text-anchor="middle" font-size="8" fill="#66bb6a" font-family="Roboto">1st half: 1.68A · ≈188mV drop (est. 60mΩ/m trace)</text>
+<text x="760" y="728" text-anchor="middle" font-size="8" fill="#66bb6a" font-family="Roboto">2nd half: 2.52A · ≈423mV drop (est. 60mΩ/m trace)</text>
+<text x="570" y="746" text-anchor="middle" font-size="9" fill="#66bb6a" font-family="Roboto" font-weight="700">Est. strip end ≈11.23V ✓  — measure strip trace R to confirm</text>
+<text x="570" y="760" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">56 LEDs/section · 0.933m/section · inject at S2/S3 junction · 60mΩ/m is typical; actual varies by brand</text>
 
 <!-- ── SCENT CONTROLLER BLOCK ─────────────────────────────────────── -->
 <rect x="1090" y="240" width="840" height="580" rx="6"
@@ -420,12 +420,12 @@
 <!-- Waveshare board -->
 <rect x="1110" y="278" width="380" height="130" rx="4"
       class="comp"
-      data-info="Waveshare ESP32-S3-Relay-6CH|Main controller board|Input: 7–36V DC (fed 12V from PSU-B)|6× SPDT relays — 4 channels used (CH1–CH4)|GPIO1→CH1 · GPIO2→CH2 · GPIO41→CH3 · GPIO42→CH4|Runs WLED firmware · ~0.58A @ 12V|Rev 2.0: NO 5V buck — 12V direct to relay COM bus"/>
+      data-info="Waveshare ESP32-S3-Relay-6CH|Main controller board|Input: 7–36V DC (fed 12V from PSU-B)|6× SPDT relays — 4 channels used (CH1–CH4)|GPIO1→CH1 · GPIO2→CH2 · GPIO41→CH3 · GPIO42→CH4|Runs WLED firmware · ~0.40A @ 12V (ESP sub-branch per schematic F1 T1A fuse)|Rev 2.0: NO 5V buck — 12V direct to relay COM bus"/>
 <text x="1300" y="299" text-anchor="middle" font-size="10" fill="#66bb6a" font-family="Roboto" font-weight="700">ESP32-S3-RELAY-6CH</text>
 <text x="1300" y="315" text-anchor="middle" font-size="9" fill="#eaddaa" font-family="Roboto" font-weight="700">Waveshare</text>
 <text x="1300" y="332" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">7–36V in · 6× SPDT relays</text>
 <text x="1300" y="347" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">CH1–CH4 · GPIO1,2,41,42</text>
-<text x="1300" y="362" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto">12V direct · ~0.58A</text>
+<text x="1300" y="362" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto">12V direct · ~0.40A (ESP)</text>
 <text x="1300" y="377" text-anchor="middle" font-size="8" fill="#ff5555" font-family="Roboto">Rev 2.0: no buck converter</text>
 <text x="1300" y="392" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">WLED firmware · SMA 2.4GHz</text>
 
@@ -433,7 +433,7 @@
 <rect x="1510" y="278" width="400" height="130" rx="4"
       fill="#0a100c" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
 <text x="1710" y="297" text-anchor="middle" font-size="10" fill="#eaddaa" font-family="Roboto" font-weight="700">FUSING — SCENT</text>
-<text x="1530" y="316" font-size="8" fill="#8eb5b8" font-family="Roboto">F_MAIN T2A  · 5×20mm · 18AWG · 1.18A load</text>
+<text x="1530" y="316" font-size="8" fill="#8eb5b8" font-family="Roboto">F_MAIN T2A  · 5×20mm · 18AWG · ~1.0A steady</text>
 <text x="1530" y="332" font-size="8" fill="#8eb5b8" font-family="Roboto">F1      T1A  · 5×20mm · 22AWG · 0.40A ESP</text>
 <text x="1530" y="348" font-size="8" fill="#8eb5b8" font-family="Roboto">F3–F6  T500mA · 5×20mm · 22AWG · per atomizer</text>
 <text x="1530" y="368" font-size="8" fill="#4a6b6d" font-family="Roboto">RC1–RC4: 100nF + 100Ω snubbers</text>
@@ -462,11 +462,11 @@
 <rect x="1510" y="462" width="380" height="90" rx="3"
       fill="#0a100c" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
 <text x="1700" y="480" text-anchor="middle" font-size="9" fill="#eaddaa" font-family="Roboto" font-weight="700">PSU-B LOAD SUMMARY</text>
-<text x="1530" y="498" font-size="8" fill="#8eb5b8" font-family="Roboto">ESP32-S3-Relay-6CH:  ~0.58A</text>
+<text x="1530" y="498" font-size="8" fill="#8eb5b8" font-family="Roboto">ESP32-S3-Relay-6CH:  ~0.40A</text>
 <text x="1530" y="513" font-size="8" fill="#8eb5b8" font-family="Roboto">4× atomizer drivers:  ~0.60A</text>
 <text x="1530" y="528" font-size="8" fill="#8eb5b8" font-family="Roboto">Strip #1 (Vertex):    ~0.90A</text>
 <line x1="1530" y1="534" x2="1880" y2="534" stroke="#4a6b6d" stroke-width="1"/>
-<text x="1530" y="547" font-size="8" fill="#eaddaa" font-family="Roboto" font-weight="700">Total PSU-B:          ~2.08A / 5A</text>
+<text x="1530" y="547" font-size="8" fill="#eaddaa" font-family="Roboto" font-weight="700">Total PSU-B:         ~1.90A / 5A</text>
 
 <!-- 12V from PSU-B into scent block -->
 <line x1="490" y1="840" x2="490" y2="820" stroke="#eaddaa" stroke-width="2"/>
@@ -518,8 +518,8 @@
 <text x="1490" y="1540" font-size="9" fill="#eaddaa" font-family="Roboto">12V ·  83A   (996W)  — available</text>
 <text x="1490" y="1560" font-size="9" fill="#66bb6a" font-family="Roboto" font-weight="700">REQUIRED:</text>
 <text x="1490" y="1576" font-size="9" fill="#c9a86a" font-family="Roboto">5V  ·  ~0.82A  → 4.1% load   ✓</text>
-<text x="1490" y="1592" font-size="9" fill="#eaddaa" font-family="Roboto">12V ·  ~27.3A → 32.9% load  ✓</text>
-<text x="1490" y="1606" font-size="8" fill="#4a6b6d" font-family="Roboto">12V worst case 53.4A → 64.3%  ✓</text>
+<text x="1490" y="1592" font-size="9" fill="#eaddaa" font-family="Roboto">12V · ~27.1A → 38.3% (850W) / 32.7% (1000W)  ✓</text>
+<text x="1490" y="1606" font-size="8" fill="#4a6b6d" font-family="Roboto">27.1A = source max (15mA/px) · sweet-spot efficiency</text>
 
 <!-- PS_ON# -->
 <rect x="1470" y="1626" width="420" height="100" rx="3"
@@ -613,9 +613,9 @@
 <text x="770" y="1445" font-size="11" fill="#66bb6a" font-family="Roboto" font-weight="700">SCENT CONTROLLER  (Rev 2.0)</text>
 
 <rect x="770" y="1458" width="360" height="100" rx="3" class="comp"
-      data-info="Waveshare ESP32-S3-Relay-6CH|12V from ATX 12V rail (7–36V input range)|Rev 2.0: no buck converter — 12V direct to relay COM|4 relays switch 12V to atomizer drivers|F_MAIN T2A protects whole scent branch|~1.18A total load at 12V"/>
+      data-info="Waveshare ESP32-S3-Relay-6CH|12V from ATX 12V rail (7–36V input range)|Rev 2.0: no buck converter — 12V direct to relay COM|4 relays switch 12V to atomizer drivers|F_MAIN T2A protects whole scent branch|~1.0A steady load at 12V (1.18A is wire design-margin rating in source schematic)"/>
 <text x="950" y="1476" text-anchor="middle" font-size="9" fill="#66bb6a" font-family="Roboto" font-weight="700">ESP32-S3-RELAY-6CH</text>
-<text x="950" y="1491" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">12V direct (no buck) · ~0.58A</text>
+<text x="950" y="1491" text-anchor="middle" font-size="8" fill="#8eb5b8" font-family="Roboto">12V direct (no buck) · ~0.40A (ESP)</text>
 <text x="950" y="1505" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">4× relays → 12V atomizer</text>
 <text x="950" y="1520" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">F_MAIN T2A + F3–F6 T500mA</text>
 <text x="950" y="1534" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">RC snubbers RC1–RC4</text>
@@ -623,11 +623,11 @@
 <rect x="1150" y="1458" width="240" height="100" rx="3"
       fill="#080e0a" stroke="rgba(74,107,109,0.3)" stroke-width="1"/>
 <text x="1270" y="1476" text-anchor="middle" font-size="9" fill="#8eb5b8" font-family="Roboto">LOAD ON 12V</text>
-<text x="1270" y="1493" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Scent:     1.18A</text>
+<text x="1270" y="1493" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Scent:     1.0A</text>
 <text x="1270" y="1508" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Strip #1:  0.90A</text>
-<text x="1270" y="1523" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Strips 2–7: 26.6A</text>
+<text x="1270" y="1523" text-anchor="middle" font-size="8" fill="#4a6b6d" font-family="Roboto">Strips 2–7: 25.2A</text>
 <line x1="1165" y1="1530" x2="1385" y2="1530" stroke="#4a6b6d" stroke-width="1"/>
-<text x="1270" y="1545" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto" font-weight="700">Total: ~28.7A</text>
+<text x="1270" y="1545" text-anchor="middle" font-size="8" fill="#eaddaa" font-family="Roboto" font-weight="700">Total: ~27.1A</text>
 
 <!-- Atomizers (ATX) -->
 <rect x="770" y="1578" width="620" height="270" rx="3"

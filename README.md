@@ -122,6 +122,7 @@ Each schematic supports:
 | NaoDec_WS2815_LED_Controller | 1.6 | Current · 7-ch dual ESP32-S3 DDP |
 | NaoDec_3D_Vertex_and_Edges_LED_Mapping | 1.2 | Current · 3D position map |
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
+| NaoDec_Controller_Box_Configs | 1.1 | Current · electrical enclosure vs PC case · audited power calculations |
 
 ---
 
