@@ -182,6 +182,7 @@ Each schematic supports:
 | NaoDec_Series_Coil_Build | 1.0 | Current · 60-coil series electromagnet subsystem |
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
 | NaoDec_Controller_Box_Configs | 1.1 | Current · electrical enclosure vs PC case · audited power calculations |
+| NaoDec_Power_and_Controller_Box_Report | 1.0 | Full power budget, PSU specs, voltage-drop analysis, audit findings |
 
 ---
 
