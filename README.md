@@ -21,6 +21,7 @@ naodec/
 ├── index.html                                     # GitHub Pages auto-index
 ├── NaoDec_WS2815_LED_Controller_Rev1.6.html       # Full controller schematic (interactive)
 ├── NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.2.html  # 3D LED position & channel map
+├── NaoDec_Series_Coil_Build_Rev1.0.html           # Series coil / electromagnet subsystem
 ├── Simple_WS2815_Controller_Rev_1.0.html          # Simplified single-controller reference
 └── Archived/                                      # Previous revisions
 ```
@@ -67,6 +68,38 @@ naodec/
 | 7 | GPIO6 (Slave) | U2 A7→B7 | #7 Edge F | 280 | ~8 m | 12 |
 
 **Total: 1,740 × WS2815 (12 V)**
+
+---
+
+## Series Coil / Electromagnet Subsystem
+
+Sixty hand-wound copper coils wired **end-to-end in a single series loop** on a 12 V DC supply, intended to produce a magnetic field. Full write-up: [`NaoDec_Series_Coil_Build_Rev1.0.html`](NaoDec_Series_Coil_Build_Rev1.0.html).
+
+> **⚠ An inductor does nothing on steady-state DC** (`Z = jωL → 0` at DC). This string is a **~4 Ω resistive near-short with no current-limiting element** — the steady current is set only by wire resistance and the PSU.
+
+### Bill of Materials
+
+| Component | Spec | Notes |
+|-----------|------|-------|
+| Coils | 60 × ~7-turn, 1 mm Cu, ~65 cm each | Air core (~3 cm dia); add steel cores for usable field |
+| Cable | 24 AWG 2-core flat | 14 m internal + ~19 m inter-group + 6 m return |
+| Connectors | 20 × JST 2-pin | Upgrade to VH (10 A) / Anderson — PH (2 A) is over rating |
+| PSU | 12 V DC, current-limited | Bench CC supply set ~3 A, or 12 V 3–5 A brick |
+| Fuse | 3–4 A inline at V+ | Matches ATC/ATO convention; load is a near-short |
+| Cores *(opt.)* | Steel bolt / nail per coil | Biggest cheap field boost |
+| Flyback diode *(opt.)* | 1N4007 / 1N5819 | If the string is switched electronically |
+
+### Electrical Summary
+
+| Quantity | Value | Note |
+|----------|-------|------|
+| Loop resistance | ~4 Ω | coils ~0.85 Ω + 24 AWG cable ~3.3 Ω |
+| Current | ~3 A | I = 12 V / ~4 Ω (if PSU allows) |
+| Voltage split | ~9.5 V cable / ~2.5 V coils | ~80 % wasted heating the cable |
+| Power | ~35 W total (~28 W in cable) | coils stay cool (~0.12 W each) |
+| Field per coil | ~21 AT | 7 turns × 3 A, air core → weak |
+
+> **⚠ Safety:** fuse it (3–4 A); prefer a current-limited supply; keep the 6 m run and slack **uncoiled**; power down before unplugging JSTs; **never** reduce cable resistance without adding a current limiter (each coil is ~0.014 Ω, a near-short); keep this V+ rail **isolated** from the LED rails.
 
 ---
 
@@ -121,6 +154,7 @@ Each schematic supports:
 |------|-----|-------|
 | NaoDec_WS2815_LED_Controller | 1.6 | Current · 7-ch dual ESP32-S3 DDP |
 | NaoDec_3D_Vertex_and_Edges_LED_Mapping | 1.2 | Current · 3D position map |
+| NaoDec_Series_Coil_Build | 1.0 | Current · 60-coil series electromagnet subsystem |
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
 
 ---

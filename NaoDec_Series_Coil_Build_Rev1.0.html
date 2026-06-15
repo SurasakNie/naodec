@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>NaoDec — Series Coil / Electromagnet Subsystem (Rev 1.0)</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg:        #ffffff;
+      --fg:        #222222;
+      --muted:     #888888;
+      --rule:      #dddddd;
+      --link:      #0645ad;
+      --link-hover:#0b63d6;
+      --code-bg:   rgba(128,128,128,0.15);
+      --warn:      #b00020;
+      --warn-bg:   rgba(176,0,32,0.08);
+      --ok:        #1a7f37;
+      --ok-bg:     rgba(26,127,55,0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0b1113;
+        --fg:        #e6edef;
+        --muted:     #8eb5b8;
+        --rule:      rgba(142, 181, 184, 0.25);
+        --link:      #88e2d6;
+        --link-hover:#eaddaa;
+        --code-bg:   rgba(142, 181, 184, 0.15);
+        --warn:      #ff8a80;
+        --warn-bg:   rgba(255,138,128,0.10);
+        --ok:        #7ee787;
+        --ok-bg:     rgba(126,231,135,0.10);
+      }
+    }
+    body { font-family: system-ui, sans-serif; max-width: 760px;
+           margin: 3rem auto; padding: 0 1rem; line-height: 1.6;
+           background: var(--bg); color: var(--fg); }
+    h1 { border-bottom: 1px solid var(--rule); padding-bottom: .4rem; }
+    h2 { margin-top: 2.2rem; border-bottom: 1px solid var(--rule); padding-bottom: .3rem; }
+    h3 { margin-top: 1.6rem; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { color: var(--link-hover); text-decoration: underline; }
+    code { background: var(--code-bg); padding: 1px 4px; border-radius: 3px; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: .95rem; }
+    th, td { border: 1px solid var(--rule); padding: .4rem .6rem; text-align: left; vertical-align: top; }
+    th { background: var(--code-bg); }
+    .sub { color: var(--muted); margin-top: -.4rem; }
+    .callout { border-left: 4px solid var(--rule); background: var(--code-bg);
+               padding: .7rem 1rem; margin: 1.1rem 0; border-radius: 4px; }
+    .callout.warn { border-left-color: var(--warn); background: var(--warn-bg); }
+    .callout.ok   { border-left-color: var(--ok);   background: var(--ok-bg); }
+    .callout p:first-child { margin-top: 0; }
+    .callout p:last-child  { margin-bottom: 0; }
+    ul { padding-left: 1.2rem; }
+    li { margin: .3rem 0; }
+    footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
+             color: var(--muted); font-size: .85rem; }
+    .num { text-align: right; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <h1>Series Coil / Electromagnet Subsystem</h1>
+  <p class="sub">NaoDec · Rev 1.0 · 60-coil series string on 12 V DC</p>
+
+  <h2>Overview</h2>
+  <p>
+    Sixty hand-wound copper coils (≈7 turns of ~65 cm of 1 mm copper each, ~3 cm
+    diameter, air core) wired <strong>end-to-end in a single series loop</strong> and
+    driven from a 12 V DC supply. Coils are grouped into 20 sets of 3, joined by
+    2-core 24 AWG flat cable and 2-pin JST connectors, with a 6 m return run to the PSU.
+    Intended purpose: <strong>electromagnetic field</strong> from the coils.
+  </p>
+
+  <table>
+    <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Coils</td><td>60 × ~7 turns, 1 mm Cu, ~65 cm wire each (~3 cm dia, air core)</td></tr>
+      <tr><td>Grouping</td><td>20 groups × 3 coils; 10 / 25 / 25 / 10 cm internal links</td></tr>
+      <tr><td>Inter-group cable</td><td>1 m, 24 AWG 2-core flat (×19 gaps)</td></tr>
+      <tr><td>Return run</td><td>6 m, 24 AWG 2-core flat</td></tr>
+      <tr><td>Connectors</td><td>20 × JST 2-pin (one mated pair per group boundary)</td></tr>
+      <tr><td>Supply</td><td>12 V DC (rating not yet selected — see recommendation below)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <p><strong>⚠ The key reality — an inductor does nothing on steady-state DC.</strong></p>
+    <p>
+      Inductor impedance is <code>Z = jωL</code>; at DC, <code>ω = 0</code>, so each coil is
+      simply a piece of wire. This circuit is therefore a <strong>~4 Ω resistive
+      near-short</strong> with <strong>no current-limiting element</strong>. Each individual
+      coil is only ~0.014 Ω — the steady current is set entirely by the total wire resistance
+      and whatever the PSU will deliver.
+    </p>
+  </div>
+
+  <h2>Electrical analysis</h2>
+  <p>
+    Resistance dominates everything here (copper ρ ≈ 0.0172 Ω·mm²/m for the coils;
+    24 AWG ≈ 0.0842 Ω/m). Figures are approximate; the feed from the PSU to group 1 is
+    unspecified, so total cable resistance may be somewhat higher.
+  </p>
+
+  <table>
+    <thead><tr><th>Element</th><th class="num">Length</th><th class="num">Resistance</th></tr></thead>
+    <tbody>
+      <tr><td>60 coils, 1 mm Cu</td><td class="num">~39 m</td><td class="num">~0.85 Ω</td></tr>
+      <tr><td>24 AWG cable (14 m internal + ~19 m inter-group + 6 m return)</td><td class="num">~39 m</td><td class="num">~3.3 Ω</td></tr>
+      <tr><th>Total loop</th><th class="num">—</th><th class="num">~4 Ω</th></tr>
+    </tbody>
+  </table>
+
+  <table>
+    <thead><tr><th>Quantity</th><th class="num">Value</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>Current (if PSU allows)</td><td class="num">~3 A</td><td>I = 12 V / ~4 Ω</td></tr>
+      <tr><td>Voltage across cable</td><td class="num">~9.5 V</td><td>~80 % of the supply, wasted as heat</td></tr>
+      <tr><td>Voltage across all 60 coils</td><td class="num">~2.5 V</td><td>coils barely energise</td></tr>
+      <tr><td>Total power</td><td class="num">~35 W</td><td>essentially a 35 W heater</td></tr>
+      <tr><td>Heat in cable</td><td class="num">~28 W</td><td>~0.7 W/m; hot spots if bundled/coiled</td></tr>
+      <tr><td>Heat per coil</td><td class="num">~0.12 W</td><td>coils stay cool</td></tr>
+      <tr><td>Field per coil</td><td class="num">~21 AT</td><td>7 turns × 3 A, air core → weak</td></tr>
+      <tr><td>Total inductance</td><td class="num">~0.13 mH</td><td>~0.6 mJ stored at 3 A (small kick)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <p><strong>⚠ The protective paradox — do not "fix" the inefficiency.</strong></p>
+    <p>
+      The cable resistance (~3.3 Ω of the ~4 Ω) is the <em>only</em> thing keeping the
+      current down to a non-destructive ~3 A, because each coil is a near short. Shortening
+      or thickening the cable to recover the wasted voltage will let the current run away
+      (e.g. ~0.5 Ω cable → ~9 A), which <strong>will</strong> overheat the 24 AWG wire and the
+      JST connectors. If you want lower cable loss, add a real current limiter — never just
+      lower the resistance.
+    </p>
+  </div>
+
+  <h2>Will the cable burn?</h2>
+  <div class="callout ok">
+    <p>
+      <strong>With a current-limited 12 V supply (≤3 A) plus an inline fuse: no.</strong>
+      The 24 AWG runs <em>warm</em> (~0.7 W/m; open-air ampacity ~3.5 A), the coils stay cool,
+      and the JST connectors are the weak link (see below). Keep the 6 m run and any slack
+      <strong>uncoiled</strong> so heat can escape.
+    </p>
+  </div>
+  <div class="callout warn">
+    <p>
+      <strong>Without current limiting / a fuse on a large supply or battery — or if the
+      cable resistance is reduced — yes, there is an overheat risk.</strong> The connectors
+      cook before the wire does: JST PH is rated 2 A (over), XH / SM ~3 A (at the limit).
+    </p>
+  </div>
+
+  <h2>Bill of materials</h2>
+  <p>Existing items plus the safety additions this analysis recommends.</p>
+  <table>
+    <thead><tr><th>Item</th><th>Spec</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Coils</td><td>60 × ~7-turn, 1 mm Cu, ~65 cm each</td><td>Air core; add ferromagnetic cores to make them useful</td></tr>
+      <tr><td>Inter-coil / inter-group cable</td><td>24 AWG 2-core flat</td><td>OK at ~3 A open-air; upsize long runs if reducing loss</td></tr>
+      <tr><td>Connectors</td><td>20 × JST 2-pin</td><td><strong>Upgrade:</strong> JST VH (10 A) or Anderson Powerpole for margin — PH (2 A) is over rating</td></tr>
+      <tr><td>PSU</td><td>12 V DC</td><td><strong>Add:</strong> bench supply with adjustable CC limit (see below)</td></tr>
+      <tr><td>Fuse <em>(add)</em></td><td>3–4 A inline, at V+</td><td>Matches NaoDec's ATC/ATO fuse convention</td></tr>
+      <tr><td>Cores <em>(optional, recommended)</em></td><td>Steel bolt / nail / rod per coil</td><td>Biggest cheap field boost (air core ~21 AT is weak)</td></tr>
+      <tr><td>Flyback diode <em>(optional)</em></td><td>1N4007 / 1N5819 across the string</td><td>Only needed if the string is switched electronically</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Recommended supply</h2>
+  <ul>
+    <li><strong>Best:</strong> a 12 V bench/lab supply with adjustable constant-current (CC)
+      limit, set to ~3 A. It physically cannot exceed the set current, gives a current
+      readout, and lets you experiment safely (e.g. when adding cores).</li>
+    <li><strong>If fixed brick:</strong> 12 V, 3–5 A, with a 3–4 A inline fuse at V+.</li>
+    <li><strong>Avoid:</strong> putting this near-short on a large unprotected supply
+      (e.g. the installation's 12 V 50 A edge rail) or a battery without a fuse.</li>
+  </ul>
+
+  <h2>Safety checklist</h2>
+  <div class="callout warn">
+    <ul>
+      <li><strong>Fuse it</strong> (3–4 A inline at V+) — non-negotiable; the load is a near-short.</li>
+      <li><strong>Current-limit it</strong> — prefer a CC bench supply set to ~3 A.</li>
+      <li><strong>Don't coil the 6 m run or slack cable</strong> — coiled cable can't shed heat.</li>
+      <li><strong>Power down before unplugging any JST</strong> — breaking an inductive loop under load arcs and pits contacts.</li>
+      <li><strong>Don't reduce cable resistance without a current limiter</strong> — current will run away.</li>
+      <li><strong>Keep this V+ rail isolated</strong> from the 5 V / 12 V 5 A / 12 V 50 A LED rails, per the NaoDec power-rail rule.</li>
+    </ul>
+  </div>
+
+  <p class="sub">
+    See also: <a href="README.md">README.md</a> ·
+    <a href="index.html">Document index</a>
+  </p>
+
+  <footer>NaoDec — Series Coil / Electromagnet Subsystem · Rev 1.0</footer>
+</body>
+</html>
