@@ -73,33 +73,58 @@ naodec/
 
 ## Series Coil / Electromagnet Subsystem
 
-Sixty hand-wound copper coils wired **end-to-end in a single series loop** on a 12 V DC supply, intended to produce a magnetic field. Full write-up: [`NaoDec_Series_Coil_Build_Rev1.0.html`](NaoDec_Series_Coil_Build_Rev1.0.html).
+Sixty hand-wound copper coils (7 turns of ~65 cm of 1 mm copper each, **~1.5 cm dia, crystal core**, with the rest of the wire left straight) wired **end-to-end in a single series loop** on a 12 V DC supply, intended to produce a magnetic field. The 6 m cable is the return from the last coil back to the PSU. Full write-up: [`NaoDec_Series_Coil_Build_Rev1.0.html`](NaoDec_Series_Coil_Build_Rev1.0.html).
 
-> **⚠ An inductor does nothing on steady-state DC** (`Z = jωL → 0` at DC). This string is a **~4 Ω resistive near-short with no current-limiting element** — the steady current is set only by wire resistance and the PSU.
+> **⚠ An inductor does nothing on steady-state DC** (`Z = jωL → 0` at DC). This string is a **~3 Ω resistive near-short with no current-limiting element** — the steady current is set only by wire resistance and the PSU.
+
+> **⚠ A crystal core is non-magnetic** (μ ≈ air) — it gives **no field boost**, so the coils behave as weak air-core coils (~28 AT each). Size everything around the ~4 A current, not field strength.
+
+### Wiring
+
+Loop topology:
+
+```mermaid
+flowchart LR
+  PSU["12 V PSU (+)"] --> F["Fuse 3-5 A"]
+  F --> G1["Group 1<br/>3 coils"]
+  G1 -->|"1 m"| G2["Group 2<br/>3 coils"]
+  G2 -.->|"..."| G20["Group 20<br/>3 coils"]
+  G20 -->|"6 m return"| PSUN["12 V PSU (-)"]
+```
+
+One group (1 of 20):
+
+```mermaid
+flowchart LR
+  JF["JST F"] -->|"10 cm"| C1(["Coil 7T"])
+  C1 -->|"25 cm"| C2(["Coil 7T"])
+  C2 -->|"25 cm"| C3(["Coil 7T"])
+  C3 -->|"10 cm"| JM["JST M"]
+```
 
 ### Bill of Materials
 
 | Component | Spec | Notes |
 |-----------|------|-------|
-| Coils | 60 × ~7-turn, 1 mm Cu, ~65 cm each | Air core (~3 cm dia); add steel cores for usable field |
-| Cable | 24 AWG 2-core flat | 14 m internal + ~19 m inter-group + 6 m return |
-| Connectors | 20 × JST 2-pin | Upgrade to VH (10 A) / Anderson — PH (2 A) is over rating |
+| Coils | 60 × 7-turn, 1 mm Cu, ~65 cm each | ~1.5 cm dia, **crystal core**; rest of wire left straight (~33 cm wound + ~32 cm leads) |
+| Cable | 24 AWG 2-core flat, ~26 m+ | Inter-group runs + 6 m return; marginal at ~4 A |
+| Connectors | 20 × JST 2-pin | **Upgrade required at ~4 A:** VH (10 A) / Anderson — PH/XH/SM all under 4 A |
 | PSU | 12 V DC, current-limited | Bench CC supply set ~3 A, or 12 V 3–5 A brick |
-| Fuse | 3–4 A inline at V+ | Matches ATC/ATO convention; load is a near-short |
-| Cores *(opt.)* | Steel bolt / nail per coil | Biggest cheap field boost |
-| Flyback diode *(opt.)* | 1N4007 / 1N5819 | If the string is switched electronically |
+| Fuse | 3–5 A inline at V+ | Just above set current; matches ATC/ATO convention |
+| Crystal cores | 1 per coil | Per design — non-magnetic, no field boost |
+| Flyback diode *(opt.)* | 1N4007 / 1N5819 | Kick is tiny (~0.4 mJ); only if switched electronically |
 
 ### Electrical Summary
 
 | Quantity | Value | Note |
 |----------|-------|------|
-| Loop resistance | ~4 Ω | coils ~0.85 Ω + 24 AWG cable ~3.3 Ω |
-| Current | ~3 A | I = 12 V / ~4 Ω (if PSU allows) |
-| Voltage split | ~9.5 V cable / ~2.5 V coils | ~80 % wasted heating the cable |
-| Power | ~35 W total (~28 W in cable) | coils stay cool (~0.12 W each) |
-| Field per coil | ~21 AT | 7 turns × 3 A, air core → weak |
+| Loop resistance | ~3 Ω | coils ~0.85 Ω + 24 AWG cable ~2.2 Ω |
+| Current | ~3–4 A | I = 12 V / ~3 Ω; design for 4 A worst case |
+| Voltage split | ~8.7 V cable / ~3.4 V coils | ~70–80 % wasted heating the cable |
+| Power | ~47 W total (~34 W in cable) | coils stay cool (~0.22 W each) |
+| Field per coil | ~28 AT | 7 turns × 4 A, crystal (non-magnetic) core → weak |
 
-> **⚠ Safety:** fuse it (3–4 A); prefer a current-limited supply; keep the 6 m run and slack **uncoiled**; power down before unplugging JSTs; **never** reduce cable resistance without adding a current limiter (each coil is ~0.014 Ω, a near-short); keep this V+ rail **isolated** from the LED rails.
+> **⚠ Safety:** fuse it (3–5 A); prefer a current-limited supply (≤3 A; unlimited draw is ~4 A); upgrade connectors (VH/Anderson — common JSTs are over rating at 4 A); keep the 6 m run and slack **uncoiled**; **never** reduce cable resistance without adding a current limiter (each coil is ~0.014 Ω, a near-short); keep the straight bare-copper leads from touching; keep this V+ rail **isolated** from the LED rails.
 
 ---
 

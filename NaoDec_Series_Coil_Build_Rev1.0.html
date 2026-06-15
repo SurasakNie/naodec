@@ -55,6 +55,9 @@
     .callout p:last-child  { margin-bottom: 0; }
     ul { padding-left: 1.2rem; }
     li { margin: .3rem 0; }
+    figure { margin: 1.4rem 0; }
+    svg { max-width: 100%; height: auto; color: var(--fg); }
+    figcaption { color: var(--muted); font-size: .9rem; margin-top: .4rem; }
     footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
              color: var(--muted); font-size: .85rem; }
     .num { text-align: right; white-space: nowrap; }
@@ -66,92 +69,190 @@
 
   <h2>Overview</h2>
   <p>
-    Sixty hand-wound copper coils (≈7 turns of ~65 cm of 1 mm copper each, ~3 cm
-    diameter, air core) wired <strong>end-to-end in a single series loop</strong> and
-    driven from a 12 V DC supply. Coils are grouped into 20 sets of 3, joined by
-    2-core 24 AWG flat cable and 2-pin JST connectors, with a 6 m return run to the PSU.
-    Intended purpose: <strong>electromagnetic field</strong> from the coils.
+    Sixty hand-wound copper coils (7 turns of ~65 cm of 1 mm copper each, <strong>~1.5 cm
+    diameter, crystal core</strong>, with the rest of the wire left straight) wired
+    <strong>end-to-end in a single series loop</strong> and driven from a 12 V DC supply.
+    Coils are grouped into 20 sets of 3, joined by 2-core 24 AWG flat cable and 2-pin JST
+    connectors, with a 6 m return run from the last coil back to the PSU. Intended purpose:
+    <strong>electromagnetic field</strong> from the coils.
   </p>
 
-  <table>
-    <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
-    <tbody>
-      <tr><td>Coils</td><td>60 × ~7 turns, 1 mm Cu, ~65 cm wire each (~3 cm dia, air core)</td></tr>
-      <tr><td>Grouping</td><td>20 groups × 3 coils; 10 / 25 / 25 / 10 cm internal links</td></tr>
-      <tr><td>Inter-group cable</td><td>1 m, 24 AWG 2-core flat (×19 gaps)</td></tr>
-      <tr><td>Return run</td><td>6 m, 24 AWG 2-core flat</td></tr>
-      <tr><td>Connectors</td><td>20 × JST 2-pin (one mated pair per group boundary)</td></tr>
-      <tr><td>Supply</td><td>12 V DC (rating not yet selected — see recommendation below)</td></tr>
-    </tbody>
-  </table>
+  <figure>
+    <svg viewBox="0 0 700 200" role="img" aria-label="Series loop topology: PSU through a fuse to 20 coil groups and a 6 m return back to the PSU">
+      <defs>
+        <marker id="ar--scl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g fill="none" stroke="currentColor" stroke-width="2">
+        <!-- PSU -->
+        <rect x="20" y="55" width="72" height="92" rx="6"/>
+        <!-- Fuse -->
+        <rect x="124" y="60" width="74" height="26" rx="4"/>
+        <!-- Groups -->
+        <rect x="226" y="56" width="74" height="36" rx="4"/>
+        <rect x="332" y="56" width="74" height="36" rx="4"/>
+        <rect x="470" y="56" width="80" height="36" rx="4"/>
+        <!-- top wires -->
+        <path d="M92,73 L124,73" marker-end="url(#ar--scl)"/>
+        <path d="M198,73 L226,73" marker-end="url(#ar--scl)"/>
+        <path d="M300,73 L332,73" marker-end="url(#ar--scl)"/>
+        <path d="M406,73 L432,73" stroke-dasharray="4 4"/>
+        <path d="M444,73 L470,73" marker-end="url(#ar--scl)"/>
+        <!-- return path -->
+        <path d="M510,92 L510,170 L92,170 L92,135" marker-end="url(#ar--scl)"/>
+      </g>
+      <g fill="currentColor" font-family="system-ui, sans-serif" font-size="13">
+        <text x="56" y="92" text-anchor="middle">12 V</text>
+        <text x="56" y="110" text-anchor="middle">PSU</text>
+        <text x="80" y="70" text-anchor="middle" font-size="15">+</text>
+        <text x="80" y="143" text-anchor="middle" font-size="15">&#8722;</text>
+        <text x="161" y="78" text-anchor="middle">Fuse 3&#8211;5 A</text>
+        <text x="263" y="72" text-anchor="middle">Group 1</text>
+        <text x="263" y="86" text-anchor="middle" font-size="11">3 coils</text>
+        <text x="369" y="72" text-anchor="middle">Group 2</text>
+        <text x="369" y="86" text-anchor="middle" font-size="11">3 coils</text>
+        <text x="419" y="78" text-anchor="middle" font-size="16">&#8230;</text>
+        <text x="510" y="72" text-anchor="middle">Group 20</text>
+        <text x="510" y="86" text-anchor="middle" font-size="11">3 coils</text>
+        <text x="316" y="66" text-anchor="middle" font-size="11">1 m</text>
+        <text x="301" y="185" text-anchor="middle" font-size="12">6 m return (last coil &#8594; PSU)</text>
+      </g>
+    </svg>
+    <figcaption>
+      Figure 1 — Loop topology. A series loop: PSU (+) &#8594; fuse &#8594; 20 groups
+      (~1 m flat cable between groups) &#8594; 6 m return to PSU (&#8722;). No current-limiting
+      element other than wire resistance and the supply.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <svg viewBox="0 0 700 150" role="img" aria-label="One group of three coils: JST female, 10 cm, coil, 25 cm, coil, 25 cm, coil, 10 cm, JST male">
+      <g fill="none" stroke="currentColor" stroke-width="2">
+        <!-- JST F -->
+        <rect x="8" y="55" width="54" height="30" rx="4"/>
+        <!-- leads & coils baseline y=70 -->
+        <path d="M62,70 L104,70"/>
+        <g transform="translate(104,52)">
+          <path d="M0,18 q6,-16 12,0 q6,-16 12,0 q6,-16 12,0 q6,-16 12,0"/>
+        </g>
+        <path d="M152,70 L200,70"/>
+        <g transform="translate(200,52)">
+          <path d="M0,18 q6,-16 12,0 q6,-16 12,0 q6,-16 12,0 q6,-16 12,0"/>
+        </g>
+        <path d="M248,70 L296,70"/>
+        <g transform="translate(296,52)">
+          <path d="M0,18 q6,-16 12,0 q6,-16 12,0 q6,-16 12,0 q6,-16 12,0"/>
+        </g>
+        <path d="M344,70 L386,70"/>
+        <!-- JST M -->
+        <rect x="386" y="55" width="54" height="30" rx="4"/>
+      </g>
+      <!-- crystal-core markers (diamonds) -->
+      <g fill="currentColor" opacity="0.55" stroke="none">
+        <path d="M128,76 l5,6 l-5,6 l-5,-6 z"/>
+        <path d="M224,76 l5,6 l-5,6 l-5,-6 z"/>
+        <path d="M320,76 l5,6 l-5,6 l-5,-6 z"/>
+      </g>
+      <g fill="currentColor" font-family="system-ui, sans-serif" font-size="12">
+        <text x="35" y="74" text-anchor="middle">JST F</text>
+        <text x="413" y="74" text-anchor="middle">JST M</text>
+        <text x="83" y="62" text-anchor="middle">10 cm</text>
+        <text x="176" y="62" text-anchor="middle">25 cm</text>
+        <text x="272" y="62" text-anchor="middle">25 cm</text>
+        <text x="365" y="62" text-anchor="middle">10 cm</text>
+        <text x="128" y="104" text-anchor="middle" font-size="11">coil</text>
+        <text x="224" y="104" text-anchor="middle" font-size="11">coil</text>
+        <text x="320" y="104" text-anchor="middle" font-size="11">coil</text>
+      </g>
+    </svg>
+    <figcaption>
+      Figure 2 — One group (1 of 20). Each coil: 7 turns, ~1.5 cm dia, crystal core
+      (&#9670;), 1 mm copper; the rest of the ~65 cm wire is left straight (~33 cm wound +
+      ~32 cm straight leads).
+    </figcaption>
+  </figure>
 
   <div class="callout warn">
-    <p><strong>⚠ The key reality — an inductor does nothing on steady-state DC.</strong></p>
+    <p><strong>&#9888; The key reality — an inductor does nothing on steady-state DC.</strong></p>
     <p>
-      Inductor impedance is <code>Z = jωL</code>; at DC, <code>ω = 0</code>, so each coil is
-      simply a piece of wire. This circuit is therefore a <strong>~4 Ω resistive
+      Inductor impedance is <code>Z = j&omega;L</code>; at DC, <code>&omega; = 0</code>, so each
+      coil is simply a piece of wire. This circuit is therefore a <strong>~3 &#937; resistive
       near-short</strong> with <strong>no current-limiting element</strong>. Each individual
-      coil is only ~0.014 Ω — the steady current is set entirely by the total wire resistance
-      and whatever the PSU will deliver.
+      coil is only ~0.014 &#937; — the steady current is set entirely by the total wire
+      resistance and whatever the PSU will deliver.
     </p>
   </div>
 
   <h2>Electrical analysis</h2>
   <p>
-    Resistance dominates everything here (copper ρ ≈ 0.0172 Ω·mm²/m for the coils;
-    24 AWG ≈ 0.0842 Ω/m). Figures are approximate; the feed from the PSU to group 1 is
-    unspecified, so total cable resistance may be somewhat higher.
+    Resistance dominates everything here (copper &rho; &asymp; 0.0172 &#937;&middot;mm&sup2;/m
+    for the coils; 24 AWG &asymp; 0.0842 &#937;/m). Figures use the user's stated
+    <strong>&ge; ~26 m</strong> of 24 AWG as the total cable; since that is a lower bound on
+    length (hence an upper bound on current), the tables below use the
+    <strong>~4 A worst case</strong>. If the total run is longer (~40 m incl. the short coil
+    pigtails), the current falls toward ~3 A.
   </p>
 
   <table>
     <thead><tr><th>Element</th><th class="num">Length</th><th class="num">Resistance</th></tr></thead>
     <tbody>
-      <tr><td>60 coils, 1 mm Cu</td><td class="num">~39 m</td><td class="num">~0.85 Ω</td></tr>
-      <tr><td>24 AWG cable (14 m internal + ~19 m inter-group + 6 m return)</td><td class="num">~39 m</td><td class="num">~3.3 Ω</td></tr>
-      <tr><th>Total loop</th><th class="num">—</th><th class="num">~4 Ω</th></tr>
+      <tr><td>60 coils, 1 mm Cu (~65 cm each)</td><td class="num">~39 m</td><td class="num">~0.85 &#937;</td></tr>
+      <tr><td>24 AWG cable (inter-group runs + 6 m return)</td><td class="num">~26 m+</td><td class="num">~2.2 &#937;</td></tr>
+      <tr><th>Total loop</th><th class="num">&mdash;</th><th class="num">~3 &#937;</th></tr>
     </tbody>
   </table>
 
   <table>
     <thead><tr><th>Quantity</th><th class="num">Value</th><th>Note</th></tr></thead>
     <tbody>
-      <tr><td>Current (if PSU allows)</td><td class="num">~3 A</td><td>I = 12 V / ~4 Ω</td></tr>
-      <tr><td>Voltage across cable</td><td class="num">~9.5 V</td><td>~80 % of the supply, wasted as heat</td></tr>
-      <tr><td>Voltage across all 60 coils</td><td class="num">~2.5 V</td><td>coils barely energise</td></tr>
-      <tr><td>Total power</td><td class="num">~35 W</td><td>essentially a 35 W heater</td></tr>
-      <tr><td>Heat in cable</td><td class="num">~28 W</td><td>~0.7 W/m; hot spots if bundled/coiled</td></tr>
-      <tr><td>Heat per coil</td><td class="num">~0.12 W</td><td>coils stay cool</td></tr>
-      <tr><td>Field per coil</td><td class="num">~21 AT</td><td>7 turns × 3 A, air core → weak</td></tr>
-      <tr><td>Total inductance</td><td class="num">~0.13 mH</td><td>~0.6 mJ stored at 3 A (small kick)</td></tr>
+      <tr><td>Current (if PSU allows)</td><td class="num">~3&#8211;4 A</td><td>I = 12 V / ~3 &#937;; design for 4 A</td></tr>
+      <tr><td>Voltage across cable</td><td class="num">~8.7 V</td><td>~70&#8211;80 % of the supply, wasted as heat</td></tr>
+      <tr><td>Voltage across all 60 coils</td><td class="num">~3.4 V</td><td>coils barely energise</td></tr>
+      <tr><td>Total power</td><td class="num">~47 W</td><td>essentially a 47 W heater</td></tr>
+      <tr><td>Heat in cable</td><td class="num">~34 W</td><td>~1.3 W/m; hot spots if bundled/coiled</td></tr>
+      <tr><td>Heat per coil</td><td class="num">~0.22 W</td><td>coils stay cool</td></tr>
+      <tr><td>Field per coil</td><td class="num">~28 AT</td><td>7 turns &times; 4 A; crystal core is non-magnetic &rarr; weak</td></tr>
+      <tr><td>Total inductance</td><td class="num">~0.05 mH</td><td>~0.4 mJ stored at 4 A (negligible kick)</td></tr>
     </tbody>
   </table>
 
   <div class="callout warn">
-    <p><strong>⚠ The protective paradox — do not "fix" the inefficiency.</strong></p>
+    <p><strong>&#9888; The protective paradox — do not "fix" the inefficiency.</strong></p>
     <p>
-      The cable resistance (~3.3 Ω of the ~4 Ω) is the <em>only</em> thing keeping the
-      current down to a non-destructive ~3 A, because each coil is a near short. Shortening
-      or thickening the cable to recover the wasted voltage will let the current run away
-      (e.g. ~0.5 Ω cable → ~9 A), which <strong>will</strong> overheat the 24 AWG wire and the
-      JST connectors. If you want lower cable loss, add a real current limiter — never just
-      lower the resistance.
+      The cable resistance (~2.2 &#937; of the ~3 &#937;) is the <em>only</em> thing keeping the
+      current down to ~4 A, because each coil is a near short. Shortening or thickening the
+      cable to recover the wasted voltage will let the current run away (e.g. ~0.5 &#937; cable
+      &rarr; ~9 A), which <strong>will</strong> overheat the 24 AWG wire and the JST connectors.
+      If you want lower cable loss, add a real current limiter — never just lower the resistance.
     </p>
   </div>
+
+  <h2>The crystal core does not boost the field</h2>
+  <p>
+    A crystal (quartz and the like) is <strong>non-magnetic</strong> — its relative
+    permeability is &asymp; 1, the same as air. So magnetically the coils behave as
+    <strong>air-core</strong> coils: ~28 ampere-turns each is a <strong>weak</strong> field.
+    The crystal core is a design/aesthetic choice, not a magnetic one. A ferromagnetic core
+    (steel) would multiply the field, but that contradicts the crystal — so expect a modest
+    field and size everything around the ~4 A current, not around field strength.
+  </p>
 
   <h2>Will the cable burn?</h2>
   <div class="callout ok">
     <p>
-      <strong>With a current-limited 12 V supply (≤3 A) plus an inline fuse: no.</strong>
-      The 24 AWG runs <em>warm</em> (~0.7 W/m; open-air ampacity ~3.5 A), the coils stay cool,
-      and the JST connectors are the weak link (see below). Keep the 6 m run and any slack
-      <strong>uncoiled</strong> so heat can escape.
+      <strong>With a current-limited 12 V supply (&le;3 A) plus an inline fuse: no.</strong>
+      Held at ~3 A the 24 AWG runs <em>warm</em>, the coils stay cool, and you are within the
+      JST and wire comfort range. Keep the 6 m run and any slack <strong>uncoiled</strong> so
+      heat can escape.
     </p>
   </div>
   <div class="callout warn">
     <p>
-      <strong>Without current limiting / a fuse on a large supply or battery — or if the
-      cable resistance is reduced — yes, there is an overheat risk.</strong> The connectors
-      cook before the wire does: JST PH is rated 2 A (over), XH / SM ~3 A (at the limit).
+      <strong>Left unlimited it draws ~4 A</strong> — above 24 AWG's comfortable open-air
+      rating (~3.5 A) and <strong>over every common JST rating</strong> (PH 2 A, XH / SM 3 A).
+      On a large supply or battery without a fuse, or if the cable resistance is reduced,
+      this is an overheat risk. The connectors cook before the wire does.
     </p>
   </div>
 
@@ -160,13 +261,13 @@
   <table>
     <thead><tr><th>Item</th><th>Spec</th><th>Notes</th></tr></thead>
     <tbody>
-      <tr><td>Coils</td><td>60 × ~7-turn, 1 mm Cu, ~65 cm each</td><td>Air core; add ferromagnetic cores to make them useful</td></tr>
-      <tr><td>Inter-coil / inter-group cable</td><td>24 AWG 2-core flat</td><td>OK at ~3 A open-air; upsize long runs if reducing loss</td></tr>
-      <tr><td>Connectors</td><td>20 × JST 2-pin</td><td><strong>Upgrade:</strong> JST VH (10 A) or Anderson Powerpole for margin — PH (2 A) is over rating</td></tr>
-      <tr><td>PSU</td><td>12 V DC</td><td><strong>Add:</strong> bench supply with adjustable CC limit (see below)</td></tr>
-      <tr><td>Fuse <em>(add)</em></td><td>3–4 A inline, at V+</td><td>Matches NaoDec's ATC/ATO fuse convention</td></tr>
-      <tr><td>Cores <em>(optional, recommended)</em></td><td>Steel bolt / nail / rod per coil</td><td>Biggest cheap field boost (air core ~21 AT is weak)</td></tr>
-      <tr><td>Flyback diode <em>(optional)</em></td><td>1N4007 / 1N5819 across the string</td><td>Only needed if the string is switched electronically</td></tr>
+      <tr><td>Coils</td><td>60 &times; 7-turn, 1 mm Cu, ~65 cm each</td><td>~1.5 cm dia, <strong>crystal core</strong>; rest of the wire left straight (~33 cm wound + ~32 cm leads)</td></tr>
+      <tr><td>Inter-coil / inter-group cable</td><td>24 AWG 2-core flat, ~26 m+</td><td>Marginal at ~4 A; upsize long runs if reducing loss</td></tr>
+      <tr><td>Connectors</td><td>20 &times; JST 2-pin</td><td><strong>Upgrade required at ~4 A:</strong> JST VH (10 A) or Anderson Powerpole — PH/XH/SM are all under 4 A</td></tr>
+      <tr><td>PSU</td><td>12 V DC, current-limited</td><td><strong>Add:</strong> bench supply with adjustable CC limit set to ~3 A (see below)</td></tr>
+      <tr><td>Fuse <em>(add)</em></td><td>3&#8211;5 A inline, at V+</td><td>Just above the set current; matches NaoDec's ATC/ATO convention</td></tr>
+      <tr><td>Crystal cores</td><td>1 per coil</td><td>Per design — non-magnetic, gives no field boost</td></tr>
+      <tr><td>Flyback diode <em>(optional)</em></td><td>1N4007 / 1N5819 across the string</td><td>Kick is tiny (~0.4 mJ); only worth it if the string is switched electronically</td></tr>
     </tbody>
   </table>
 
@@ -174,8 +275,9 @@
   <ul>
     <li><strong>Best:</strong> a 12 V bench/lab supply with adjustable constant-current (CC)
       limit, set to ~3 A. It physically cannot exceed the set current, gives a current
-      readout, and lets you experiment safely (e.g. when adding cores).</li>
-    <li><strong>If fixed brick:</strong> 12 V, 3–5 A, with a 3–4 A inline fuse at V+.</li>
+      readout, and keeps you within wire/connector comfort.</li>
+    <li><strong>If fixed brick:</strong> 12 V, 3&#8211;5 A, with a 3&#8211;5 A inline fuse at V+,
+      and VH/Anderson connectors to handle the ~4 A it will push.</li>
     <li><strong>Avoid:</strong> putting this near-short on a large unprotected supply
       (e.g. the installation's 12 V 50 A edge rail) or a battery without a fuse.</li>
   </ul>
@@ -183,17 +285,18 @@
   <h2>Safety checklist</h2>
   <div class="callout warn">
     <ul>
-      <li><strong>Fuse it</strong> (3–4 A inline at V+) — non-negotiable; the load is a near-short.</li>
-      <li><strong>Current-limit it</strong> — prefer a CC bench supply set to ~3 A.</li>
+      <li><strong>Fuse it</strong> (3&#8211;5 A inline at V+) — non-negotiable; the load is a near-short.</li>
+      <li><strong>Current-limit it</strong> — prefer a CC bench supply set to ~3 A (unlimited draw is ~4 A).</li>
+      <li><strong>Upgrade the connectors</strong> — at ~4 A all common JSTs are over rating; use VH (10 A) / Anderson.</li>
       <li><strong>Don't coil the 6 m run or slack cable</strong> — coiled cable can't shed heat.</li>
-      <li><strong>Power down before unplugging any JST</strong> — breaking an inductive loop under load arcs and pits contacts.</li>
       <li><strong>Don't reduce cable resistance without a current limiter</strong> — current will run away.</li>
+      <li><strong>Keep the straight bare-copper leads from touching</strong> — a stray lead-to-lead short bypasses coils and raises current.</li>
       <li><strong>Keep this V+ rail isolated</strong> from the 5 V / 12 V 5 A / 12 V 50 A LED rails, per the NaoDec power-rail rule.</li>
     </ul>
   </div>
 
   <p class="sub">
-    See also: <a href="README.md">README.md</a> ·
+    See also: <a href="README.md">README.md</a> &middot;
     <a href="index.html">Document index</a>
   </p>
 
