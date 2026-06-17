@@ -265,7 +265,7 @@
       <tr><td>Inter-coil / inter-group cable</td><td>24 AWG 2-core flat, ~26 m+</td><td>Marginal at ~4 A; upsize long runs if reducing loss</td></tr>
       <tr><td>Connectors</td><td>20 &times; JST SM 2-pin</td><td><strong>Both pins paralleled onto the series conductor.</strong> OK with the buck holding the loop to ~3 A — a single SM pin is rated 3 A, so even worst-case current sharing stays at/under rating; the pair (~4.5 A) adds margin and covers the ~4 A buck-fail-short fallback. VH (10 A) / XT30 (~15 A) / Anderson are higher-margin alternatives</td></tr>
       <tr><td>PSU</td><td>12 V DC</td><td>Feeds the buck input; may be a shared rail, but keep this branch fused and the V+ isolated per the rail rule</td></tr>
-      <tr><td>CC/CV buck module <em>(add)</em></td><td>12 V in, CC limit set ~3 A</td><td><strong>The current limiter.</strong> Caps the loop at the set point regardless of load resistance — removes the runaway risk, so the existing 24 AWG cable and SM connectors are no longer marginal</td></tr>
+      <tr><td>CC/CV buck module <em>(add)</em></td><td>XL4015, 12 V in, CC set ~3 A</td><td><strong>The current limiter.</strong> A 5 A-rated XL4015 board (margin over 3 A; avoid 3 A-peak LM2596) caps the loop regardless of load resistance — removes the runaway risk, so the existing 24 AWG cable and SM connectors are no longer marginal</td></tr>
       <tr><td>Fuse <em>(add)</em></td><td>3&#8211;5 A inline, at the buck input</td><td><strong>Still required with the buck</strong> — its CC limit is regulation, not fault protection, and bucks typically fail <em>shorted</em>. Matches NaoDec's ATC/ATO convention</td></tr>
       <tr><td>Crystal cores</td><td>1 per coil</td><td>Per design — non-magnetic, gives no field boost</td></tr>
       <tr><td>Flyback diode <em>(optional)</em></td><td>1N4007 / 1N5819 across the string</td><td>Kick is tiny (~0.4 mJ); only worth it if the string is switched electronically</td></tr>
@@ -278,11 +278,13 @@
     regulator, then back up the regulator's failure mode with a fuse:
   </p>
   <ul>
-    <li><strong>CC/CV buck module, CC limit set to ~3 A</strong>, on the 12 V input. It caps the
-      loop current at the set point regardless of load resistance, so the
-      <strong>protective paradox no longer applies</strong>: the near-short cannot run away, and
-      the existing 24 AWG cable and JST SM connectors are no longer marginal — at a capped ~3 A
-      they sit inside their comfort range.</li>
+    <li><strong>CC/CV buck module (XL4015), CC limit set to ~3 A</strong>, on the 12 V input.
+      Use a 5 A-rated XL4015 board (margin over 3 A; avoid 3 A-peak LM2596 modules). Set CV to
+      ~11&#8211;12 V and the CC pot to 3.0 A; it then runs in CC mode at ~9 V / 3 A into the
+      ~3 &#937; loop (~27 W out, ~2.5 A drawn at the 12 V input). It caps the loop current
+      regardless of load resistance, so the <strong>protective paradox no longer applies</strong>:
+      the near-short cannot run away, and the existing 24 AWG cable and JST SM connectors are no
+      longer marginal — at a capped ~3 A they sit inside their comfort range.</li>
     <li><strong>Inline fuse, 3&#8211;5 A, at the buck input — still required.</strong> The buck's
       current limit is a <em>regulation</em> feature, not a fault interrupter, and buck converters
       typically fail <strong>shorted</strong> (high-side MOSFET drain-to-source), connecting the
@@ -310,7 +312,7 @@
   <div class="callout warn">
     <ul>
       <li><strong>Fuse it</strong> (3&#8211;5 A at the buck input) — non-negotiable, even with the buck: its CC limit is regulation, not fault protection, and bucks fail <em>shorted</em>.</li>
-      <li><strong>Current-limit it</strong> with a CC/CV buck module set to ~3 A (or a CC bench supply) — this caps the loop and removes the runaway risk (unlimited draw is ~4 A).</li>
+      <li><strong>Current-limit it</strong> with a CC/CV buck module (XL4015 5 A board) set to ~3 A (or a CC bench supply) — this caps the loop and removes the runaway risk (unlimited draw is ~4 A).</li>
       <li><strong>Connectors:</strong> JST SM 2-pin with both pins paralleled onto the series conductor is fine once the buck caps the loop at ~3 A (single SM pin = 3 A); VH (10 A) / XT30 (~15 A) / Anderson for extra margin.</li>
       <li><strong>Don't coil the 6 m run or slack cable</strong> — coiled cable can't shed heat.</li>
       <li><strong>Don't run the string without the buck</strong> — it is the current limiter; on a bare supply the cable resistance is the only thing holding current down and the near-short will run away.</li>
