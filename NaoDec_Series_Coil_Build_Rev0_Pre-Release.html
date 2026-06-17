@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>NaoDec — Series Coil / Electromagnet Subsystem (Rev 1.0)</title>
+  <title>NaoDec — Series Coil / Electromagnet Subsystem (Rev 0 — pre-release)</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -65,7 +65,7 @@
 </head>
 <body>
   <h1>Series Coil / Electromagnet Subsystem</h1>
-  <p class="sub">NaoDec · Rev 1.0 · 60-coil series string on 12 V DC</p>
+  <p class="sub">NaoDec · Rev 0 — pre-release · 2026-06-17 · 60-coil series string on 12 V DC</p>
 
   <h2>Overview</h2>
   <p>
@@ -78,7 +78,7 @@
   </p>
 
   <figure>
-    <svg viewBox="0 0 700 200" role="img" aria-label="Series loop topology: PSU through a fuse to 20 coil groups and a 6 m return back to the PSU">
+    <svg viewBox="0 0 570 210" role="img" aria-label="Series loop topology: 12 V PSU through an input fuse into a CC/CV buck (XL4015) set to about 3 A, then 20 coil groups in series and a 6 m return to the common negative.">
       <defs>
         <marker id="ar--scl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
@@ -86,43 +86,49 @@
       </defs>
       <g fill="none" stroke="currentColor" stroke-width="2">
         <!-- PSU -->
-        <rect x="20" y="55" width="72" height="92" rx="6"/>
-        <!-- Fuse -->
-        <rect x="124" y="60" width="74" height="26" rx="4"/>
+        <rect x="12" y="52" width="60" height="92" rx="6"/>
+        <!-- Fuse (at buck input) -->
+        <rect x="92" y="60" width="52" height="26" rx="4"/>
+        <!-- CC/CV buck — the current limiter -->
+        <rect x="164" y="54" width="100" height="40" rx="4"/>
         <!-- Groups -->
-        <rect x="226" y="56" width="74" height="36" rx="4"/>
-        <rect x="332" y="56" width="74" height="36" rx="4"/>
+        <rect x="286" y="56" width="64" height="36" rx="4"/>
+        <rect x="366" y="56" width="64" height="36" rx="4"/>
         <rect x="470" y="56" width="80" height="36" rx="4"/>
         <!-- top wires -->
-        <path d="M92,73 L124,73" marker-end="url(#ar--scl)"/>
-        <path d="M198,73 L226,73" marker-end="url(#ar--scl)"/>
-        <path d="M300,73 L332,73" marker-end="url(#ar--scl)"/>
-        <path d="M406,73 L432,73" stroke-dasharray="4 4"/>
-        <path d="M444,73 L470,73" marker-end="url(#ar--scl)"/>
-        <!-- return path -->
-        <path d="M510,92 L510,170 L92,170 L92,135" marker-end="url(#ar--scl)"/>
+        <path d="M72,73 L92,73" marker-end="url(#ar--scl)"/>
+        <path d="M144,73 L164,73" marker-end="url(#ar--scl)"/>
+        <path d="M264,73 L286,73" marker-end="url(#ar--scl)"/>
+        <path d="M350,73 L366,73" marker-end="url(#ar--scl)"/>
+        <path d="M430,73 L452,73" stroke-dasharray="4 4"/>
+        <path d="M452,73 L470,73" marker-end="url(#ar--scl)"/>
+        <!-- return path (loop back to the common negative) -->
+        <path d="M510,92 L510,184 L42,184 L42,144" marker-end="url(#ar--scl)"/>
       </g>
       <g fill="currentColor" font-family="system-ui, sans-serif" font-size="13">
-        <text x="56" y="92" text-anchor="middle">12 V</text>
-        <text x="56" y="110" text-anchor="middle">PSU</text>
-        <text x="80" y="70" text-anchor="middle" font-size="15">+</text>
-        <text x="80" y="143" text-anchor="middle" font-size="15">&#8722;</text>
-        <text x="161" y="78" text-anchor="middle">Fuse 3&#8211;5 A</text>
-        <text x="263" y="72" text-anchor="middle">Group 1</text>
-        <text x="263" y="86" text-anchor="middle" font-size="11">3 coils</text>
-        <text x="369" y="72" text-anchor="middle">Group 2</text>
-        <text x="369" y="86" text-anchor="middle" font-size="11">3 coils</text>
-        <text x="419" y="78" text-anchor="middle" font-size="16">&#8230;</text>
+        <text x="42" y="92" text-anchor="middle">12 V</text>
+        <text x="42" y="110" text-anchor="middle">PSU</text>
+        <text x="60" y="68" text-anchor="middle" font-size="15">+</text>
+        <text x="40" y="137" text-anchor="middle" font-size="15">&#8722;</text>
+        <text x="118" y="104" text-anchor="middle" font-size="11">Fuse 3&#8211;5 A</text>
+        <text x="214" y="71" text-anchor="middle" font-size="12">CC/CV buck</text>
+        <text x="214" y="86" text-anchor="middle" font-size="11">XL4015 &middot; ~3 A</text>
+        <text x="318" y="72" text-anchor="middle">Group 1</text>
+        <text x="318" y="86" text-anchor="middle" font-size="11">3 coils</text>
+        <text x="398" y="72" text-anchor="middle">Group 2</text>
+        <text x="398" y="86" text-anchor="middle" font-size="11">3 coils</text>
+        <text x="450" y="79" text-anchor="middle" font-size="16">&#8230;</text>
         <text x="510" y="72" text-anchor="middle">Group 20</text>
         <text x="510" y="86" text-anchor="middle" font-size="11">3 coils</text>
-        <text x="316" y="66" text-anchor="middle" font-size="11">1 m</text>
-        <text x="301" y="185" text-anchor="middle" font-size="12">6 m return (last coil &#8594; PSU)</text>
+        <text x="358" y="50" text-anchor="middle" font-size="11">1 m</text>
+        <text x="276" y="201" text-anchor="middle" font-size="12">6 m return (last coil &#8594; PSU &#8722;)</text>
       </g>
     </svg>
     <figcaption>
-      Figure 1 — Loop topology. A series loop: PSU (+) &#8594; fuse &#8594; 20 groups
-      (~1 m flat cable between groups) &#8594; 6 m return to PSU (&#8722;). No current-limiting
-      element other than wire resistance and the supply.
+      Figure 1 — Loop topology. 12 V PSU &#8594; fuse &#8594; CC/CV buck (XL4015, CC ~3 A)
+      &#8594; 20 groups (~1 m flat cable between groups) &#8594; 6 m return to the common
+      negative. The buck is the current limiter — it caps the loop at ~3 A regardless of load
+      resistance; the fuse sits at the buck input (its CC limit is regulation, not fault protection).
     </figcaption>
   </figure>
 
@@ -263,33 +269,60 @@
     <tbody>
       <tr><td>Coils</td><td>60 &times; 7-turn, 1 mm Cu, ~65 cm each</td><td>~1.5 cm dia, <strong>crystal core</strong>; rest of the wire left straight (~33 cm wound + ~32 cm leads)</td></tr>
       <tr><td>Inter-coil / inter-group cable</td><td>24 AWG 2-core flat, ~26 m+</td><td>Marginal at ~4 A; upsize long runs if reducing loss</td></tr>
-      <tr><td>Connectors</td><td>20 &times; JST 2-pin</td><td><strong>Upgrade required at ~4 A:</strong> JST VH (10 A) or Anderson Powerpole — PH/XH/SM are all under 4 A</td></tr>
-      <tr><td>PSU</td><td>12 V DC, current-limited</td><td><strong>Add:</strong> bench supply with adjustable CC limit set to ~3 A (see below)</td></tr>
-      <tr><td>Fuse <em>(add)</em></td><td>3&#8211;5 A inline, at V+</td><td>Just above the set current; matches NaoDec's ATC/ATO convention</td></tr>
+      <tr><td>Connectors</td><td>20 &times; JST SM 2-pin</td><td><strong>Both pins paralleled onto the series conductor.</strong> OK with the buck holding the loop to ~3 A — a single SM pin is rated 3 A, so even worst-case current sharing stays at/under rating; the pair (~4.5 A) adds margin and covers the ~4 A buck-fail-short fallback. VH (10 A) / XT30 (~15 A) / Anderson are higher-margin alternatives</td></tr>
+      <tr><td>PSU</td><td>12 V DC</td><td>Feeds the buck input; may be a shared rail, but keep this branch fused and the V+ isolated per the rail rule</td></tr>
+      <tr><td>CC/CV buck module <em>(add)</em></td><td>XL4015, 12 V in, CC set ~3 A</td><td><strong>The current limiter.</strong> A 5 A-rated XL4015 board (margin over 3 A; avoid 3 A-peak LM2596) caps the loop regardless of load resistance — removes the runaway risk, so the existing 24 AWG cable and SM connectors are no longer marginal</td></tr>
+      <tr><td>Fuse <em>(add)</em></td><td>3&#8211;5 A inline, at the buck input</td><td><strong>Still required with the buck</strong> — its CC limit is regulation, not fault protection, and bucks typically fail <em>shorted</em>. Matches NaoDec's ATC/ATO convention</td></tr>
       <tr><td>Crystal cores</td><td>1 per coil</td><td>Per design — non-magnetic, gives no field boost</td></tr>
       <tr><td>Flyback diode <em>(optional)</em></td><td>1N4007 / 1N5819 across the string</td><td>Kick is tiny (~0.4 mJ); only worth it if the string is switched electronically</td></tr>
     </tbody>
   </table>
 
-  <h2>Recommended supply</h2>
+  <h2>Recommended solution (Rev 0 — pre-release)</h2>
+  <p>
+    Move the current-limiting out of the parasitic cable resistance and into a dedicated
+    regulator, then back up the regulator's failure mode with a fuse:
+  </p>
   <ul>
-    <li><strong>Best:</strong> a 12 V bench/lab supply with adjustable constant-current (CC)
-      limit, set to ~3 A. It physically cannot exceed the set current, gives a current
-      readout, and keeps you within wire/connector comfort.</li>
-    <li><strong>If fixed brick:</strong> 12 V, 3&#8211;5 A, with a 3&#8211;5 A inline fuse at V+,
-      and VH/Anderson connectors to handle the ~4 A it will push.</li>
-    <li><strong>Avoid:</strong> putting this near-short on a large unprotected supply
-      (e.g. the installation's 12 V 50 A edge rail) or a battery without a fuse.</li>
+    <li><strong>CC/CV buck module (XL4015), CC limit set to ~3 A</strong>, on the 12 V input.
+      Use a 5 A-rated XL4015 board (margin over 3 A; avoid 3 A-peak LM2596 modules). Set CV to
+      ~11&#8211;12 V and the CC pot to 3.0 A; it then runs in CC mode at ~9 V / 3 A into the
+      ~3 &#937; loop (~27 W out, ~2.5 A drawn at the 12 V input). It caps the loop current
+      regardless of load resistance, so the <strong>protective paradox no longer applies</strong>:
+      the near-short cannot run away, and the existing 24 AWG cable and JST SM connectors are no
+      longer marginal — at a capped ~3 A they sit inside their comfort range.</li>
+    <li><strong>Inline fuse, 3&#8211;5 A, at the buck input — still required.</strong> The buck's
+      current limit is a <em>regulation</em> feature, not a fault interrupter, and buck converters
+      typically fail <strong>shorted</strong> (high-side MOSFET drain-to-source), connecting the
+      supply straight through to the near-short load with no limit. On a large shared rail that is
+      a fire risk; the fuse is the only thing that contains it. Put it <strong>before the buck, not after</strong>: an output-side fuse is blind to input-stage
+      and buck-internal shorts (input cap, FET-to-ground, shorted output cap), so only an input fuse
+      contains every fault the rail can feed.</li>
+    <li><strong>Connectors: JST SM 2-pin, both pins paralleled onto the series conductor.</strong>
+      With the loop held to ~3 A each connector sees &le;3 A; a single SM pin is rated 3 A, so even
+      worst-case current sharing stays at/under rating, and the paralleled pair (~4.5 A) adds margin
+      plus covers the ~4 A buck-fail-short fallback. VH (10 A) / XT30 (~15 A) / Anderson remain valid
+      higher-margin choices.</li>
+    <li><strong>Avoid</strong> running the string on a large <em>unprotected</em> supply (e.g. the
+      installation's 12 V 50 A edge rail) or a battery without the buck and fuse in front of it.</li>
   </ul>
+  <div class="callout ok">
+    <p>
+      <strong>Why this works:</strong> the loop needs ~2 &#937; of current-limiting somewhere. It
+      used to live in the thin cable and marginal connectors — the worst place for it. The buck
+      moves it into a proper regulator, the fuse backs up the regulator's one dangerous failure
+      mode, and the connectors then only have to handle the capped ~3 A.
+    </p>
+  </div>
 
   <h2>Safety checklist</h2>
   <div class="callout warn">
     <ul>
-      <li><strong>Fuse it</strong> (3&#8211;5 A inline at V+) — non-negotiable; the load is a near-short.</li>
-      <li><strong>Current-limit it</strong> — prefer a CC bench supply set to ~3 A (unlimited draw is ~4 A).</li>
-      <li><strong>Upgrade the connectors</strong> — at ~4 A all common JSTs are over rating; use VH (10 A) / Anderson.</li>
+      <li><strong>Fuse it</strong> (3&#8211;5 A at the buck input) — non-negotiable, even with the buck: its CC limit is regulation, not fault protection, and bucks fail <em>shorted</em>.</li>
+      <li><strong>Current-limit it</strong> with a CC/CV buck module (XL4015 5 A board) set to ~3 A (or a CC bench supply) — this caps the loop and removes the runaway risk (unlimited draw is ~4 A).</li>
+      <li><strong>Connectors:</strong> JST SM 2-pin with both pins paralleled onto the series conductor is fine once the buck caps the loop at ~3 A (single SM pin = 3 A); VH (10 A) / XT30 (~15 A) / Anderson for extra margin.</li>
       <li><strong>Don't coil the 6 m run or slack cable</strong> — coiled cable can't shed heat.</li>
-      <li><strong>Don't reduce cable resistance without a current limiter</strong> — current will run away.</li>
+      <li><strong>Don't run the string without the buck</strong> — it is the current limiter; on a bare supply the cable resistance is the only thing holding current down and the near-short will run away.</li>
       <li><strong>Keep the straight bare-copper leads from touching</strong> — a stray lead-to-lead short bypasses coils and raises current.</li>
       <li><strong>Keep this V+ rail isolated</strong> from the 5 V / 12 V 5 A / 12 V 50 A LED rails, per the NaoDec power-rail rule.</li>
     </ul>
@@ -300,6 +333,6 @@
     <a href="index.html">Document index</a>
   </p>
 
-  <footer>NaoDec — Series Coil / Electromagnet Subsystem · Rev 1.0</footer>
+  <footer>NaoDec — Series Coil / Electromagnet Subsystem · Rev 0 — pre-release · 2026-06-17</footer>
 </body>
 </html>

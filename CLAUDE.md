@@ -2,7 +2,8 @@
 
 Project memory for the **NaoDec** 7-channel WS2815 LED installation (1,740 px) — dual
 ESP32-S3-WROOM-1 running WLED in master/slave DDP, 3.3 V → 5 V via an SN74AHCT245N.
-Docs are self-contained interactive HTML schematics (browse: https://surasaknie.github.io/naodec/).
+Self-contained interactive HTML docs — no build step, no dependencies.
+Published at https://surasaknie.github.io/naodec/.
 
 ## Wire Assignment Table
 
@@ -40,3 +41,31 @@ Source: README hardware tables + `NaoDec_WS2815_LED_Controller_Rev1.6.html`.
 | CH7 | wdata7      | #7 Edge F  | GPIO6 (Slave)  | U2 A7→B7  | 280  |
 
 Theme reference: `.claude/skills/html-schematic/reference/themes/Color-Palette_Dark-Teal-theme.md`.
+
+## Conventions
+
+- Each document is versioned in its filename as `RevX.Y` (e.g. `..._Rev1.6.html`).
+- Superseded revisions are moved to `Archived/`.
+- `index.html` is **auto-generated** by `.github/workflows/update-index.yml` on
+  push to `main` (it lists every `*.html` except `index.html`, sorted). When
+  renaming/adding HTML on a feature branch, update `index.html` and `README.md`
+  by hand to stay consistent until the workflow regenerates it on `main`.
+- Keep the three 12 V / 5 V power rails fully isolated (never tie V+ rails).
+
+## Status notes
+
+- **Series Coil / Electromagnet subsystem is Rev 0 — pre-release** (renamed from
+  `Rev1.0` to `NaoDec_Series_Coil_Build_Rev0_Pre-Release.html`). It is a
+  pre-release design, **not** a finalized/current build. Treat its numbers and
+  BOM as provisional.
+  - It is a ~3 Ω resistive near-short on 12 V DC (an inductor does nothing on
+    steady-state DC); current is set only by wire resistance + PSU.
+  - The crystal core is non-magnetic (μ ≈ air) → no field boost; weak air-core
+    coils (~28 AT each).
+  - Adopted solution: a **CC/CV buck (XL4015, CC set ~3 A)** is the current
+    limiter — it caps the loop regardless of load resistance (removes the
+    runaway risk). Still **fuse the buck input** (3–5 A): the CC limit is
+    regulation, not fault protection, and bucks fail *shorted*. Connectors are
+    **JST SM 2-pin, both pins paralleled** (fine at the capped ~3 A; VH/XT30/
+    Anderson for more margin). Keep runs uncoiled; never run the string without
+    the buck.
