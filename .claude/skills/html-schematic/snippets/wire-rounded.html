@@ -1,0 +1,41 @@
+<!-- Wire with required crossing hop (Validator Rule VR10).
+     A bare crossing (no arc) means electrical connection — never omit the hop.
+     All 4 variants are below — uncomment the one matching your crossing geometry;
+     the others stay commented as reference.
+     See reference/conventions.md §Arc-hop variants for standalone-hop variants.
+     Pick the variant whose hop bulges AWAY from the wire being crossed.
+       sweep-flag 0,1 = hop bumps right/up
+       sweep-flag 0,0 = hop bumps left/down
+     {wire-class}: w12v | w5v | w3v3 | wgnd | wdata | wdata2 … wdata7
+     (x,y) is the crossing point.
+     IMPORTANT: always keep the secondary class "arc" — it exempts the path
+     from VR2 (curved-path check) and VR7 (channel-label check). -->
+
+<!-- Variant A — horizontal wire hopping UP over a vertical wire at (x,y): -->
+<path d="M {X1},{Y} L {x-5},{Y} a 5,5 0 0,1 10,0 L {X3},{Y}"
+      class="{wire-class} arc" data-info="{Net name}|{Source → Sink}"/>
+
+<!-- Variant B — horizontal wire hopping DOWN under a vertical wire at (x,y): -->
+<!-- <path d="M {X1},{Y} L {x-5},{Y} a 5,5 0 0,0 10,0 L {X3},{Y}"
+        class="{wire-class} arc" data-info="{Net name}|{Source → Sink}"/> -->
+
+<!-- Variant C — vertical wire hopping RIGHT over a horizontal wire at (x,y): -->
+<!-- <path d="M {X},{Y1} L {X},{y-5} a 5,5 0 0,0 0,10 L {X},{Y3}"
+        class="{wire-class} arc" data-info="{Net name}|{Source → Sink}"/> -->
+
+<!-- Variant D — vertical wire hopping LEFT over a horizontal wire at (x,y): -->
+<!-- <path d="M {X},{Y1} L {X},{y-5} a 5,5 0 0,1 0,10 L {X},{Y3}"
+        class="{wire-class} arc" data-info="{Net name}|{Source → Sink}"/> -->
+
+<!-- Variant E — Pigtail stub (L1).
+     Dashed accent-color line for RF / coax / antenna pigtails connecting an
+     antenna mount-point to the board's u.FL connector. NOT a routed net —
+     exempt from VR7 (no channel-label needed) and VR9 (no wire class on the
+     line, just the accent color). MUST carry data-info per VR4.
+     Pattern (Scent Controller §10.5 ANT1 → U1 mounting hole):
+     <line x1="{X1}" y1="{Y}" x2="{X2}" y2="{Y}"
+           stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"
+           data-info="ANT1 pigtail|u.FL coax to antenna|RG-178 ~15 cm"/> -->
+<!-- <line x1="{X1}" y1="{Y}" x2="{X2}" y2="{Y}"
+        stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"
+        data-info="{Pigtail name}|{From → To}|{Cable spec}"/> -->

@@ -1,0 +1,30 @@
+<!-- Vertical in-line fuse (20×70 box, rotated label inside).
+     Canonical use: 5×20 mm slow-blow inline fuse mounted vertically in a wire run.
+     Wire Router connects the routed net through the body (Sub-Agent 6 rule 11
+     "Series component through-wires" — a <line> in the wire class spans the
+     terminal coordinates so the wire doesn't visually break at the box edges).
+
+     Substitutions:
+       {ID}          — designator, e.g. "F_MAIN", "F2"
+       {X} {Y}       — top-left corner of the 20×70 rect
+       {LABEL}       — short value rendered rotated inside the box, e.g. "2A T2A"
+       {SUBCAPTION}  — slow-blow note rendered rotated outside, e.g. "slow-blow"
+       {DATA_INFO}   — pipe-separated tooltip: "F_MAIN|Inline fuse 2 A slow-blow (T2A)|5×20 mm · 18 AWG|All-downstream protection"
+
+     Per M8: class="comp" + data-info go on the <rect>, not the <g>.
+     The label uses the 3-argument rotate(-90, cx, cy) form to keep the anchor in place. -->
+<g id="{ID}">
+  <rect class="comp" data-info="{DATA_INFO}"
+        x="{X}" y="{Y}" width="20" height="70" rx="2"/>
+  <!-- Inner label — rotated -90 around the box center -->
+  <text x="{X + 10}" y="{Y + 35}" font-size="11" fill="var(--wire-12v)"
+        text-anchor="middle" class="bold-text"
+        transform="rotate(-90,{X + 10},{Y + 35})">{LABEL}</text>
+  <!-- Sub-caption — rotated -90, placed to the right of the box -->
+  <text x="{X + 30}" y="{Y + 35}" font-size="9" fill="var(--text-secondary)"
+        text-anchor="middle"
+        transform="rotate(-90,{X + 30},{Y + 35})">{SUBCAPTION}</text>
+  <!-- Designator label — above the box, horizontal -->
+  <text x="{X + 10}" y="{Y - 6}" font-size="12" fill="var(--accent)"
+        text-anchor="middle" class="black-text">{ID}</text>
+</g>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{Project Name} · {Revision}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+  /* === THEME START — Cyberpunk ===
+     Default theme. To re-theme: replace this entire :root block with one
+     from any Color-Palette_*-theme.md file. Keep the comment markers so
+     future swaps know the boundaries. */
+  :root {
+    --bg-dark:          #0A0A0F;
+    --bg-panel:         rgba(26, 26, 38, 0.95);
+    --wire-12v:         #FF6B2B;
+    --wire-5v:          #F5E642;
+    --wire-3v3:         #BF5FFF;
+    --wire-gnd:         #606080;
+    --wire-data:        #0FF0B3;
+    --wire-data2:       #E0E0F0;
+    --wire-data3:       #4DBBFF;
+    --wire-data4:       #FF2D78;
+    --wire-data5:       #FF9E6B;
+    --wire-data6:       #F8EE7A;
+    --wire-data7:       #D48FFF;
+    --text-primary:     #E0E0F0;
+    --text-secondary:   #8888A0;
+    --accent:           #0FF0B3;
+    --border:           rgba(44, 44, 64, 0.6);
+    --comp-fill:        #14141F;
+    --comp-fill-hover:  #22222E;
+    --comp-stroke:      #2C2C40;
+    --pin-dot:          #0FF0B3;
+    --warn:             #FF2D78;
+    --warn-bg:          #1F0A14;
+  }
+  /* === THEME END === */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .schematic-container {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+  }
+  .schematic-container.grabbing { cursor: grabbing; }
+  .svg-wrapper {
+    transform-origin: 0 0;
+    will-change: transform;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .comp {
+    fill: none;
+    stroke: var(--comp-stroke);
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .comp:hover {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .sec-border-dash { fill:none; stroke: var(--comp-stroke); stroke-width:1.5; stroke-dasharray:6 6; opacity: 0.8; }
+  .w12v      { stroke:var(--wire-12v);  stroke-width:2.5; fill:none; }
+  .w12v-bus  { stroke:var(--wire-12v);  stroke-width:4;   fill:none; }
+  .wgnd      { stroke:var(--wire-gnd);  stroke-width:2.5; fill:none; }
+  .wgnd-bus  { stroke:var(--wire-gnd);  stroke-width:4;   fill:none; }
+  .w5v       { stroke:var(--wire-5v);   stroke-width:2;   fill:none; }
+  .w5v-bus   { stroke:var(--wire-5v);   stroke-width:4;   fill:none; }
+  .w3v3      { stroke:var(--wire-3v3);  stroke-width:2;   fill:none; }
+  .w3v3-bus  { stroke:var(--wire-3v3);  stroke-width:4;   fill:none; }
+  .wdata     { stroke:var(--wire-data);  stroke-width:2;  fill:none; }
+  .wdata2    { stroke:var(--wire-data2); stroke-width:2;  fill:none; }
+  .wdata3    { stroke:var(--wire-data3); stroke-width:2;  fill:none; }
+  .wdata4    { stroke:var(--wire-data4); stroke-width:2;  fill:none; }
+  .wdata5    { stroke:var(--wire-data5); stroke-width:2;  fill:none; }
+  .wdata6    { stroke:var(--wire-data6); stroke-width:2;  fill:none; }
+  .wdata7    { stroke:var(--wire-data7); stroke-width:2;  fill:none; }
+  .j12v   { fill:var(--wire-12v); }
+  .jgnd   { fill:var(--wire-gnd); }
+  .j5v    { fill:var(--wire-5v);  }
+  .j3v3   { fill:var(--wire-3v3); }
+  .jdata  { fill:var(--wire-data); }
+  .jdata2 { fill:var(--wire-data2); }
+  .jdata3 { fill:var(--wire-data3); }
+  .jdata4 { fill:var(--wire-data4); }
+  .jdata5 { fill:var(--wire-data5); }
+  .jdata6 { fill:var(--wire-data6); }
+  .jdata7 { fill:var(--wire-data7); }
+  .pin    { fill:var(--pin-dot); }
+  .channel-label { font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 9px; fill: var(--text-secondary); pointer-events: none; }
+  polyline[data-info], line[data-info], path[data-info] { cursor: pointer; pointer-events: visibleStroke; }
+  g[data-info], circle[data-info] { cursor: pointer; }
+  polyline[data-info]:hover, line[data-info]:hover, path[data-info]:hover { stroke-width: 6; filter: brightness(1.4); }
+  text { font-family: 'Roboto', sans-serif; font-weight: 500; }
+  .bold-text { font-weight: 700; }
+  .black-text { font-weight: 900; }
+  .tip {
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+    background: var(--bg-dark);
+    border: 1px solid var(--accent);
+    border-radius: 4px; padding: 16px 24px;
+    font-size: 15px; color: var(--text-primary);
+    opacity:0; pointer-events:none; z-index:100;
+    max-width:620px; text-align:center;
+    transition: opacity .2s, transform .2s;
+  }
+  .tip.on { opacity:1; transform:translateX(-50%) translateY(-8px); }
+  .tip .ttl { color:var(--accent); font-weight:900; margin-bottom:6px; font-size:16px; letter-spacing: 1px; text-transform: uppercase; }
+  .tip .desc { line-height: 1.5; color: var(--text-secondary); font-weight: 500; }
+  #zoom-controls {
+    position: fixed; bottom: 30px; left: 30px;
+    display: flex; gap: 6px; z-index: 100; align-items: center;
+  }
+  .zoom-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    width: 40px; height: 40px; border-radius: 4px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+  }
+  .zoom-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .zoom-btn:active { transform: scale(0.95); }
+  .zoom-btn.fit-btn {
+    width: auto; padding: 0 14px; font-size: 13px; letter-spacing: 1px; font-weight: 700;
+  }
+  #zoom-level {
+    color: var(--text-primary); font-size: 13px; font-weight: 700;
+    min-width: 52px; text-align: center; padding: 0 6px; user-select: none;
+  }
+  .zoom-shortcut-hint {
+    position: fixed; bottom: 75px; left: 30px;
+    font-size: 11px; font-weight: 500; color: var(--text-secondary);
+    z-index: 100; letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+<div class="schematic-container" id="schematic-container">
+<div class="svg-wrapper" id="svg-wrapper">
+<svg width="2400" height="1800" viewBox="-180 -15 2420 1815" xmlns="http://www.w3.org/2000/svg" id="schematic-svg">
+
+  <!-- CANVAS REGISTRATION MARKS -->
+  <g stroke="var(--text-secondary)" stroke-width="2" opacity="0.6">
+    <path d="M -150 20 h 20 M -140 10 v 20"/>
+    <path d="M 2210 20 h 20 M 2220 10 v 20"/>
+    <path d="M -150 1840 h 20 M -140 1830 v 20"/>
+    <path d="M 2210 1840 h 20 M 2220 1830 v 20"/>
+  </g>
+
+  <g transform="translate(80, 0)">
+
+    <!-- ===========================
+         TITLE BLOCK
+         =========================== -->
+    <g id="title-block">
+      <text x="40" y="15" font-size="28" fill="var(--text-primary)" class="black-text" letter-spacing="4">P R O J E C T</text>
+      <text x="40" y="38" font-size="14" fill="var(--accent)" class="bold-text" letter-spacing="1">{Project Name} · Rev 1.0</text>
+      <text x="40" y="56" font-size="13" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">{IC summary / one-line tagline}</text>
+
+      <!-- Legend Box -->
+      <rect x="580" y="25" width="1420" height="46" rx="4" fill="var(--bg-panel)" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="600"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-12v)"/>
+      <text x="632"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">12V</text>
+      <rect x="680"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-5v)"/>
+      <text x="712"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">5V</text>
+      <rect x="750"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-gnd)"/>
+      <text x="782"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">GND</text>
+      <rect x="830"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-3v3)"/>
+      <text x="862"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">3.3V</text>
+      <rect x="920"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-data)"/>
+      <text x="952"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH1</text>
+      <rect x="990"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-data2)"/>
+      <text x="1022" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH2</text>
+      <rect x="1060" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data3)"/>
+      <text x="1092" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH3</text>
+      <rect x="1130" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data4)"/>
+      <text x="1162" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH4</text>
+      <rect x="1200" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data5)"/>
+      <text x="1232" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH5</text>
+      <rect x="1270" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data6)"/>
+      <text x="1302" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH6</text>
+      <rect x="1340" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data7)"/>
+      <text x="1372" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">CH7</text>
+    </g>
+
+    <!-- ===========================
+         MAIN DIAGRAM AREA
+         (components, wires, junctions, labels)
+         place at y ≈ 110 … 1010
+         =========================== -->
+
+
+    <!-- ===========================
+         COMMON GROUND BUS
+         =========================== -->
+    <line x1="-170" y1="1020" x2="2040" y2="1020" class="wgnd-bus" data-info="GND Bus|Common ground rail spanning the full canvas"/>
+    <text x="935" y="1014" class="channel-label" text-anchor="middle">GND</text>
+    <text x="2030" y="1010" font-size="15" fill="var(--wire-gnd)" text-anchor="end" class="black-text" letter-spacing="3">── COMMON GROUND BUS ──</text>
+
+    <!-- ===========================
+         BOTTOM PANELS (4 zones, y 1080…1700)
+         BOM          : x   40… 660
+         Wire-gauge   : x  690… 990
+         Harness col  : x 1000…1340  (stacks per-part vertically)
+         Notes + Rev  : x 1350…2000
+         =========================== -->
+
+    <!-- BOM panel (VR6) — populated by BOM Specialist sub-agent.
+         Pure-SVG: each row = 4 <text> elements at the same y-baseline + one <line> separator.
+         Row pitch 16 px. First row y = 1143. Column x = 60 / 105 / 195 / 268 (#/QTY/REF/DESC).
+         Critical rows (is_critical=true): swap every cell fill to var(--warn) + add class="bold-text". -->
+    <g id="bom-panel" class="bom-panel" data-info="Bill of Materials|Component list">
+      <rect x="40" y="1080" width="620" height="620" rx="4" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="350" y="1100" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="2">BILL OF MATERIALS</text>
+      <line x1="40" y1="1108" x2="660" y2="1108" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <!-- column header band -->
+      <rect x="40" y="1108" width="620" height="20" fill="var(--bg-panel)" stroke="none"/>
+      <text x="60"  y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">#</text>
+      <text x="105" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">QTY</text>
+      <text x="195" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">REF</text>
+      <text x="455" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">DESCRIPTION</text>
+      <line x1="40"  y1="1128" x2="660" y2="1128" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+      <!-- vertical column dividers -->
+      <line x1="80"  y1="1108" x2="80"  y2="1690" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+      <line x1="130" y1="1108" x2="130" y2="1690" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+      <line x1="260" y1="1108" x2="260" y2="1690" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+      <!-- BOM rows inserted by the BOM Specialist sub-agent. Row template:
+           <text x="60"  y="{ROW_Y}" font-size="10" fill="var(--text-primary)" text-anchor="middle">{N}</text>
+           <text x="105" y="{ROW_Y}" font-size="10" fill="var(--text-primary)" text-anchor="middle">{QTY}</text>
+           <text x="195" y="{ROW_Y}" font-size="10" fill="var(--accent)"       text-anchor="middle" class="bold-text">{REF}</text>
+           <text x="268" y="{ROW_Y}" font-size="10" fill="var(--text-primary)">{DESCRIPTION}</text>
+           <line x1="80" y1="{ROW_Y+5}" x2="655" y2="{ROW_Y+5}" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/> -->
+    </g>
+
+  </g>
+</svg>
+</div>
+</div>
+
+<!-- Zoom Controls -->
+<div id="zoom-controls">
+  <button class="zoom-btn" id="zoom-in" title="Zoom In (Ctrl+Shift++)">+</button>
+  <button class="zoom-btn" id="zoom-out" title="Zoom Out (Ctrl+Shift+−)">−</button>
+  <span id="zoom-level">100%</span>
+  <button class="zoom-btn fit-btn" id="zoom-fit" title="Fit to Screen (Ctrl+Shift+0)">FIT</button>
+  <button class="zoom-btn fit-btn" id="export-svg" title="Export as Standalone SVG" style="margin-left: 12px; color: var(--wire-data);">Export SVG</button>
+  <button class="zoom-btn fit-btn" id="export-png" title="Export as High-Res PNG" style="color: var(--wire-5v);">Export PNG</button>
+</div>
+<div class="zoom-shortcut-hint">Ctrl+Shift+ +/−/0 · Scroll to zoom · Drag to pan</div>
+
+<!-- Tooltip -->
+<div class="tip" id="tip">
+  <div class="ttl" id="tipTtl">Component Name</div>
+  <div class="desc" id="tipDesc">Description</div>
+</div>
+
+<script>
+  const tip = document.getElementById('tip');
+  const tipTtl = document.getElementById('tipTtl');
+  const tipDesc = document.getElementById('tipDesc');
+  document.querySelectorAll('[data-info]').forEach(el => {
+    el.addEventListener('mouseenter', (e) => {
+      const t = e.target.closest('[data-info]') || e.target;
+      const info = t.getAttribute('data-info');
+      if (info) {
+        const parts = info.split('|');
+        tipTtl.textContent = parts[0];
+        tipDesc.textContent = '';
+        parts.slice(1).forEach((seg, i) => {
+          if (i > 0) tipDesc.appendChild(document.createElement('br'));
+          tipDesc.appendChild(document.createTextNode(seg));
+        });
+        tip.classList.add('on');
+      }
+    });
+    el.addEventListener('mouseleave', () => tip.classList.remove('on'));
+  });
+  const container = document.getElementById('schematic-container');
+  const wrapper = document.getElementById('svg-wrapper');
+  const zoomLevelEl = document.getElementById('zoom-level');
+  let scale = 1, panX = 0, panY = 0, isPanning = false, startX, startY;
+  const MIN_SCALE = 0.1, MAX_SCALE = 4, ZOOM_STEP = 0.15;
+  const SVG_W = 2400, SVG_H = 1800;
+  function updateTransform() {
+    wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    zoomLevelEl.textContent = Math.round(scale * 100) + '%';
+  }
+  function zoomTo(ns, cx, cy) {
+    ns = Math.max(MIN_SCALE, Math.min(MAX_SCALE, ns));
+    if (cx !== undefined && cy !== undefined) {
+      const r = ns / scale;
+      panX = cx - (cx - panX) * r;
+      panY = cy - (cy - panY) * r;
+    }
+    scale = ns;
+    updateTransform();
+  }
+  function zoomIn()  { const r = container.getBoundingClientRect(); zoomTo(scale * (1 + ZOOM_STEP), r.width / 2, r.height / 2); }
+  function zoomOut() { const r = container.getBoundingClientRect(); zoomTo(scale * (1 - ZOOM_STEP), r.width / 2, r.height / 2); }
+  function fitToScreen() {
+    const r = container.getBoundingClientRect();
+    scale = Math.min(r.width / SVG_W, r.height / SVG_H) * 0.95;
+    panX = (r.width - SVG_W * scale) / 2;
+    panY = (r.height - SVG_H * scale) / 2;
+    updateTransform();
+  }
+  document.getElementById('zoom-in').addEventListener('click', zoomIn);
+  document.getElementById('zoom-out').addEventListener('click', zoomOut);
+  document.getElementById('zoom-fit').addEventListener('click', fitToScreen);
+  container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const r = container.getBoundingClientRect();
+    zoomTo(scale * (e.deltaY > 0 ? (1 - ZOOM_STEP) : (1 + ZOOM_STEP)), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+  container.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.comp') || e.target.closest('#zoom-controls')) return;
+    isPanning = true; startX = e.clientX - panX; startY = e.clientY - panY;
+    container.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove', (e) => { if (!isPanning) return; panX = e.clientX - startX; panY = e.clientY - startY; updateTransform(); });
+  window.addEventListener('mouseup', () => { isPanning = false; container.classList.remove('grabbing'); });
+  let lastTouchDist = 0;
+  container.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) { isPanning = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY; }
+    else if (e.touches.length === 2) { e.preventDefault(); isPanning = false; const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY; lastTouchDist = Math.sqrt(dx*dx+dy*dy); }
+  }, { passive: false });
+  container.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isPanning) { panX = e.touches[0].clientX - startX; panY = e.touches[0].clientY - startY; updateTransform(); }
+    else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx+dy*dy), r = container.getBoundingClientRect();
+      const cx = (e.touches[0].clientX + e.touches[1].clientX)/2 - r.left, cy = (e.touches[0].clientY + e.touches[1].clientY)/2 - r.top;
+      zoomTo(scale * (dist / lastTouchDist), cx, cy); lastTouchDist = dist;
+    }
+  }, { passive: false });
+  container.addEventListener('touchend', () => { isPanning = false; });
+  window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey) {
+      if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomIn(); }
+      else if (e.key === '-' || e.key === '_') { e.preventDefault(); zoomOut(); }
+      else if (e.key === '0' || e.key === ')') { e.preventDefault(); fitToScreen(); }
+    }
+  });
+  window.addEventListener('load', () => { (document.fonts?.ready || Promise.resolve()).then(fitToScreen); });
+  function getSvgStringThemed() {
+    // Themed (matches on-screen) — used for PNG export.
+    const clone = document.getElementById('schematic-svg').cloneNode(true);
+    const styleTag = document.querySelector('style');
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = styleTag ? styleTag.innerHTML : '';
+    defs.appendChild(style);
+    const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim();
+    bgRect.setAttribute("width", "100%"); bgRect.setAttribute("height", "100%"); bgRect.setAttribute("fill", bgColor);
+    if (bgColor) clone.insertBefore(bgRect, clone.firstChild);
+    clone.insertBefore(defs, clone.firstChild);
+    if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    return new XMLSerializer().serializeToString(clone);
+  }
+  function getSvgStringPrint() {
+    // Print/embed export — black strokes & text on transparent background.
+    // No <rect> background. Overrides every themed color via injected !important style.
+    const clone = document.getElementById('schematic-svg').cloneNode(true);
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    // M6: use attribute-prefix selectors so adding --wire-data8 / .wdata8 (or
+    // any new wire class) is picked up automatically without editing print CSS.
+    style.textContent = `
+      svg { background: transparent !important; }
+      .comp, .sec-border-dash,
+      [class~="w12v"], [class~="w12v-bus"],
+      [class~="wgnd"], [class~="wgnd-bus"],
+      [class~="w5v"],  [class~="w5v-bus"],
+      [class~="w3v3"], [class~="w3v3-bus"],
+      [class*="wdata"] {
+        stroke: #000 !important;
+        fill: none !important;
+      }
+      [class^="j"], [class*=" j"], .pin {
+        fill: #000 !important;
+        stroke: none !important;
+      }
+      text { fill: #000 !important; }
+      line[stroke], path[stroke], polyline[stroke], rect[stroke], circle[stroke] {
+        stroke: #000 !important;
+      }
+      [fill]:not(text):not([class^="j"]):not([class*=" j"]):not(.pin) {
+        fill: none !important;
+      }
+    `;
+    defs.appendChild(style);
+    clone.insertBefore(defs, clone.firstChild);
+    if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    return new XMLSerializer().serializeToString(clone);
+  }
+  function exportFilename(ext) {
+    const title = document.title.replace(/[\\/:*?"<>|]/g, '_') || 'Schematic_Export';
+    return title + '.' + ext;
+  }
+  document.getElementById('export-svg').addEventListener('click', () => {
+    const blob = new Blob([getSvgStringPrint()], {type: "image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a"); link.href = url; link.download = exportFilename('svg');
+    document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+  });
+  document.getElementById('export-png').addEventListener('click', () => {
+    const btn = document.getElementById('export-png');
+    const origText = btn.textContent; btn.textContent = "WAIT..."; btn.style.opacity = "0.5";
+    const canvas = document.createElement("canvas"); canvas.width = SVG_W; canvas.height = SVG_H;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    const url = URL.createObjectURL(new Blob([getSvgStringThemed()], {type: "image/svg+xml;charset=utf-8"}));
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0); URL.revokeObjectURL(url);
+      try {
+        const link = document.createElement("a"); link.href = canvas.toDataURL("image/png", 1.0);
+        link.download = exportFilename('png');
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      } catch (e) {
+        console.error("PNG export error:", e.message);
+      } finally { btn.textContent = origText; btn.style.opacity = "1"; }
+    };
+    img.onerror = function() {
+      btn.textContent = origText; btn.style.opacity = "1";
+      URL.revokeObjectURL(url);
+      console.error("PNG export: SVG image failed to load");
+    };
+    img.src = url;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!-- Numbered note for the notes panel (M2).
+     Substitutions:
+       {N}            — note number (1, 2, …)
+       {Y}            — baseline y of the first line
+       {FIRST_LINE}   — text of line 1 (after "{N}.")
+       {LINE_2/3/…}   — optional continuation lines (omit blocks if not needed)
+
+     Pitch guidance: 40 px next-note Δy for 2-line notes, 55 px for 3-line notes.
+     The "{N}." prefix always uses var(--text-primary) so the bold number stands
+     out even when the rest of the note is muted. -->
+
+<!-- Standard note — single line -->
+<text x="1365" y="{Y}" font-size="12" fill="var(--text-secondary)" class="bold-text">
+  <tspan fill="var(--text-primary)">{N}.</tspan> {FIRST_LINE}
+</text>
+
+<!-- Standard note — multi-line continuation (dy=14 between lines) -->
+<text x="1365" y="{Y}" font-size="12" fill="var(--text-secondary)" class="bold-text">
+  <tspan fill="var(--text-primary)">{N}.</tspan> {FIRST_LINE}
+  <tspan x="1380" dy="14">{LINE_2}</tspan>
+  <tspan x="1380" dy="14">{LINE_3}</tspan>
+</text>
+
+<!-- Critical / warning note — wrapper fill swaps to var(--warn); the {N}. prefix stays var(--text-primary) -->
+<text x="1365" y="{Y}" font-size="12" fill="var(--warn)" class="bold-text">
+  <tspan fill="var(--text-primary)">{N}.</tspan> {FIRST_LINE}
+  <tspan x="1380" dy="14">{LINE_2}</tspan>
+  <tspan x="1380" dy="14">{LINE_3}</tspan>
+</text>
