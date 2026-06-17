@@ -1,0 +1,23 @@
+<!-- Component box.
+     class="comp" and data-info go on the inner <rect>, NOT on the <g>.
+     Why: .comp { fill: none } applied to a <g> cascades via CSS inheritance to
+     child <text> elements, making all labels invisible (SVG text uses `fill` for
+     its glyph color). Putting the class on the <rect> isolates fill:none to the
+     box outline only. VR3/VR4/VR6 selectors target rect[class~="comp"] and
+     resolve the component id by walking up to the closest <g id="...">.
+     Substitutions:
+       {COMPONENT_ID}      — unique id, e.g. "U1", "Q2"
+       {Title}             — designator shown in data-info, e.g. "U1 — ESP32-S3"
+       {Line 1..3}         — tooltip description lines
+       {X}, {Y}            — top-left corner
+       {W}, {H}            — width, height
+       {IC NAME}           — large label (accent color), e.g. "ESP32-S3"
+       {Variant / Package} — small label (text-primary), e.g. "WROOM-1 · QFN56" -->
+<g id="{COMPONENT_ID}">
+  <rect class="comp" data-info="{Title}|{Line 1}|{Line 2}|{Line 3}"
+        rx="2" x="{X}" y="{Y}" width="{W}" height="{H}"/>
+  <text x="{X+W/2}" y="{Y+H/2}" font-size="20" fill="var(--accent)"
+        text-anchor="middle" class="black-text">{IC NAME}</text>
+  <text x="{X+W/2}" y="{Y+H/2+18}" font-size="14" fill="var(--text-primary)"
+        text-anchor="middle" class="bold-text">{Variant / Package}</text>
+</g>

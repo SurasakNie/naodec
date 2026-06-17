@@ -1,0 +1,5 @@
+<!-- Power junction dot.
+     {junction-class}: j12v | j5v | j3v3 | jgnd | jdata | jdata2 … jdata7
+     {r}: 4.5 (major power) | 3.5 (secondary) | 3 (pin/data) | 2.5 (minor signal)
+     {data-info}: "NET_ID|junction role" or "NET_ID|junction role|note" — VR4 requires 2–3 non-empty pipe-separated fields on every j*-class circle. -->
+<circle cx="{X}" cy="{Y}" r="{r}" class="{junction-class}" data-info="{data-info}"/>

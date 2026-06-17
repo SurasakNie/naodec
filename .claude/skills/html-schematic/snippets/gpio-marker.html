@@ -1,0 +1,6 @@
+<!-- GPIO pin marker.
+     {wire-token}: --wire-data | --wire-data2 … --wire-data7 | --wire-gnd | etc.
+                   Use the token matching this pin's net channel. -->
+<circle cx="{X}" cy="{Y}" r="3" class="pin"/>
+<text x="{X+10}" y="{Y+5}" font-size="13" fill="var({wire-token})"
+      text-anchor="start" class="bold-text">{GPIO_LABEL}</text>

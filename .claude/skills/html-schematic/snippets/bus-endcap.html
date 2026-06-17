@@ -1,0 +1,11 @@
+<!-- Bus trunk with end-cap label.
+     Substitutions:
+       {X1}, {X2}, {Y}     — trunk endpoints
+       {bus-class}         — "w12v-bus" | "w5v-bus" | "w3v3-bus" | "wgnd-bus"
+       {wire-token}        — matching CSS var: "--wire-12v" | "--wire-5v" | "--wire-3v3" | "--wire-gnd"
+       {RAIL_LABEL}        — "12V" | "5V" | "3.3V" | "GND"
+-->
+<line x1="{X1}" y1="{Y}" x2="{X2}" y2="{Y}" class="{bus-class}"
+      data-info="{RAIL_LABEL} bus|Power rail bus trunk"/>
+<text x="{X2-10}" y="{Y-10}" font-size="15" fill="var({wire-token})"
+      text-anchor="end" class="black-text" letter-spacing="3">── {RAIL_LABEL} BUS ──</text>

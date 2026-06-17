@@ -1,0 +1,141 @@
+<!--
+  Dev-board visual — a scaled SVG replica of a physical PCB used when the board
+  itself is the schematic representation (relay boards, dev kits with rich silk).
+  Canonical example: Waveshare ESP32-S3-Relay-6CH (Scent Controller §10.6, U1).
+
+  Structure:
+    1. Outer <g id="{BOARD_ID}"> — schematic-frame container (NO class="comp" here)
+    2. Inner <g transform="translate({TX},{TY}) scale({SX},{SY})"> — scaled replica
+       in the board's LOCAL coordinate frame. Every child's x/y/cx/cy/d is in
+       local units. To convert a schematic-frame nudge into local units, divide
+       by the scale factor per axis.
+    3. After the inner group: identifier label + schematic-frame pin circles
+       + per-channel net annotations, all in SCHEMATIC coords (outside the
+       scaled group so they sit unscaled at the schematic font/dot sizes).
+
+  Required substitutions:
+    {BOARD_ID}        — outer <g> id, e.g. "U1"
+    {TX} {TY}         — inner-group translate offsets
+    {SX} {SY}         — inner-group scale factors (e.g. 0.8539, 0.8)
+    {BOARD_W} {BOARD_H} — outline width/height (in LOCAL units, before scale)
+    {DATA_INFO_TITLE} — first field of board-outline rect's data-info, e.g.
+                        "U1|Waveshare ESP32-S3-Relay-6CH|7–36 V VIN · 6× SPDT (4 used)|WLED · CH1/2/41/42 → CH1..4"
+
+  Sub-block repetition:
+    – Channel block: one per relay channel. Active channels use the channel's
+      net color for COM stroke + NO terminal; unused channels use comp-stroke
+      grey with opacity 0.40–0.45 (see Sub-Agent 4 / unused-channel dimming
+      convention in reference/conventions.md).
+    – Pin circles: one per schematic-frame connection point. Active pins r=3,
+      unused pins r=2.5 with opacity 0.35.
+
+  IMPORTANT — class="comp" placement:
+    The outer board outline <rect> carries class="comp" + data-info (it is the
+    tooltip target and the bbox source for VR1/VR3/VR6). The outer <g> stays
+    bare (id only). All other rects inside the inner group are decorative —
+    leave them without class="comp" so VR1/VR3 don't treat them as components.
+    Their tooltips, if any, live as separate data-info attributes on the inner
+    rect they describe.
+-->
+<g id="{BOARD_ID}">
+  <!-- ── Inner scaled group: physical board replica in LOCAL coords ──────── -->
+  <g transform="translate({TX},{TY}) scale({SX},{SY})">
+
+    <!-- Board outline — this is the U1 tooltip target. class="comp" + data-info on the <rect>. -->
+    <rect class="comp" data-info="{DATA_INFO_TITLE}"
+          x="70" y="15" width="{BOARD_W}" height="{BOARD_H}"
+          fill="var(--comp-fill)" stroke="var(--accent)" stroke-width="1.76" rx="6" opacity="0.55"
+          style="cursor:pointer;"/>
+    <!-- Inner silkscreen border (subtle accent line, no class="comp" — it's decorative) -->
+    <rect x="78" y="23" width="{BOARD_W - 16}" height="{BOARD_H - 16}"
+          fill="none" stroke="var(--accent)" stroke-width="0.7" rx="4" opacity="0.2"/>
+
+    <!-- ── Mounting hole — 3 concentric circles + label. Repeat per hole. ── -->
+    <circle cx="{HOLE_X}" cy="{HOLE_Y}" r="11"  fill="none" stroke="var(--accent)" stroke-width="1.17" opacity="0.55"/>
+    <circle cx="{HOLE_X}" cy="{HOLE_Y}" r="4"   fill="none" stroke="var(--accent)" stroke-width="0.7"  opacity="0.4"/>
+    <circle cx="{HOLE_X}" cy="{HOLE_Y}" r="1.5" fill="var(--accent)" opacity="0.6"/>
+    <text x="{HOLE_X}" y="{HOLE_Y + 33}" text-anchor="middle" font-size="11" fill="var(--text-secondary)" opacity="0.7">{HOLE_LABEL}</text>
+
+    <!-- ── Channel terminal block (ACTIVE — repeat per active channel) ──────
+         {NET_TOKEN} — wire-data, wire-data2, …  (drives the CH-id, NO stroke)
+         {COM_TOKEN} — typically wire-5v for relay-COM bus
+         {CH_LABEL}  — e.g. "CH1 · GPIO1" -->
+    <rect x="535" y="{CH_Y}" width="90" height="125" rx="3"
+          fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+    <text x="540" y="{CH_Y + 14}" font-size="13" font-weight="bold" fill="var({NET_TOKEN})">{CH_LABEL}</text>
+    <!-- NC (top, unused on this channel) -->
+    <circle cx="615" cy="{CH_Y + 25}"  r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.45"/>
+    <text x="605"  y="{CH_Y + 29}"  font-size="11" fill="var(--text-secondary)" opacity="0.45" text-anchor="end">NC</text>
+    <!-- COM (mid, bussed) -->
+    <circle cx="615" cy="{CH_Y + 60}"  r="7" fill="var(--comp-fill)" stroke="var({COM_TOKEN})"  stroke-width="1.4"/>
+    <text x="605"  y="{CH_Y + 64}"  font-size="11" fill="var({COM_TOKEN})" text-anchor="end">COM</text>
+    <!-- NO (bot, switched to load) -->
+    <circle cx="615" cy="{CH_Y + 95}"  r="7" fill="var(--comp-fill)" stroke="var({NET_TOKEN})" stroke-width="1.4"/>
+    <text x="605"  y="{CH_Y + 99}"  font-size="11" fill="var({NET_TOKEN})" text-anchor="end">NO</text>
+
+    <!-- ── Channel terminal block (UNUSED — opacity 0.45 + grey stroke) ────
+         Repeat for every present-but-unused channel. -->
+    <rect x="535" y="{CH_Y}" width="90" height="125" rx="3"
+          fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94" opacity="0.45"/>
+    <text x="540" y="{CH_Y + 14}" font-size="13" font-weight="bold" fill="var(--text-secondary)" opacity="0.5">{CH_LABEL}</text>
+    <circle cx="615" cy="{CH_Y + 25}" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+    <text x="605"  y="{CH_Y + 29}" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">NC</text>
+    <circle cx="615" cy="{CH_Y + 60}" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+    <text x="605"  y="{CH_Y + 64}" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">COM</text>
+    <circle cx="615" cy="{CH_Y + 95}" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.4"/>
+    <text x="605"  y="{CH_Y + 99}" font-size="11" fill="var(--text-secondary)" opacity="0.4" text-anchor="end">NO</text>
+
+    <!-- ── DC power input block (optional — present on most relay boards) ─── -->
+    <rect x="80" y="{PWR_Y}" width="115" height="80" rx="3"
+          fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+    <text x="93"  y="{PWR_Y + 25}" font-size="13" fill="var(--wire-12v)">+</text>
+    <circle cx="110" cy="{PWR_Y + 35}" r="7" fill="var(--comp-fill)" stroke="var(--wire-12v)" stroke-width="1.4"/>
+    <text x="93"  y="{PWR_Y + 60}" font-size="13" fill="var(--text-secondary)">−</text>
+    <circle cx="110" cy="{PWR_Y + 70}" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4"/>
+    <text x="130" y="{PWR_Y + 55}" font-size="11" font-weight="bold" fill="var(--wire-12v)">{PWR_LABEL}</text>
+
+    <!-- ── RS485 block with DO-NOT-CONNECT GND warning (optional sub-block) ─ -->
+    <rect x="80" y="{RS485_Y}" width="115" height="115" rx="3"
+          fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="0.94"/>
+    <text x="89"  y="{RS485_Y + 27}" font-size="11" fill="var(--text-secondary)">A+</text>
+    <circle cx="110" cy="{RS485_Y + 37}" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.5"/>
+    <text x="89"  y="{RS485_Y + 62}" font-size="11" fill="var(--text-secondary)">B−</text>
+    <circle cx="110" cy="{RS485_Y + 72}" r="7" fill="var(--comp-fill)" stroke="var(--comp-stroke)" stroke-width="1.4" opacity="0.5"/>
+    <text x="84"  y="{RS485_Y + 98}" font-size="11" font-weight="bold" fill="var(--warn)">GND</text>
+    <circle cx="110" cy="{RS485_Y + 107}" r="7" fill="var(--warn)" opacity="0.25" stroke="var(--warn)" stroke-width="1.4"/>
+    <!-- X over GND terminal -->
+    <line x1="103" y1="{RS485_Y + 100}" x2="117" y2="{RS485_Y + 114}" stroke="var(--warn)" stroke-width="1.76"/>
+    <line x1="117" y1="{RS485_Y + 100}" x2="103" y2="{RS485_Y + 114}" stroke="var(--warn)" stroke-width="1.76"/>
+    <text x="130" y="{RS485_Y + 65}" font-size="11" font-weight="bold" fill="var(--text-secondary)">RS485</text>
+    <text x="130" y="{RS485_Y + 95}" font-size="9"  font-weight="bold" fill="var(--warn)">DO NOT</text>
+    <text x="130" y="{RS485_Y + 107}" font-size="9"  font-weight="bold" fill="var(--warn)">CONNECT</text>
+    <text x="130" y="{RS485_Y + 119}" font-size="8" fill="var(--warn)" opacity="0.8">GND pin</text>
+  </g>
+  <!-- ── End inner scaled group ───────────────────────────────────────────── -->
+
+  <!-- ── Identifier label (schematic frame — unscaled font) ──────────────── -->
+  <text x="{ID_X}" y="{ID_Y}" font-size="16" fill="var(--accent)"
+        text-anchor="middle" class="black-text">{BOARD_ID} · {BOARD_TITLE}</text>
+  <text x="{ID_X}" y="{ID_Y + 22}" font-size="14" fill="var(--text-secondary)"
+        text-anchor="middle" class="bold-text">{BOARD_SUBTITLE}</text>
+
+  <!-- ── Schematic-frame pin circles (one per outer connection point) ──────
+       Active pins: r=3, .pin class. Unused pins: r=2.5, .pin class, opacity 0.35. -->
+  <circle cx="{PIN_CX}" cy="{PIN_CY}" r="3"   class="pin"/>
+  <circle cx="{PIN_CX}" cy="{PIN_CY}" r="2.5" class="pin" opacity="0.35"/>
+
+  <!-- ── Net annotations (schematic-frame text, sits clear of wire centerlines) ── -->
+  <text x="{ANNO_X}" y="{ANNO_Y}" font-size="9" fill="var({NET_TOKEN})" text-anchor="middle">{NET_ID}</text>
+
+  <!-- ── COM jumper bus (schematic-frame internal wiring linking all COM pins) ──
+       Vertical spine + horizontal stubs from spine to each COM-pin circle.
+       Sub-Agent 6 (Wire Router) does NOT route inside transformed sub-groups;
+       internal wiring is authored here. -->
+  <line x1="{SPINE_X}" y1="{SPINE_Y1}" x2="{SPINE_X}" y2="{SPINE_Y2}"
+        stroke="var({COM_TOKEN})" stroke-width="1" opacity="0.7"/>
+  <line x1="{SPINE_X}" y1="{COM_PIN_Y}" x2="{COM_PIN_X}" y2="{COM_PIN_Y}"
+        stroke="var({COM_TOKEN})" stroke-width="1" opacity="0.7"/>
+  <text x="{SPINE_X - 16}" y="{SPINE_LABEL_Y}" font-size="11" fill="var({COM_TOKEN})"
+        text-anchor="middle" opacity="0.7"
+        transform="rotate(270,{SPINE_X - 16},{SPINE_LABEL_Y})">{JUMPER_LABEL}</text>
+</g>

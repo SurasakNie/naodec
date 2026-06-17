@@ -1,0 +1,86 @@
+<!--
+  Wire-harness / pinout table.
+  Use for: ICs (DIP-8, ESP32, ATmega, MAX485, regulators >3 pins),
+           Dev kits (Arduino, RPi 40-pin, ESP32 dev boards),
+           Connectors (JST PH/XH, Molex, Dupont, terminal blocks),
+           Headers (2.54mm, IDC, board-to-board)
+  Emit one table per part with >=4 used pins.
+  Place stacked in the lower section, adjacent to the wire-gauge table.
+
+  Required substitutions:
+    {PART_NAME}       — e.g. "ESP32-S3-WROOM-1" or "JST-XH 4P"
+    {X}, {Y}          — top-left corner of the table group
+    {W}               — total table width (suggest 300 for ICs, 360 for dev kits)
+    {ROW_COUNT}       — number of data rows (excluding header)
+    {TABLE_HEIGHT}    — 50 + ROW_COUNT*22  (= 28 title + 22 header + ROW_COUNT×22 data rows)
+
+  Per-row substitutions (repeat the <g class="hrow"> block):
+    {ROW_INDEX}       — 0,1,2,…  (used for y = 50 + ROW_INDEX*22)
+    {PIN_NUM}         — "1", "2", … or "A0", "GPIO15"
+    {PIN_NAME}        — "VCC", "GND", "MOSI", "DRV_EN"
+    {NET}             — net name, e.g. "BUS_5V" or "DATA_CH1"
+    {WIRE_CLASS}      — full CSS wire class assigned to the net, e.g. "w5v", "wdata3".
+                        The swatch class is derived by stripping the leading "w" and
+                        prepending "j":  "w5v" → class="j5v",  "wdata3" → class="jdata3".
+                        Substitute this derived value into the j{WIRE_CLASS_SUFFIX} slot
+                        on the swatch <rect>.
+
+  Note: .harness-table and .hrow are label-only classes — no CSS rule required.
+-->
+<g class="harness-table" transform="translate({X},{Y})" data-info="{PART_NAME} pinout|Wire-harness map">
+
+  <!-- outer outline (no fill) -->
+  <rect x="0" y="0" width="{W}" height="{TABLE_HEIGHT}" rx="2"
+        fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+
+  <!-- title bar separator -->
+  <line x1="0" y1="28" x2="{W}" y2="28"
+        stroke="var(--comp-stroke)" stroke-width="1"/>
+
+  <!-- title -->
+  <text x="{W/2}" y="19" font-size="13" fill="var(--accent)"
+        text-anchor="middle" class="black-text" letter-spacing="1.5">
+    {PART_NAME} · HARNESS
+  </text>
+
+  <!-- column dividers (4 columns: 14% / 36% / 36% / 14%) -->
+  <line x1="{W*0.14}" y1="28" x2="{W*0.14}" y2="{TABLE_HEIGHT}"
+        stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+  <line x1="{W*0.50}" y1="28" x2="{W*0.50}" y2="{TABLE_HEIGHT}"
+        stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+  <line x1="{W*0.86}" y1="28" x2="{W*0.86}" y2="{TABLE_HEIGHT}"
+        stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+
+  <!-- column headers -->
+  <text x="{W*0.07}"  y="44" font-size="10" fill="var(--text-secondary)"
+        text-anchor="middle" class="bold-text" letter-spacing="1">PIN</text>
+  <text x="{W*0.32}"  y="44" font-size="10" fill="var(--text-secondary)"
+        text-anchor="middle" class="bold-text" letter-spacing="1">NAME</text>
+  <text x="{W*0.68}"  y="44" font-size="10" fill="var(--text-secondary)"
+        text-anchor="middle" class="bold-text" letter-spacing="1">NET</text>
+  <text x="{W*0.93}"  y="44" font-size="10" fill="var(--text-secondary)"
+        text-anchor="middle" class="bold-text" letter-spacing="1">CH</text>
+
+  <!-- header underline -->
+  <line x1="0" y1="50" x2="{W}" y2="50"
+        stroke="var(--comp-stroke)" stroke-width="0.5"/>
+
+  <!-- ============== ROW TEMPLATE (repeat per pin) ==============
+       Compute y = 50 + ROW_INDEX*22 for each row.
+       Color swatch uses the wire class so it tracks the theme. -->
+  <g class="hrow" transform="translate(0,{50 + ROW_INDEX*22})">
+    <text x="{W*0.07}" y="14" font-size="11" fill="var(--text-primary)"
+          text-anchor="middle" class="bold-text">{PIN_NUM}</text>
+    <text x="{W*0.32}" y="14" font-size="11" fill="var(--text-primary)"
+          text-anchor="middle">{PIN_NAME}</text>
+    <text x="{W*0.68}" y="14" font-size="11" fill="var(--text-secondary)"
+          text-anchor="middle">{NET}</text>
+    <rect x="{W*0.89}" y="9" width="20" height="4" rx="1"
+          class="j{WIRE_CLASS_SUFFIX}"/>
+    <!-- row separator -->
+    <line x1="6" y1="22" x2="{W-6}" y2="22"
+          stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+  </g>
+  <!-- ============================================================ -->
+
+</g>
