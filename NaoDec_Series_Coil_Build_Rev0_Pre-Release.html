@@ -295,8 +295,9 @@
       current limit is a <em>regulation</em> feature, not a fault interrupter, and buck converters
       typically fail <strong>shorted</strong> (high-side MOSFET drain-to-source), connecting the
       supply straight through to the near-short load with no limit. On a large shared rail that is
-      a fire risk; the fuse is the only thing that contains it. Put it on the input, where it also
-      covers input-side faults.</li>
+      a fire risk; the fuse is the only thing that contains it. Put it <strong>before the buck, not after</strong>: an output-side fuse is blind to input-stage
+      and buck-internal shorts (input cap, FET-to-ground, shorted output cap), so only an input fuse
+      contains every fault the rail can feed.</li>
     <li><strong>Connectors: JST SM 2-pin, both pins paralleled onto the series conductor.</strong>
       With the loop held to ~3 A each connector sees &le;3 A; a single SM pin is rated 3 A, so even
       worst-case current sharing stays at/under rating, and the paralleled pair (~4.5 A) adds margin
