@@ -21,7 +21,7 @@ naodec/
 ├── index.html                                     # GitHub Pages auto-index
 ├── NaoDec_WS2815_LED_Controller_Rev1.6.html       # Full controller schematic (interactive)
 ├── NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.2.html  # 3D LED position & channel map
-├── NaoDec_Series_Coil_Build_Rev1.0.html           # Series coil / electromagnet subsystem
+├── NaoDec_Series_Coil_Build_Rev0_Pre-Release.html # Series coil / electromagnet subsystem (pre-release)
 ├── Simple_WS2815_Controller_Rev_1.0.html          # Simplified single-controller reference
 └── Archived/                                      # Previous revisions
 ```
@@ -73,7 +73,7 @@ naodec/
 
 ## Series Coil / Electromagnet Subsystem
 
-Sixty hand-wound copper coils (7 turns of ~65 cm of 1 mm copper each, **~1.5 cm dia, crystal core**, with the rest of the wire left straight) wired **end-to-end in a single series loop** on a 12 V DC supply, intended to produce a magnetic field. The 6 m cable is the return from the last coil back to the PSU. Full write-up: [`NaoDec_Series_Coil_Build_Rev1.0.html`](NaoDec_Series_Coil_Build_Rev1.0.html).
+Sixty hand-wound copper coils (7 turns of ~65 cm of 1 mm copper each, **~1.5 cm dia, crystal core**, with the rest of the wire left straight) wired **end-to-end in a single series loop** on a 12 V DC supply, intended to produce a magnetic field. The 6 m cable is the return from the last coil back to the PSU. Full write-up: [`NaoDec_Series_Coil_Build_Rev0_Pre-Release.html`](NaoDec_Series_Coil_Build_Rev0_Pre-Release.html).
 
 > **⚠ An inductor does nothing on steady-state DC** (`Z = jωL → 0` at DC). This string is a **~3 Ω resistive near-short with no current-limiting element** — the steady current is set only by wire resistance and the PSU.
 
@@ -179,7 +179,7 @@ Each schematic supports:
 |------|-----|-------|
 | NaoDec_WS2815_LED_Controller | 1.6 | Current · 7-ch dual ESP32-S3 DDP |
 | NaoDec_3D_Vertex_and_Edges_LED_Mapping | 1.2 | Current · 3D position map |
-| NaoDec_Series_Coil_Build | 1.0 | Current · 60-coil series electromagnet subsystem |
+| NaoDec_Series_Coil_Build | 0 (pre-release) | Pre-release · 60-coil series electromagnet subsystem |
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
 | NaoDec_Controller_Box_Configs | 1.1 | Current · electrical enclosure vs PC case · audited power calculations |
 | NaoDec_Power_and_Controller_Box_Report | 1.0 | Full power budget, PSU specs, voltage-drop analysis, audit findings |
