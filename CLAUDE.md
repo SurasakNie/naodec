@@ -24,6 +24,10 @@ no build step, no dependencies. Published at https://surasaknie.github.io/naodec
     steady-state DC); current is set only by wire resistance + PSU.
   - The crystal core is non-magnetic (μ ≈ air) → no field boost; weak air-core
     coils (~28 AT each).
-  - Safety: fuse it (3–5 A), prefer a current-limited supply (≤3 A; unlimited
-    draw ≈ 4 A), upgrade connectors (common JSTs are over rating at 4 A), keep
-    cable runs uncoiled, and never reduce cable resistance without a limiter.
+  - Adopted solution: a **CC/CV buck (XL4015, CC set ~3 A)** is the current
+    limiter — it caps the loop regardless of load resistance (removes the
+    runaway risk). Still **fuse the buck input** (3–5 A): the CC limit is
+    regulation, not fault protection, and bucks fail *shorted*. Connectors are
+    **JST SM 2-pin, both pins paralleled** (fine at the capped ~3 A; VH/XT30/
+    Anderson for more margin). Keep runs uncoiled; never run the string without
+    the buck.

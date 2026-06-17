@@ -108,9 +108,10 @@ flowchart LR
 |-----------|------|-------|
 | Coils | 60 × 7-turn, 1 mm Cu, ~65 cm each | ~1.5 cm dia, **crystal core**; rest of wire left straight (~33 cm wound + ~32 cm leads) |
 | Cable | 24 AWG 2-core flat, ~26 m+ | Inter-group runs + 6 m return; marginal at ~4 A |
-| Connectors | 20 × JST 2-pin | **Upgrade required at ~4 A:** VH (10 A) / Anderson — PH/XH/SM all under 4 A |
-| PSU | 12 V DC, current-limited | Bench CC supply set ~3 A, or 12 V 3–5 A brick |
-| Fuse | 3–5 A inline at V+ | Just above set current; matches ATC/ATO convention |
+| Connectors | 20 × JST SM 2-pin | Both pins paralleled onto the series conductor; OK once the buck caps the loop at ~3 A (single SM pin = 3 A). VH (10 A) / XT30 / Anderson are higher-margin alternatives |
+| PSU | 12 V DC | Feeds the buck input; may be a shared rail, but keep this branch fused and V+ isolated |
+| CC/CV buck module | XL4015, 12 V in, CC set ~3 A | **The current limiter.** 5 A-rated board (avoid 3 A-peak LM2596); caps the loop regardless of load resistance, removing the runaway risk |
+| Fuse | 3–5 A inline at buck input | **Still required:** the buck's CC limit is regulation, not fault protection, and bucks fail *shorted* |
 | Crystal cores | 1 per coil | Per design — non-magnetic, no field boost |
 | Flyback diode *(opt.)* | 1N4007 / 1N5819 | Kick is tiny (~0.4 mJ); only if switched electronically |
 
@@ -123,8 +124,9 @@ flowchart LR
 | Voltage split | ~8.7 V cable / ~3.4 V coils | ~70–80 % wasted heating the cable |
 | Power | ~47 W total (~34 W in cable) | coils stay cool (~0.22 W each) |
 | Field per coil | ~28 AT | 7 turns × 4 A, crystal (non-magnetic) core → weak |
+| With buck (recommended) | capped ~3 A | XL4015 CC limit → ~9 V / 3 A into the loop, ~27 W out, ~2.5 A at the 12 V input |
 
-> **⚠ Safety:** fuse it (3–5 A); prefer a current-limited supply (≤3 A; unlimited draw is ~4 A); upgrade connectors (VH/Anderson — common JSTs are over rating at 4 A); keep the 6 m run and slack **uncoiled**; **never** reduce cable resistance without adding a current limiter (each coil is ~0.014 Ω, a near-short); keep the straight bare-copper leads from touching; keep this V+ rail **isolated** from the LED rails.
+> **⚠ Safety:** current-limit it with a CC/CV buck (XL4015, CC ~3 A) — caps the loop and removes the runaway risk; **still fuse the buck input** (3–5 A): its CC limit is regulation, not fault protection, and bucks fail *shorted*; JST SM 2-pin with both pins paralleled is fine at the capped ~3 A (VH/XT30/Anderson for more margin); keep the 6 m run and slack **uncoiled**; **never** run the string without the buck (each coil is ~0.014 Ω, a near-short — the cable resistance is all that holds current down); keep the straight bare-copper leads from touching; keep this V+ rail **isolated** from the LED rails.
 
 ---
 
