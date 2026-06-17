@@ -78,7 +78,7 @@
   </p>
 
   <figure>
-    <svg viewBox="0 0 700 200" role="img" aria-label="Series loop topology: PSU through a fuse to 20 coil groups and a 6 m return back to the PSU">
+    <svg viewBox="0 0 570 210" role="img" aria-label="Series loop topology: 12 V PSU through an input fuse into a CC/CV buck (XL4015) set to about 3 A, then 20 coil groups in series and a 6 m return to the common negative.">
       <defs>
         <marker id="ar--scl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
@@ -86,43 +86,49 @@
       </defs>
       <g fill="none" stroke="currentColor" stroke-width="2">
         <!-- PSU -->
-        <rect x="20" y="55" width="72" height="92" rx="6"/>
-        <!-- Fuse -->
-        <rect x="124" y="60" width="74" height="26" rx="4"/>
+        <rect x="12" y="52" width="60" height="92" rx="6"/>
+        <!-- Fuse (at buck input) -->
+        <rect x="92" y="60" width="52" height="26" rx="4"/>
+        <!-- CC/CV buck — the current limiter -->
+        <rect x="164" y="54" width="100" height="40" rx="4"/>
         <!-- Groups -->
-        <rect x="226" y="56" width="74" height="36" rx="4"/>
-        <rect x="332" y="56" width="74" height="36" rx="4"/>
+        <rect x="286" y="56" width="64" height="36" rx="4"/>
+        <rect x="366" y="56" width="64" height="36" rx="4"/>
         <rect x="470" y="56" width="80" height="36" rx="4"/>
         <!-- top wires -->
-        <path d="M92,73 L124,73" marker-end="url(#ar--scl)"/>
-        <path d="M198,73 L226,73" marker-end="url(#ar--scl)"/>
-        <path d="M300,73 L332,73" marker-end="url(#ar--scl)"/>
-        <path d="M406,73 L432,73" stroke-dasharray="4 4"/>
-        <path d="M444,73 L470,73" marker-end="url(#ar--scl)"/>
-        <!-- return path -->
-        <path d="M510,92 L510,170 L92,170 L92,135" marker-end="url(#ar--scl)"/>
+        <path d="M72,73 L92,73" marker-end="url(#ar--scl)"/>
+        <path d="M144,73 L164,73" marker-end="url(#ar--scl)"/>
+        <path d="M264,73 L286,73" marker-end="url(#ar--scl)"/>
+        <path d="M350,73 L366,73" marker-end="url(#ar--scl)"/>
+        <path d="M430,73 L452,73" stroke-dasharray="4 4"/>
+        <path d="M452,73 L470,73" marker-end="url(#ar--scl)"/>
+        <!-- return path (loop back to the common negative) -->
+        <path d="M510,92 L510,184 L42,184 L42,144" marker-end="url(#ar--scl)"/>
       </g>
       <g fill="currentColor" font-family="system-ui, sans-serif" font-size="13">
-        <text x="56" y="92" text-anchor="middle">12 V</text>
-        <text x="56" y="110" text-anchor="middle">PSU</text>
-        <text x="80" y="70" text-anchor="middle" font-size="15">+</text>
-        <text x="80" y="143" text-anchor="middle" font-size="15">&#8722;</text>
-        <text x="161" y="78" text-anchor="middle">Fuse 3&#8211;5 A</text>
-        <text x="263" y="72" text-anchor="middle">Group 1</text>
-        <text x="263" y="86" text-anchor="middle" font-size="11">3 coils</text>
-        <text x="369" y="72" text-anchor="middle">Group 2</text>
-        <text x="369" y="86" text-anchor="middle" font-size="11">3 coils</text>
-        <text x="419" y="78" text-anchor="middle" font-size="16">&#8230;</text>
+        <text x="42" y="92" text-anchor="middle">12 V</text>
+        <text x="42" y="110" text-anchor="middle">PSU</text>
+        <text x="60" y="68" text-anchor="middle" font-size="15">+</text>
+        <text x="40" y="137" text-anchor="middle" font-size="15">&#8722;</text>
+        <text x="118" y="104" text-anchor="middle" font-size="11">Fuse 3&#8211;5 A</text>
+        <text x="214" y="71" text-anchor="middle" font-size="12">CC/CV buck</text>
+        <text x="214" y="86" text-anchor="middle" font-size="11">XL4015 &middot; ~3 A</text>
+        <text x="318" y="72" text-anchor="middle">Group 1</text>
+        <text x="318" y="86" text-anchor="middle" font-size="11">3 coils</text>
+        <text x="398" y="72" text-anchor="middle">Group 2</text>
+        <text x="398" y="86" text-anchor="middle" font-size="11">3 coils</text>
+        <text x="450" y="79" text-anchor="middle" font-size="16">&#8230;</text>
         <text x="510" y="72" text-anchor="middle">Group 20</text>
         <text x="510" y="86" text-anchor="middle" font-size="11">3 coils</text>
-        <text x="316" y="66" text-anchor="middle" font-size="11">1 m</text>
-        <text x="301" y="185" text-anchor="middle" font-size="12">6 m return (last coil &#8594; PSU)</text>
+        <text x="358" y="50" text-anchor="middle" font-size="11">1 m</text>
+        <text x="276" y="201" text-anchor="middle" font-size="12">6 m return (last coil &#8594; PSU &#8722;)</text>
       </g>
     </svg>
     <figcaption>
-      Figure 1 — Loop topology. A series loop: PSU (+) &#8594; fuse &#8594; 20 groups
-      (~1 m flat cable between groups) &#8594; 6 m return to PSU (&#8722;). No current-limiting
-      element other than wire resistance and the supply.
+      Figure 1 — Loop topology. 12 V PSU &#8594; fuse &#8594; CC/CV buck (XL4015, CC ~3 A)
+      &#8594; 20 groups (~1 m flat cable between groups) &#8594; 6 m return to the common
+      negative. The buck is the current limiter — it caps the loop at ~3 A regardless of load
+      resistance; the fuse sits at the buck input (its CC limit is regulation, not fault protection).
     </figcaption>
   </figure>
 
