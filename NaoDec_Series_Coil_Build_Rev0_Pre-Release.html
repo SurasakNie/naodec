@@ -265,6 +265,7 @@
       <tr><td>Inter-coil / inter-group cable</td><td>24 AWG 2-core flat, ~26 m+</td><td>Marginal at ~4 A; upsize long runs if reducing loss</td></tr>
       <tr><td>Connectors</td><td>20 &times; JST 2-pin</td><td><strong>Upgrade required at ~4 A:</strong> JST VH (10 A) or Anderson Powerpole — PH/XH/SM are all under 4 A</td></tr>
       <tr><td>PSU</td><td>12 V DC, current-limited</td><td><strong>Add:</strong> bench supply with adjustable CC limit set to ~3 A (see below)</td></tr>
+      <tr><td>CC/CV buck converter <em>(recommended)</em></td><td>12 V in, &ge; 3 A module, CC set to ~3 A (CV ~12 V)</td><td>Cheap, enclosure-friendly hard current limit — the standing-install equivalent of a bench supply's CC mode. Into the ~3 &#937; near-short it sits in CC and the output self-settles to ~9 V. Pick a module rated above 3 A so it runs cool; still fuse the input.</td></tr>
       <tr><td>Fuse <em>(add)</em></td><td>3&#8211;5 A inline, at V+</td><td>Just above the set current; matches NaoDec's ATC/ATO convention</td></tr>
       <tr><td>Crystal cores</td><td>1 per coil</td><td>Per design — non-magnetic, gives no field boost</td></tr>
       <tr><td>Flyback diode <em>(optional)</em></td><td>1N4007 / 1N5819 across the string</td><td>Kick is tiny (~0.4 mJ); only worth it if the string is switched electronically</td></tr>
@@ -276,6 +277,11 @@
     <li><strong>Best:</strong> a 12 V bench/lab supply with adjustable constant-current (CC)
       limit, set to ~3 A. It physically cannot exceed the set current, gives a current
       readout, and keeps you within wire/connector comfort.</li>
+    <li><strong>Practical / permanent install:</strong> a <strong>CC/CV buck converter</strong>
+      fed from 12 V, with the <strong>constant-current (CC) limit set to ~3 A</strong> (CV ~12 V).
+      Like a bench supply's CC mode it physically caps the current, but it is cheap and can live
+      inside the enclosure. Into the ~3 &#937; near-short it runs in CC, so the output self-settles
+      to ~9 V; pick a module rated above 3 A so it stays cool, and still fuse the input.</li>
     <li><strong>If fixed brick:</strong> 12 V, 3&#8211;5 A, with a 3&#8211;5 A inline fuse at V+,
       and VH/Anderson connectors to handle the ~4 A it will push.</li>
     <li><strong>Avoid:</strong> putting this near-short on a large unprotected supply
@@ -286,7 +292,7 @@
   <div class="callout warn">
     <ul>
       <li><strong>Fuse it</strong> (3&#8211;5 A inline at V+) — non-negotiable; the load is a near-short.</li>
-      <li><strong>Current-limit it</strong> — prefer a CC bench supply set to ~3 A (unlimited draw is ~4 A).</li>
+      <li><strong>Current-limit it</strong> — prefer a CC bench supply or CC/CV buck set to ~3 A (unlimited draw is ~4 A).</li>
       <li><strong>Upgrade the connectors</strong> — at ~4 A all common JSTs are over rating; use VH (10 A) / Anderson.</li>
       <li><strong>Don't coil the 6 m run or slack cable</strong> — coiled cable can't shed heat.</li>
       <li><strong>Don't reduce cable resistance without a current limiter</strong> — current will run away.</li>
