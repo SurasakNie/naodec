@@ -266,6 +266,7 @@
             <!-- Tabs -->
             <div class="flex gap-1 mb-3">
                 <button id="tab-btn-routing"   class="tab-btn active" onclick="switchLeftTab('routing')">Routing</button>
+                <button id="tab-btn-summary"   class="tab-btn"        onclick="switchLeftTab('summary')">Summary</button>
                 <button id="tab-btn-revisions" class="tab-btn"        onclick="switchLeftTab('revisions')">Revisions</button>
             </div>
 
@@ -309,19 +310,27 @@
                         <li><strong style="color:#1e3a8a;">Negative (&minus;):</strong> <span style="color:#1e3a8a; font-weight:700;">v20 &rarr; v16 &rarr; v15 &rarr; v6 &rarr; v5 &rarr; v1 &rarr; 0</span></li>
                     </ul>
                 </div>
-                <div class="mt-3 pt-2 border-t text-xs text-slate-600">
-                    <h4 class="font-bold text-slate-700 mb-1">Summary</h4>
-                    <table class="w-full text-xs">
-                        <tr><td class="text-slate-500">Vertex LEDs</td><td class="text-right font-semibold">20</td></tr>
-                        <tr><td class="text-slate-500">Total Circuits</td><td class="text-right font-semibold">6</td></tr>
-                        <tr><td class="text-slate-500">Structural Edges (e1&ndash;e30)</td><td class="text-right font-semibold">30</td></tr>
-                        <tr><td class="text-slate-500">Jumper Cables (C1&ndash;C5)</td><td class="text-right font-semibold">5</td></tr>
-                        <tr class="border-t border-slate-300"><td class="text-slate-700 font-bold pt-1">Total Wire Segments</td><td class="text-right font-bold pt-1">35</td></tr>
-                    </table>
-                </div>
             </div>
 
-            <!-- Tab 2: Revisions -->
+            <!-- Tab 2: Summary -->
+            <div id="tab-summary" class="tab-content">
+                <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">Summary</h3>
+                <table class="w-full text-xs text-slate-600">
+                    <tr><td class="text-slate-500">Vertex LEDs</td><td class="text-right font-semibold">20</td></tr>
+                    <tr><td class="text-slate-500">Total Circuits</td><td class="text-right font-semibold">6</td></tr>
+                    <tr><td class="text-slate-500">Structural Edges (e1&ndash;e30)</td><td class="text-right font-semibold">30</td></tr>
+                    <tr><td class="text-slate-500">Jumper Cables (C1&ndash;C5)</td><td class="text-right font-semibold">5</td></tr>
+                    <tr class="border-t border-slate-300"><td class="text-slate-700 font-bold pt-1">Total Wire Segments</td><td class="text-right font-bold pt-1">35</td></tr>
+                </table>
+                <h4 class="font-bold text-slate-700 mb-1 mt-3 pt-2 border-t text-sm">Series Coil Circuit</h4>
+                <table class="w-full text-xs text-slate-600">
+                    <tr><td class="text-slate-500">Coil Vertex Nodes</td><td class="text-right font-semibold">20</td></tr>
+                    <tr><td class="text-slate-500"><span style="color:#ef4444;">&#9632;</span> Positive segments</td><td class="text-right font-semibold">20</td></tr>
+                    <tr><td class="text-slate-500"><span style="color:#1e3a8a;">&#9632;</span> Negative segments</td><td class="text-right font-semibold">6</td></tr>
+                </table>
+            </div>
+
+            <!-- Tab 3: Revisions -->
             <div id="tab-revisions" class="tab-content">
                 <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">Revision History</h3>
                 <ul class="space-y-2 text-xs text-slate-600">
@@ -377,7 +386,7 @@
         };
         // --- Left-panel tab switcher ---
         window.switchLeftTab = function(tabId) {
-            ['routing', 'revisions'].forEach(id => {
+            ['routing', 'summary', 'revisions'].forEach(id => {
                 const content = document.getElementById('tab-' + id);
                 const btn = document.getElementById('tab-btn-' + id);
                 if (content) content.classList.toggle('active', id === tabId);
@@ -501,7 +510,7 @@
         // --- Series Coil Circuit (single route: red positive daisy-chain + dark-blue negative return) ---
         const COIL_POS_COLOR = '#ef4444';   // red
         const COIL_NEG_COLOR = '#1e3a8a';   // dark blue
-        const COIL_OFFSET = 7;               // perpendicular offset for parallel (shared-edge) lines
+        const COIL_OFFSET = 9;               // perpendicular offset for the parallel (shared-edge) line
         const _pairKey = (a, b) => a < b ? a + '-' + b : b + '-' + a;
         // Positive: 0 -> v1 -> v2 -> ... -> v20
         const coilPosPath = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
@@ -514,13 +523,15 @@
         const coilWireSegments = [];
         for (let i = 0; i < coilPosPath.length - 1; i++) {
             const from = coilPosPath[i], to = coilPosPath[i + 1];
+            // Positive (red) always sits ON the edge — never offset.
             coilWireSegments.push({ from, to, color: COIL_POS_COLOR, marker: 'arrow-red',
-                parallel: _coilNegSet.has(_pairKey(from, to)), offsetDir: 1 });
+                parallel: false, offsetDir: 0 });
         }
         for (let i = 0; i < coilNegPath.length - 1; i++) {
             const from = coilNegPath[i], to = coilNegPath[i + 1];
+            // Negative (blue) runs parallel (offset) only where it shares an edge with the positive line.
             coilWireSegments.push({ from, to, color: COIL_NEG_COLOR, marker: 'arrow-darkblue',
-                parallel: _coilPosSet.has(_pairKey(from, to)), offsetDir: -1 });
+                parallel: _coilPosSet.has(_pairKey(from, to)), offsetDir: 1 });
         }
 
         // --- Display State ---
@@ -825,7 +836,7 @@
 
             // C. Nodes (gated on showVertexView; node 0 always shown)
             Object.values(projNodes).forEach(p => {
-                if (!showVertexView && !showNodeLabels && p.origId !== 0) return;
+                if (!showVertexView && !showNodeLabels && !showCoilView && p.origId !== 0) return;
                 if (p.origId === 0) {
                     let opacity0 = insideView ? (p.z < POV_FAR_THRESHOLD ? 1.0 : 0) : (p.z > 0 ? 1.0 : 0.4);
                     renderQueue.push({
@@ -848,7 +859,7 @@
                     html: `
                     <g class="node pointer-events-auto" transform="translate(${p.x}, ${p.y})" opacity="${opacity}">
                         <circle cx="0" cy="0" r="${r}" fill="${COL_NFILL}" stroke="${fillColor}" stroke-width="3" />
-                        ${(showNodeLabels || showVertexView) ? `<text x="0" y="${r/3}" font-size="${fs}" font-weight="600" text-anchor="middle" fill="${COL_NTEXT}">v${p.origId}</text>` : ''}
+                        ${(showNodeLabels || showVertexView || showCoilView) ? `<text x="0" y="${r/3}" font-size="${fs}" font-weight="600" text-anchor="middle" fill="${COL_NTEXT}">v${p.origId}</text>` : ''}
                     </g>`
                 });
             });
