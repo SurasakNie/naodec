@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaoDec Vertex Series Coil - Rev 1.0a</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+
+  /* === THEME START - Dark Blue-Mint === */
+  :root {
+    --bg-dark:          #080b10;
+    --bg-panel:         rgba(17, 23, 34, 0.95);
+    --wire-12v:         #0ff0b3;
+    --wire-5v:          #56a8ff;
+    --wire-3v3:         #f5d547;
+    --wire-gnd:         #4d7096;
+    --wire-data:        #88e2d6;
+    --wire-data2:       #ffffff;
+    --wire-data3:       #7cb3ff;
+    --wire-data4:       #c8a2e8;
+    --wire-data5:       #f0997b;
+    --wire-data6:       #97c459;
+    --wire-data7:       #f0d060;
+    --text-primary:     #edf5f3;
+    --text-secondary:   #91a0ad;
+    --accent:           #0ff0b3;
+    --comp-fill:        #111722;
+    --comp-fill-hover:  #151d29;
+    --comp-stroke:      #293444;
+    --border:           rgba(41, 52, 68, 0.6);
+    --pin-dot:          #0ff0b3;
+    --warn:             #ff4f86;
+    --warn-bg:          rgba(255, 79, 134, 0.12);
+  }
+  /* === THEME END === */
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .schematic-container {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+  }
+  .schematic-container.grabbing { cursor: grabbing; }
+  .svg-wrapper {
+    transform-origin: 0 0;
+    will-change: transform;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .comp {
+    fill: none;
+    stroke: var(--comp-stroke);
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: stroke .2s ease, stroke-width .2s ease;
+  }
+  .comp:hover, .comp:focus {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    outline: none;
+  }
+  .sec-border-dash {
+    fill: none;
+    stroke: var(--comp-stroke);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 6;
+    opacity: .8;
+  }
+  .deco { fill: none; }
+  .w12v      { stroke: var(--wire-12v);  stroke-width: 2.5; fill: none; }
+  .w12v-bus  { stroke: var(--wire-12v);  stroke-width: 4; fill: none; }
+  .w5v       { stroke: var(--wire-5v);   stroke-width: 2; fill: none; }
+  .w5v-bus   { stroke: var(--wire-5v);   stroke-width: 4; fill: none; }
+  .w3v3      { stroke: var(--wire-3v3);  stroke-width: 2; fill: none; }
+  .w3v3-bus  { stroke: var(--wire-3v3);  stroke-width: 4; fill: none; }
+  .wgnd      { stroke: var(--wire-gnd);  stroke-width: 2.5; fill: none; }
+  .wgnd-bus  { stroke: var(--wire-gnd);  stroke-width: 4; fill: none; }
+  .wdata     { stroke: var(--wire-data);  stroke-width: 2; fill: none; }
+  .wdata2    { stroke: var(--wire-data2); stroke-width: 2; fill: none; }
+  .wdata3    { stroke: var(--wire-data3); stroke-width: 2; fill: none; }
+  .wdata4    { stroke: var(--wire-data4); stroke-width: 2; fill: none; }
+  .wdata5    { stroke: var(--wire-data5); stroke-width: 2; fill: none; }
+  .wdata6    { stroke: var(--wire-data6); stroke-width: 2; fill: none; }
+  .wdata7    { stroke: var(--wire-data7); stroke-width: 2; fill: none; }
+  .j12v   { fill: var(--wire-12v); }
+  .j5v    { fill: var(--wire-5v); }
+  .j3v3   { fill: var(--wire-3v3); }
+  .jgnd   { fill: var(--wire-gnd); }
+  .jdata  { fill: var(--wire-data); }
+  .jdata2 { fill: var(--wire-data2); }
+  .jdata3 { fill: var(--wire-data3); }
+  .jdata4 { fill: var(--wire-data4); }
+  .jdata5 { fill: var(--wire-data5); }
+  .jdata6 { fill: var(--wire-data6); }
+  .jdata7 { fill: var(--wire-data7); }
+  .pin { fill: var(--pin-dot); }
+  .coil-symbol { stroke: var(--wire-12v); stroke-width: 2; fill: none; }
+  .channel-label {
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 9px;
+    fill: var(--text-secondary);
+    pointer-events: none;
+  }
+  polyline[data-info], line[data-info], path[data-info] {
+    cursor: pointer;
+    pointer-events: visibleStroke;
+  }
+  rect[data-info], circle[data-info], g[data-info] { cursor: pointer; }
+  polyline[data-info]:hover, line[data-info]:hover, path[data-info]:hover,
+  polyline[data-info]:focus, line[data-info]:focus, path[data-info]:focus {
+    stroke-width: 6;
+    filter: brightness(1.4);
+    outline: none;
+  }
+  text { font-family: 'Roboto', sans-serif; font-weight: 500; }
+  .bold-text { font-weight: 700; }
+  .black-text { font-weight: 900; }
+  .tip {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-dark);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 16px 24px;
+    font-size: 15px;
+    color: var(--text-primary);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+    max-width: 620px;
+    text-align: center;
+    transition: opacity .2s, transform .2s;
+  }
+  .tip.on { opacity: 1; transform: translateX(-50%) translateY(-8px); }
+  .tip .ttl {
+    color: var(--accent);
+    font-weight: 900;
+    margin-bottom: 6px;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .tip .desc { line-height: 1.5; color: var(--text-secondary); font-weight: 500; }
+  #zoom-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    display: flex;
+    gap: 6px;
+    z-index: 100;
+    align-items: center;
+  }
+  .zoom-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    transition: all .2s;
+    font-family: 'Roboto', sans-serif;
+  }
+  .zoom-btn:hover, .zoom-btn:focus { border-color: var(--accent); color: var(--accent); outline: none; }
+  .zoom-btn:active { transform: scale(.95); }
+  .zoom-btn.fit-btn {
+    width: auto;
+    padding: 0 14px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  #zoom-level {
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 52px;
+    text-align: center;
+    padding: 0 6px;
+    user-select: none;
+  }
+  .zoom-shortcut-hint {
+    position: fixed;
+    bottom: 75px;
+    left: 30px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    z-index: 100;
+    letter-spacing: .5px;
+  }
+</style>
+</head>
+<body>
+<div class="schematic-container" id="schematic-container">
+<div class="svg-wrapper" id="svg-wrapper">
+<svg width="2400" height="1800" viewBox="-180 -15 2420 1815" xmlns="http://www.w3.org/2000/svg" id="schematic-svg" role="img" aria-labelledby="svg-title svg-desc">
+  <title id="svg-title">NaoDec Vertex Series Coil Rev 1.0a</title>
+  <desc id="svg-desc">Interactive schematic of a current-limited sixty-coil series electromagnet loop.</desc>
+
+  <g stroke="var(--text-secondary)" stroke-width="2" opacity=".6">
+    <path class="deco" d="M -150 20 h 20 M -140 10 v 20"/>
+    <path class="deco" d="M 2210 20 h 20 M 2220 10 v 20"/>
+    <path class="deco" d="M -150 1770 h 20 M -140 1760 v 20"/>
+    <path class="deco" d="M 2210 1770 h 20 M 2220 1760 v 20"/>
+  </g>
+
+  <g transform="translate(80,0)">
+    <g id="title-block">
+      <text x="40" y="24" font-size="28" fill="var(--text-primary)" class="black-text" letter-spacing="4">N A O D E C</text>
+      <text x="40" y="48" font-size="14" fill="var(--accent)" class="bold-text" letter-spacing="1">VERTEX SERIES COIL - REV 1.0A</text>
+      <text x="40" y="68" font-size="13" fill="var(--text-secondary)" class="bold-text">60-coil pre-release design | dual-pot XL4015 CC/CV | exact 3 A input fuse | thermal cutoff</text>
+
+      <rect x="730" y="25" width="720" height="46" rx="4" fill="var(--bg-panel)" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="755" y="46" width="24" height="3" rx="1.5" fill="var(--wire-12v)"/>
+      <text x="787" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">12V INPUT / CC LOOP+</text>
+      <rect x="1035" y="46" width="24" height="3" rx="1.5" fill="var(--wire-gnd)"/>
+      <text x="1067" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">0V / RETURN</text>
+    </g>
+
+    <rect x="-10" y="130" width="2010" height="850" rx="4" class="sec-border-dash deco"/>
+    <text x="60" y="154" font-size="14" fill="var(--text-secondary)" class="black-text" letter-spacing="2">CURRENT-LIMITED POWER AND SERIES LOOP</text>
+
+    <g id="PSU1">
+      <rect class="comp" tabindex="0" data-info="PSU1|12 V DC power supply|Isolated branch feeding XL4015 input|Keep this positive branch isolated from LED positive rails" x="40" y="210" width="160" height="190" rx="2"/>
+      <text x="120" y="282" font-size="20" fill="var(--accent)" text-anchor="middle" class="black-text">12 V PSU</text>
+      <text x="120" y="307" font-size="13" fill="var(--text-primary)" text-anchor="middle" class="bold-text">DC SUPPLY</text>
+      <text x="195" y="364" font-size="10" fill="var(--text-secondary)" text-anchor="end" class="bold-text">0 V</text>
+      <circle cx="200" cy="270" r="3" class="pin"/>
+      <circle cx="200" cy="370" r="3" class="pin"/>
+    </g>
+    <text x="210" y="260" font-size="10" fill="var(--text-secondary)" class="bold-text">+12 V</text>
+
+    <g id="F1">
+      <rect class="comp" tabindex="0" data-info="F1|Input fuse, exactly 3 A slow-blow T-type|Inline before XL4015 IN+|Fault protection remains required because the buck can fail shorted" x="300" y="240" width="80" height="60" rx="2"/>
+      <text x="340" y="257" font-size="11" fill="var(--accent)" text-anchor="middle" class="black-text">F1</text>
+      <text x="340" y="294" font-size="10" fill="var(--wire-12v)" text-anchor="middle" class="bold-text">3 A T</text>
+      <circle cx="300" cy="270" r="3" class="pin"/>
+      <circle cx="380" cy="270" r="3" class="pin"/>
+    </g>
+
+    <g id="C1">
+      <rect class="comp" tabindex="0" data-info="C1|XL4015 input bulk capacitor|220-470 ÂµF low-ESR, at least 25 V|Mount directly across IN+ and IN-" x="425" y="310" width="90" height="70" rx="2"/>
+      <text x="470" y="336" font-size="12" fill="var(--accent)" text-anchor="middle" class="black-text">C1</text>
+      <text x="470" y="356" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">220-470 ÂµF</text>
+      <text x="470" y="372" font-size="9" fill="var(--text-secondary)" text-anchor="middle">â‰¥25 V LOW-ESR</text>
+      <circle cx="470" cy="310" r="3" class="pin"/>
+      <circle cx="470" cy="380" r="3" class="pin"/>
+    </g>
+
+    <g id="C2">
+      <rect class="comp" tabindex="0" data-info="C2|XL4015 input ceramic bypass|100 nF X7R, at least 25 V|Place in parallel with C1 at the module input" x="565" y="310" width="90" height="70" rx="2"/>
+      <text x="610" y="336" font-size="12" fill="var(--accent)" text-anchor="middle" class="black-text">C2</text>
+      <text x="610" y="356" font-size="10" fill="var(--text-primary)" text-anchor="middle" class="bold-text">100 nF X7R</text>
+      <text x="610" y="372" font-size="9" fill="var(--text-secondary)" text-anchor="middle">â‰¥25 V</text>
+      <circle cx="610" cy="310" r="3" class="pin"/>
+      <circle cx="610" cy="380" r="3" class="pin"/>
+    </g>
+
+    <g id="U1">
+      <rect class="comp" tabindex="0" data-info="U1|Dual-pot XL4015 HW-083-B CC/CV buck|CV 11.0 V open-load ceiling, CC 3.0 A|Normal loaded output is approximately 5.55 V in CC mode" x="700" y="200" width="240" height="180" rx="2"/>
+      <text x="820" y="255" font-size="20" fill="var(--accent)" text-anchor="middle" class="black-text">XL4015</text>
+      <text x="820" y="281" font-size="14" fill="var(--text-primary)" text-anchor="middle" class="bold-text">DUAL-POT CC/CV</text>
+      <text x="820" y="307" font-size="12" fill="var(--wire-12v)" text-anchor="middle" class="bold-text">CV 11.0 V | CC 3.0 A</text>
+      <text x="720" y="260" font-size="9" fill="var(--text-secondary)" class="bold-text">IN+</text>
+      <text x="920" y="260" font-size="9" fill="var(--text-secondary)" text-anchor="end" class="bold-text">OUT+</text>
+      <text x="710" y="344" font-size="9" fill="var(--text-secondary)" text-anchor="start" class="bold-text">IN-</text>
+      <text x="935" y="344" font-size="9" fill="var(--text-secondary)" text-anchor="end" class="bold-text">OUT-</text>
+      <circle cx="700" cy="270" r="3" class="pin"/>
+      <circle cx="940" cy="270" r="3" class="pin"/>
+      <circle cx="700" cy="350" r="3" class="pin"/>
+      <circle cx="940" cy="350" r="3" class="pin"/>
+    </g>
+
+    <g id="TCO1">
+      <rect class="comp" tabindex="0" data-info="TCO1|Series thermal cutoff|70-80 Â°C, rated at least 5 A|Required for a manned installation and bonded to the hottest cable or connector area" x="1020" y="240" width="110" height="60" rx="2"/>
+      <text x="1075" y="257" font-size="11" fill="var(--accent)" text-anchor="middle" class="black-text">TCO1</text>
+      <text x="1075" y="294" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">70-80 Â°C</text>
+      <circle cx="1020" cy="270" r="3" class="pin"/>
+      <circle cx="1130" cy="270" r="3" class="pin"/>
+    </g>
+
+    <g id="G1">
+      <rect class="deco" tabindex="0" data-info="Group 1|Three coils in series, L1-L3|Seven turns each, 12.5 mm ID crystal core" x="1200" y="220" width="120" height="100" rx="2" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="1260" y="247" font-size="12" fill="var(--accent)" text-anchor="middle" class="black-text">GROUP 1</text>
+      <text x="1260" y="306" font-size="10" fill="var(--text-secondary)" text-anchor="middle">L1-L3</text>
+    </g>
+    <g id="G2">
+      <rect class="deco" tabindex="0" data-info="Group 2|Three coils in series, L4-L6|Connected to Group 1 by the installed 20 AWG run" x="1390" y="220" width="120" height="100" rx="2" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="1450" y="247" font-size="12" fill="var(--accent)" text-anchor="middle" class="black-text">GROUP 2</text>
+      <text x="1450" y="306" font-size="10" fill="var(--text-secondary)" text-anchor="middle">L4-L6</text>
+    </g>
+    <text x="1600" y="245" font-size="20" fill="var(--text-secondary)" text-anchor="middle" class="black-text">. . .</text>
+    <text x="1600" y="306" font-size="9" fill="var(--text-secondary)" text-anchor="middle">GROUPS 3-19</text>
+    <g id="G20">
+      <rect class="deco" tabindex="0" data-info="Group 20|Final three coils in series, L58-L60|Feeds the complete 20 AWG return path" x="1710" y="220" width="130" height="100" rx="2" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="1775" y="247" font-size="12" fill="var(--accent)" text-anchor="middle" class="black-text">GROUP 20</text>
+      <text x="1775" y="306" font-size="10" fill="var(--text-secondary)" text-anchor="middle">L58-L60</text>
+    </g>
+
+    <line x1="200" y1="270" x2="300" y2="270" class="w12v" tabindex="0" data-info="12V_IN|PSU1 positive to F1 input|12 V input"/>
+    <line x1="380" y1="270" x2="700" y2="270" class="w12v" tabindex="0" data-info="12V_IN|F1 output to XL4015 IN+|12 V input"/>
+    <line x1="470" y1="270" x2="470" y2="310" class="w12v" tabindex="0" data-info="12V_IN|C1 positive input tap|12 V input"/>
+    <line x1="610" y1="270" x2="610" y2="310" class="w12v" tabindex="0" data-info="12V_IN|C2 positive input tap|12 V input"/>
+    <line x1="940" y1="270" x2="1020" y2="270" class="w12v" tabindex="0" data-info="LOOP_POS|XL4015 OUT+ to TCO1|approximately 5.55 V loaded"/>
+    <line x1="1130" y1="270" x2="1200" y2="270" class="w12v" tabindex="0" data-info="LOOP_POS|TCO1 to Group 1|20 AWG regulated loop"/>
+    <line x1="1320" y1="270" x2="1390" y2="270" class="w12v" tabindex="0" data-info="LOOP_POS|Group 1 to Group 2|20 AWG regulated loop"/>
+    <line x1="1510" y1="270" x2="1710" y2="270" class="w12v" tabindex="0" data-info="LOOP_POS|through Groups 3-19|20 AWG regulated loop"/>
+    <line x1="1840" y1="270" x2="1900" y2="270" class="wgnd" tabindex="0" data-info="RETURN|Group 20 to return corner|20 AWG return"/>
+    <line x1="1900" y1="270" x2="1900" y2="430" class="wgnd" tabindex="0" data-info="RETURN|final group down to return bus|20 AWG return"/>
+    <line x1="230" y1="430" x2="1900" y2="430" class="wgnd-bus" tabindex="0" data-info="RETURN|complete loop return to PSU1 0 V|20 AWG, approximately 1.30 ohm total wiring"/>
+    <line x1="200" y1="370" x2="230" y2="370" class="wgnd" tabindex="0" data-info="RETURN|PSU1 0 V stub|0 V return"/>
+    <line x1="230" y1="370" x2="230" y2="430" class="wgnd" tabindex="0" data-info="RETURN|PSU1 0 V landing|0 V return"/>
+    <line x1="470" y1="380" x2="470" y2="430" class="wgnd" tabindex="0" data-info="GND|C1 negative input tap|0 V return"/>
+    <line x1="610" y1="380" x2="610" y2="430" class="wgnd" tabindex="0" data-info="GND|C2 negative input tap|0 V return"/>
+    <line x1="685" y1="350" x2="700" y2="350" class="wgnd" tabindex="0" data-info="GND|XL4015 IN- stub|0 V return"/>
+    <line x1="685" y1="350" x2="685" y2="430" class="wgnd" tabindex="0" data-info="GND|XL4015 IN- to return|0 V return"/>
+    <line x1="940" y1="350" x2="970" y2="350" class="wgnd" tabindex="0" data-info="GND|XL4015 OUT- stub|0 V return"/>
+    <line x1="970" y1="350" x2="970" y2="430" class="wgnd" tabindex="0" data-info="GND|XL4015 OUT- to return|0 V return"/>
+
+    <circle cx="470" cy="270" r="3.5" class="j12v" tabindex="0" data-info="12V_IN|C1 positive junction|local input decoupling"/>
+    <circle cx="610" cy="270" r="3.5" class="j12v" tabindex="0" data-info="12V_IN|C2 positive junction|local input decoupling"/>
+    <circle cx="230" cy="430" r="4.5" class="jgnd" tabindex="0" data-info="RETURN|PSU1 return junction|common 0 V"/>
+    <circle cx="470" cy="430" r="3.5" class="jgnd" tabindex="0" data-info="GND|C1 return junction|common 0 V"/>
+    <circle cx="610" cy="430" r="3.5" class="jgnd" tabindex="0" data-info="GND|C2 return junction|common 0 V"/>
+    <circle cx="685" cy="430" r="3.5" class="jgnd" tabindex="0" data-info="GND|XL4015 input return junction|common 0 V"/>
+    <circle cx="970" cy="430" r="3.5" class="jgnd" tabindex="0" data-info="GND|XL4015 output return junction|common 0 V"/>
+    <circle cx="1900" cy="430" r="4.5" class="jgnd" tabindex="0" data-info="RETURN|coil string return junction|20 AWG return"/>
+
+    <text x="1450" y="195" font-size="9" fill="var(--wire-12v)" text-anchor="middle" class="bold-text">CC-REGULATED LOOP+ | ~5.55 V LOADED | 3.0 A</text>
+    <text x="1010" y="452" class="channel-label" text-anchor="middle">COMPLETE 20 AWG WIRING | ~1.30 Î© MEASURED | KEEP UNCOILED</text>
+
+    <g id="coil-detail" data-info="One group detail|Three seven-turn coils connected in series|JST SM connector pins are paralleled onto the series conductor">
+      <rect x="420" y="540" width="1070" height="140" rx="4" class="sec-border-dash deco"/>
+      <text x="955" y="562" font-size="12" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1">ONE GROUP - 1 OF 20</text>
+      <rect x="455" y="595" width="70" height="34" rx="2" class="deco" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="490" y="616" font-size="9" fill="var(--text-primary)" text-anchor="middle" class="bold-text">JST-F</text>
+      <rect x="1385" y="595" width="70" height="34" rx="2" class="deco" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="1420" y="616" font-size="9" fill="var(--text-primary)" text-anchor="middle" class="bold-text">JST-M</text>
+      <line x1="525" y1="612" x2="630" y2="612" class="deco" stroke="var(--wire-12v)" stroke-width="2"/>
+      <path d="M 630 612 c 10 -20 20 -20 30 0 c 10 20 20 20 30 0 c 10 -20 20 -20 30 0" class="deco arc coil-symbol"/>
+      <line x1="720" y1="612" x2="820" y2="612" class="deco" stroke="var(--wire-12v)" stroke-width="2"/>
+      <path d="M 820 612 c 10 -20 20 -20 30 0 c 10 20 20 20 30 0 c 10 -20 20 -20 30 0" class="deco arc coil-symbol"/>
+      <line x1="910" y1="612" x2="1010" y2="612" class="deco" stroke="var(--wire-12v)" stroke-width="2"/>
+      <path d="M 1010 612 c 10 -20 20 -20 30 0 c 10 20 20 20 30 0 c 10 -20 20 -20 30 0" class="deco arc coil-symbol"/>
+      <line x1="1100" y1="612" x2="1385" y2="612" class="deco" stroke="var(--wire-12v)" stroke-width="2"/>
+      <text x="675" y="585" font-size="9" fill="var(--text-secondary)" text-anchor="middle">7 T</text>
+      <text x="865" y="585" font-size="9" fill="var(--text-secondary)" text-anchor="middle">7 T</text>
+      <text x="1055" y="585" font-size="9" fill="var(--text-secondary)" text-anchor="middle">7 T</text>
+      <text x="955" y="645" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">Each coil: 1 mm Cu | 12.5 mm ID | 5 cm lead + 7 cm lead | ~0.417 m copper | crystal core (non-magnetic)</text>
+      <text x="955" y="663" font-size="9" fill="var(--text-secondary)" text-anchor="middle">Connector: JST SM 2-pin, both pins paralleled | 20 connectors total | 60 coils total</text>
+    </g>
+
+    <g id="operating-summary" data-info="Operating point|Estimated cold-loop values pending final end-to-end measurement|Normal operation is current regulated, not 11 V across the load">
+      <rect x="1520" y="520" width="430" height="220" rx="4" class="sec-border-dash deco"/>
+      <text x="1735" y="546" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1">OPERATING POINT</text>
+      <text x="1545" y="582" font-size="12" fill="var(--text-secondary)" class="bold-text">Cold loop estimate</text>
+      <text x="1925" y="582" font-size="12" fill="var(--text-primary)" text-anchor="end" class="bold-text">~1.85 Î©</text>
+      <text x="1545" y="610" font-size="12" fill="var(--text-secondary)" class="bold-text">Regulated output</text>
+      <text x="1925" y="610" font-size="12" fill="var(--text-primary)" text-anchor="end" class="bold-text">~5.55 V | 3.0 A</text>
+      <text x="1545" y="638" font-size="12" fill="var(--text-secondary)" class="bold-text">Total output power</text>
+      <text x="1925" y="638" font-size="12" fill="var(--text-primary)" text-anchor="end" class="bold-text">~16.65 W</text>
+      <text x="1545" y="666" font-size="12" fill="var(--text-secondary)" class="bold-text">Wiring / coils</text>
+      <text x="1925" y="666" font-size="12" fill="var(--text-primary)" text-anchor="end" class="bold-text">~11.70 / 4.95 W</text>
+      <text x="1545" y="694" font-size="12" fill="var(--text-secondary)" class="bold-text">Field per coil</text>
+      <text x="1925" y="694" font-size="12" fill="var(--text-primary)" text-anchor="end" class="bold-text">~21 AT</text>
+      <text x="1735" y="722" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">FINAL LOOP RESISTANCE MUST BE MEASURED AFTER ASSEMBLY</text>
+    </g>
+
+    <g id="critical-warning" data-info="Critical operating rule|Never connect the coil string directly to 12 V|Without current limiting the estimated attempt is approximately 6.5 A and 78 W">
+      <rect x="903" y="755" width="564" height="36" rx="2" fill="none" stroke="var(--warn)" stroke-width="2" class="deco"/>
+      <text x="1185" y="770" font-size="12" fill="var(--warn)" text-anchor="middle" class="black-text" letter-spacing="1">WARNING - NEVER RUN THE STRING WITHOUT THE VERIFIED CC/CV BUCK</text>
+      <text x="1185" y="783" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">Direct 12 V would attempt ~6.5 A / ~78 W | exact 3 A T-fuse + 70-80 Â°C TCO required | keep all 20 AWG runs uncoiled</text>
+    </g>
+    <g id="qualification-banner" data-info="Pre-release qualification|Bench-qualify every XL4015 before coil connection|Use the documented 1.86 ohm mock load and thirty-minute burn-in">
+      <rect x="903" y="801" width="564" height="30" rx="2" fill="none" stroke="var(--accent)" stroke-width="1.5" class="deco"/>
+      <text x="1185" y="814" font-size="10" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1">PRE-RELEASE - BENCH QUALIFICATION REQUIRED</text>
+      <text x="1185" y="825" font-size="9" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">1.30 Î© mock wire + ~0.56 Î© / â‰¥10 W resistor bank | CV 11.0 Â±0.3 V | CC 3.0 Â±0.1 A | 30 min burn-in</text>
+    </g>
+
+    <g id="engineering-panel">
+      <rect x="40" y="1080" width="640" height="620" rx="4" class="sec-border-dash deco"/>
+      <text x="360" y="1104" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="2">SIGNAL FLOW, WIRING &amp; CALCULATIONS</text>
+      <line x1="40" y1="1115" x2="680" y2="1115" class="deco" stroke="var(--comp-stroke)" stroke-width="1"/>
+
+      <text x="60" y="1143" font-size="11" fill="var(--text-secondary)" class="bold-text">POWER PATH</text>
+      <text x="60" y="1167" font-size="12" fill="var(--text-primary)" class="bold-text">12 V PSU -> 3 A T fuse -> XL4015 -> TCO -> 60 coils -> return</text>
+      <text x="60" y="1190" font-size="10" fill="var(--text-secondary)">The 11.0 V CV setting is an open-load ceiling. The loaded loop operates in CC mode near 5.55 V.</text>
+      <line x1="60" y1="1210" x2="660" y2="1210" class="deco" stroke="var(--comp-stroke)" stroke-width=".5" opacity=".5"/>
+
+      <text x="60" y="1238" font-size="11" fill="var(--accent)" class="black-text">ELECTRICAL SUMMARY</text>
+      <text x="60" y="1265" font-size="11" fill="var(--text-secondary)" class="bold-text">60 coils</text>
+      <text x="650" y="1265" font-size="11" fill="var(--text-primary)" text-anchor="end">~0.55 Î© calculated at 20 Â°C</text>
+      <text x="60" y="1288" font-size="11" fill="var(--text-secondary)" class="bold-text">20 AWG installation wiring</text>
+      <text x="650" y="1288" font-size="11" fill="var(--text-primary)" text-anchor="end">~1.30 Î© measured | uncoiled</text>
+      <text x="60" y="1311" font-size="11" fill="var(--text-secondary)" class="bold-text">Complete cold loop</text>
+      <text x="650" y="1311" font-size="11" fill="var(--text-primary)" text-anchor="end">~1.85 Î© estimated</text>
+      <text x="60" y="1334" font-size="11" fill="var(--text-secondary)" class="bold-text">At 3.0 A</text>
+      <text x="650" y="1334" font-size="11" fill="var(--text-primary)" text-anchor="end">~5.55 V | 16.65 W</text>
+      <text x="60" y="1357" font-size="11" fill="var(--text-secondary)" class="bold-text">Power split</text>
+      <text x="650" y="1357" font-size="11" fill="var(--text-primary)" text-anchor="end">11.70 W wire | 4.95 W coils</text>
+      <line x1="60" y1="1378" x2="660" y2="1378" class="deco" stroke="var(--comp-stroke)" stroke-width=".5" opacity=".5"/>
+
+      <text x="60" y="1406" font-size="11" fill="var(--accent)" class="black-text">PROTECTION &amp; WIRING</text>
+      <text x="60" y="1433" font-size="11" fill="var(--text-secondary)" class="bold-text">F1</text>
+      <text x="650" y="1433" font-size="11" fill="var(--warn)" text-anchor="end" class="bold-text">exactly 3 A T-type | not 3-5 A</text>
+      <text x="60" y="1456" font-size="11" fill="var(--text-secondary)" class="bold-text">Expected PSU input</text>
+      <text x="650" y="1456" font-size="11" fill="var(--text-primary)" text-anchor="end">~1.5-1.7 A at 12 V</text>
+      <text x="60" y="1479" font-size="11" fill="var(--text-secondary)" class="bold-text">TCO1</text>
+      <text x="650" y="1479" font-size="11" fill="var(--text-primary)" text-anchor="end">70-80 Â°C | â‰¥5 A | bonded at hot spot</text>
+      <text x="60" y="1502" font-size="11" fill="var(--text-secondary)" class="bold-text">J1-J20</text>
+      <text x="650" y="1502" font-size="11" fill="var(--text-primary)" text-anchor="end">JST SM 2-pin | both pins paralleled</text>
+      <line x1="60" y1="1523" x2="660" y2="1523" class="deco" stroke="var(--comp-stroke)" stroke-width=".5" opacity=".5"/>
+
+      <text x="60" y="1551" font-size="11" fill="var(--accent)" class="black-text">XL4015 MOCK QUALIFICATION</text>
+      <text x="60" y="1578" font-size="11" fill="var(--text-secondary)" class="bold-text">Mock load</text>
+      <text x="650" y="1578" font-size="11" fill="var(--text-primary)" text-anchor="end">1.30 Î© wire + ~0.56 Î© / â‰¥10 W bank</text>
+      <text x="60" y="1601" font-size="11" fill="var(--text-secondary)" class="bold-text">Open-load CV</text>
+      <text x="650" y="1601" font-size="11" fill="var(--text-primary)" text-anchor="end">11.0 Â±0.3 V</text>
+      <text x="60" y="1624" font-size="11" fill="var(--text-secondary)" class="bold-text">Full-load CC</text>
+      <text x="650" y="1624" font-size="11" fill="var(--text-primary)" text-anchor="end">3.0 Â±0.1 A | steady</text>
+      <text x="60" y="1647" font-size="11" fill="var(--text-secondary)" class="bold-text">Clamp / burn-in</text>
+      <text x="650" y="1647" font-size="11" fill="var(--text-primary)" text-anchor="end">â‰¤3.1 A on 1.30 Î© | 30 minutes</text>
+      <text x="360" y="1680" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">Reject any module with pulsing, drift, smoke, odour, or unstable current regulation.</text>
+    </g>
+
+    <g id="bom-panel" class="bom-panel" transform="translate(650,0)" data-info="Bill of Materials|Component list">
+      <rect x="40" y="1080" width="650" height="620" rx="4" class="sec-border-dash deco"/>
+      <text x="365" y="1104" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="2">BILL OF MATERIALS &amp; XL4015 HARNESS</text>
+      <line x1="40" y1="1108" x2="690" y2="1108" class="deco" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <rect x="40" y="1108" width="620" height="20" fill="var(--bg-panel)" stroke="none"/>
+      <text x="60" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">#</text>
+      <text x="105" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">QTY</text>
+      <text x="195" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">REF</text>
+      <text x="455" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">DESCRIPTION</text>
+      <line x1="40" y1="1128" x2="660" y2="1128" class="deco" stroke="var(--comp-stroke)" stroke-width=".5"/>
+      <line x1="80" y1="1108" x2="80" y2="1300" class="deco" stroke="var(--comp-stroke)" stroke-width=".5" opacity=".4"/>
+      <line x1="130" y1="1108" x2="130" y2="1300" class="deco" stroke="var(--comp-stroke)" stroke-width=".5" opacity=".4"/>
+      <line x1="260" y1="1108" x2="260" y2="1300" class="deco" stroke="var(--comp-stroke)" stroke-width=".5" opacity=".4"/>
+
+      <text x="60" y="1143" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="105" y="1143" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1143" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">D1</text>
+      <text x="268" y="1143" font-size="9" fill="var(--text-primary)">1N5819 / 1N4007 flyback (optional, only if electronically switched)</text>
+      <line x1="80" y1="1148" x2="655" y2="1148" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1159" font-size="10" fill="var(--text-primary)" text-anchor="middle">2</text>
+      <text x="105" y="1159" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1159" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">F1</text>
+      <text x="268" y="1159" font-size="9" fill="var(--text-primary)">Exactly 3 A slow-blow T-type | buck input</text>
+      <line x1="80" y1="1164" x2="655" y2="1164" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1175" font-size="10" fill="var(--text-primary)" text-anchor="middle">3</text>
+      <text x="105" y="1175" font-size="10" fill="var(--text-primary)" text-anchor="middle">20</text>
+      <text x="195" y="1175" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">J1-J20</text>
+      <text x="268" y="1175" font-size="9" fill="var(--text-primary)">JST SM 2-pin | both pins paralleled</text>
+      <line x1="80" y1="1180" x2="655" y2="1180" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1191" font-size="10" fill="var(--text-primary)" text-anchor="middle">4</text>
+      <text x="105" y="1191" font-size="10" fill="var(--text-primary)" text-anchor="middle">60</text>
+      <text x="195" y="1191" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">L1-L60</text>
+      <text x="268" y="1191" font-size="9" fill="var(--text-primary)">7 T | 1 mm Cu | 12.5 mm ID | crystal core | ~0.417 m each</text>
+      <line x1="80" y1="1196" x2="655" y2="1196" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1207" font-size="10" fill="var(--text-primary)" text-anchor="middle">5</text>
+      <text x="105" y="1207" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1207" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">U1</text>
+      <text x="268" y="1207" font-size="9" fill="var(--text-primary)">Dual-pot XL4015 HW-083-B | CV 11.0 V | CC 3.0 A</text>
+      <line x1="80" y1="1212" x2="655" y2="1212" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1223" font-size="10" fill="var(--text-primary)" text-anchor="middle">6</text>
+      <text x="105" y="1223" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1223" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">W1</text>
+      <text x="268" y="1223" font-size="9" fill="var(--text-primary)">Complete 20 AWG installation wiring | ~1.30 Î© measured</text>
+      <line x1="80" y1="1228" x2="655" y2="1228" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1239" font-size="10" fill="var(--text-primary)" text-anchor="middle">7</text>
+      <text x="105" y="1239" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1239" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">PSU1</text>
+      <text x="268" y="1239" font-size="9" fill="var(--text-primary)">12 V DC supply | fused isolated positive branch</text>
+      <line x1="80" y1="1244" x2="655" y2="1244" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1255" font-size="10" fill="var(--text-primary)" text-anchor="middle">8</text>
+      <text x="105" y="1255" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1255" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">C1</text>
+      <text x="268" y="1255" font-size="9" fill="var(--text-primary)">220-470 ÂµF low-ESR electrolytic | â‰¥25 V | XL4015 input</text>
+      <line x1="80" y1="1260" x2="655" y2="1260" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1271" font-size="10" fill="var(--text-primary)" text-anchor="middle">9</text>
+      <text x="105" y="1271" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1271" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">C2</text>
+      <text x="268" y="1271" font-size="9" fill="var(--text-primary)">100 nF X7R ceramic | â‰¥25 V | parallel with C1</text>
+      <line x1="80" y1="1276" x2="655" y2="1276" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+      <text x="60" y="1287" font-size="10" fill="var(--text-primary)" text-anchor="middle">10</text>
+      <text x="105" y="1287" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1287" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">TCO1</text>
+      <text x="268" y="1287" font-size="9" fill="var(--text-primary)">70-80 Â°C thermal cutoff | â‰¥5 A | manned installation</text>
+      <line x1="80" y1="1292" x2="655" y2="1292" class="deco" stroke="var(--comp-stroke)" stroke-width=".3" opacity=".4"/>
+
+      <g class="harness-table" transform="translate(60,1330)" data-info="XL4015 pinout|Wire-harness map">
+        <rect x="0" y="0" width="300" height="160" rx="2" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+        <text x="150" y="20" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1">U1 XL4015 HARNESS</text>
+        <line x1="0" y1="30" x2="300" y2="30" class="deco" stroke="var(--comp-stroke)" stroke-width="1"/>
+        <text x="32" y="47" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">PIN</text>
+        <text x="95" y="47" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">NAME</text>
+        <text x="205" y="47" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">NET</text>
+        <text x="275" y="47" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">CH</text>
+        <line x1="0" y1="54" x2="300" y2="54" class="deco" stroke="var(--comp-stroke)" stroke-width=".5"/>
+        <text x="32" y="74" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">IN+</text>
+        <text x="95" y="74" font-size="11" fill="var(--text-primary)" text-anchor="middle">VIN+</text>
+        <text x="205" y="74" font-size="11" fill="var(--text-secondary)" text-anchor="middle">12V_IN</text>
+        <rect x="265" y="69" width="20" height="4" rx="1" class="j12v"/>
+        <text x="32" y="96" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">IN-</text>
+        <text x="95" y="96" font-size="11" fill="var(--text-primary)" text-anchor="middle">VIN-</text>
+        <text x="205" y="96" font-size="11" fill="var(--text-secondary)" text-anchor="middle">GND</text>
+        <rect x="265" y="91" width="20" height="4" rx="1" class="jgnd"/>
+        <text x="32" y="118" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">OUT+</text>
+        <text x="95" y="118" font-size="11" fill="var(--text-primary)" text-anchor="middle">VOUT+</text>
+        <text x="205" y="118" font-size="11" fill="var(--text-secondary)" text-anchor="middle">LOOP_POS</text>
+        <rect x="265" y="113" width="20" height="4" rx="1" class="j12v"/>
+        <text x="32" y="140" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">OUT-</text>
+        <text x="95" y="140" font-size="11" fill="var(--text-primary)" text-anchor="middle">VOUT-</text>
+        <text x="205" y="140" font-size="11" fill="var(--text-secondary)" text-anchor="middle">RETURN</text>
+        <rect x="265" y="135" width="20" height="4" rx="1" class="jgnd"/>
+      </g>
+
+      <g class="protection-table" transform="translate(380,1330)" data-info="Protection summary|Required independent electrical and thermal layers">
+        <rect x="0" y="0" width="280" height="250" rx="2" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+        <text x="140" y="20" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1">PROTECTION SUMMARY</text>
+        <line x1="0" y1="30" x2="280" y2="30" class="deco" stroke="var(--comp-stroke)" stroke-width="1"/>
+        <text x="15" y="58" font-size="11" fill="var(--warn)" class="bold-text">F1</text>
+        <text x="265" y="58" font-size="11" fill="var(--text-primary)" text-anchor="end">3 A T-type</text>
+        <text x="15" y="82" font-size="11" fill="var(--warn)" class="bold-text">TCO1</text>
+        <text x="265" y="82" font-size="11" fill="var(--text-primary)" text-anchor="end">70-80 Â°C | â‰¥5 A</text>
+        <text x="15" y="106" font-size="11" fill="var(--accent)" class="bold-text">C1</text>
+        <text x="265" y="106" font-size="11" fill="var(--text-primary)" text-anchor="end">220-470 ÂµF | â‰¥25 V</text>
+        <text x="15" y="130" font-size="11" fill="var(--accent)" class="bold-text">C2</text>
+        <text x="265" y="130" font-size="11" fill="var(--text-primary)" text-anchor="end">100 nF X7R | â‰¥25 V</text>
+        <line x1="15" y1="150" x2="265" y2="150" class="deco" stroke="var(--comp-stroke)" stroke-width=".5" opacity=".5"/>
+        <text x="140" y="176" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">CC LIMIT = REGULATION</text>
+        <text x="140" y="197" font-size="10" fill="var(--text-secondary)" text-anchor="middle">FUSE + TCO = FAULT PROTECTION</text>
+        <text x="140" y="224" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">ONLY USE A TRUE DUAL-POT</text>
+        <text x="140" y="242" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">CC/CV MODULE</text>
+      </g>
+    </g>
+
+    <g id="notes-rev-panel">
+      <rect x="1350" y="1080" width="650" height="620" rx="4" class="sec-border-dash deco"/>
+      <text x="1675" y="1104" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="2">ENGINEERING NOTES &amp; REVISION HISTORY</text>
+      <line x1="1350" y1="1115" x2="2000" y2="1115" class="deco" stroke="var(--comp-stroke)" stroke-width="1"/>
+
+      <text x="1370" y="1143" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">1.</tspan> At steady-state DC, inductive reactance tends to zero. The loop behaves
+        <tspan x="1390" dy="16">as an approximately 1.85 Î© resistive load pending final assembly measurement.</tspan>
+      </text>
+      <text x="1370" y="1198" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">2.</tspan> The crystal core is non-magnetic (Âµ approximately air), so it provides no
+        <tspan x="1390" dy="16">field boost. Each seven-turn coil produces approximately 21 ampere-turns at 3 A.</tspan>
+      </text>
+      <text x="1370" y="1253" font-size="12" fill="var(--warn)" class="bold-text">
+        <tspan fill="var(--text-primary)">3.</tspan> The XL4015 current-control loop is the operating current limiter. A CV-only
+        <tspan x="1390" dy="16">or fixed-output board is not acceptable for this installation.</tspan>
+      </text>
+      <text x="1370" y="1308" font-size="12" fill="var(--warn)" class="bold-text">
+        <tspan fill="var(--text-primary)">4.</tspan> F1 must be exactly 3 A slow-blow. C1 and C2 mount directly at IN+/IN-.
+        <tspan x="1390" dy="16">The 70-80 Â°C thermal cutoff is mandatory for manned operation.</tspan>
+      </text>
+      <text x="1370" y="1363" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">5.</tspan> Keep every 20 AWG run and all slack uncoiled. Keep bare copper apart and
+        <tspan x="1390" dy="16">keep this positive branch isolated from the three LED-supply positive rails.</tspan>
+      </text>
+      <text x="1370" y="1418" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">6.</tspan> Bench-qualify each XL4015 with the documented 1.86 Î© mock load before
+        <tspan x="1390" dy="16">connecting the real loop, then perform supervised commissioning and thermal inspection.</tspan>
+      </text>
+      <text x="1370" y="1473" font-size="12" fill="var(--warn)" class="bold-text">
+        <tspan fill="var(--text-primary)">7.</tspan> Do not adjust CV to force 11 V across the loaded loop. Normal operation is
+        <tspan x="1390" dy="16">3 A CC near 5.55 V for the present estimated cold resistance.</tspan>
+      </text>
+
+      <text x="1370" y="1540" font-size="14" fill="var(--accent)" class="black-text" letter-spacing="1">REVISION HISTORY</text>
+      <line x1="1350" y1="1552" x2="2000" y2="1552" class="deco" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <text x="1370" y="1556" font-size="13" fill="var(--accent)" class="bold-text">
+        <tspan fill="var(--text-primary)">Rev 1.0a</tspan> - Dark Blue-Mint theme variant (HTML_Document_Recreation_Guide palette):
+        <tspan x="1430" dy="18">accent #0ff0b3, --bg #080b10, --warn #ff4f86, GND wire #4d7096.</tspan>
+        <tspan x="1430" dy="18">All technical content unchanged from Rev 1.0.</tspan>
+      </text>
+      <text x="1370" y="1618" font-size="13" fill="var(--accent)" class="bold-text">
+        <tspan fill="var(--text-primary)">Rev 1.0</tspan> - Strict NaoDec style rebuild with 2026-06-18 design data:
+        <tspan x="1430" dy="18">20 AWG / ~1.85 Î© loop, exact 3 A T-fuse, dual-pot XL4015,</tspan>
+        <tspan x="1430" dy="18">input decoupling, TCO, current calculations, and mock qualification.</tspan>
+        <tspan x="1430" dy="18">Document rebuild: 2026-06-19. Values remain provisional until final measurement.</tspan>
+      </text>
+    </g>
+  </g>
+</svg>
+</div>
+</div>
+
+<div id="zoom-controls" role="toolbar" aria-label="Schematic view and export controls">
+  <button class="zoom-btn" id="zoom-in" type="button" title="Zoom In (Ctrl+Shift++)" aria-label="Zoom in">+</button>
+  <button class="zoom-btn" id="zoom-out" type="button" title="Zoom Out (Ctrl+Shift+-)" aria-label="Zoom out">-</button>
+  <span id="zoom-level" aria-live="polite">100%</span>
+  <button class="zoom-btn fit-btn" id="zoom-fit" type="button" title="Fit to Screen (Ctrl+Shift+0)" aria-label="Fit schematic to screen">FIT</button>
+  <button class="zoom-btn fit-btn" id="export-svg" type="button" title="Export print-ready standalone SVG" aria-label="Export print-ready SVG" style="margin-left:12px;color:var(--wire-data)">Export SVG</button>
+  <button class="zoom-btn fit-btn" id="export-png" type="button" title="Export themed high-resolution PNG" aria-label="Export themed PNG" style="color:var(--wire-5v)">Export PNG</button>
+</div>
+<div class="zoom-shortcut-hint">Ctrl+Shift+ +/-/0 | Scroll to zoom | Drag to pan</div>
+
+<div class="tip" id="tip" role="status" aria-live="polite">
+  <div class="ttl" id="tipTtl">Component</div>
+  <div class="desc" id="tipDesc">Details</div>
+</div>
+
+<script>
+  const SVG_W = 2400;
+  const SVG_H = 1800;
+  const EXPORT_BASENAME = 'NaoDec_Vertex_Series_Coil_Rev1.0a';
+  const MIN_SCALE = 0.1;
+  const MAX_SCALE = 4;
+  const ZOOM_IN_FACTOR = 1.15;
+  const ZOOM_OUT_FACTOR = 0.85;
+
+  const container = document.getElementById('schematic-container');
+  const wrapper = document.getElementById('svg-wrapper');
+  const zoomLevelEl = document.getElementById('zoom-level');
+  const tip = document.getElementById('tip');
+  const tipTtl = document.getElementById('tipTtl');
+  const tipDesc = document.getElementById('tipDesc');
+
+  let scale = 1;
+  let panX = 0;
+  let panY = 0;
+  let isPanning = false;
+  let startX = 0;
+  let startY = 0;
+  let lastTouchDist = 0;
+  let resizeTimer = null;
+
+  function showTip(el) {
+    const info = el && el.getAttribute('data-info');
+    if (!info) return;
+    const parts = info.split('|');
+    tipTtl.textContent = parts[0].trim();
+    tipDesc.textContent = '';
+    parts.slice(1).forEach((segment, index) => {
+      if (index) tipDesc.appendChild(document.createElement('br'));
+      tipDesc.appendChild(document.createTextNode(segment.trim()));
+    });
+    tip.classList.add('on');
+  }
+
+  function hideTip() { tip.classList.remove('on'); }
+
+  document.querySelectorAll('[data-info]').forEach(el => {
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+    el.addEventListener('mouseenter', () => showTip(el));
+    el.addEventListener('mouseleave', hideTip);
+    el.addEventListener('focus', () => showTip(el));
+    el.addEventListener('blur', hideTip);
+    el.addEventListener('click', event => {
+      event.stopPropagation();
+      showTip(el);
+    });
+  });
+
+  function updateTransform() {
+    wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    zoomLevelEl.textContent = Math.round(scale * 100) + '%';
+  }
+
+  function zoomTo(nextScale, centerX, centerY) {
+    nextScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, nextScale));
+    if (centerX !== undefined && centerY !== undefined) {
+      const ratio = nextScale / scale;
+      panX = centerX - (centerX - panX) * ratio;
+      panY = centerY - (centerY - panY) * ratio;
+    }
+    scale = nextScale;
+    updateTransform();
+  }
+
+  function viewportCenter() {
+    const rect = container.getBoundingClientRect();
+    return { x: rect.width / 2, y: rect.height / 2 };
+  }
+
+  function zoomIn() {
+    const center = viewportCenter();
+    zoomTo(scale * ZOOM_IN_FACTOR, center.x, center.y);
+  }
+
+  function zoomOut() {
+    const center = viewportCenter();
+    zoomTo(scale * ZOOM_OUT_FACTOR, center.x, center.y);
+  }
+
+  function fitToScreen() {
+    const rect = container.getBoundingClientRect();
+    scale = Math.min(rect.width / SVG_W, rect.height / SVG_H) * 0.95;
+    panX = (rect.width - SVG_W * scale) / 2;
+    panY = (rect.height - SVG_H * scale) / 2;
+    updateTransform();
+  }
+
+  document.getElementById('zoom-in').addEventListener('click', zoomIn);
+  document.getElementById('zoom-out').addEventListener('click', zoomOut);
+  document.getElementById('zoom-fit').addEventListener('click', fitToScreen);
+
+  container.addEventListener('wheel', event => {
+    event.preventDefault();
+    const rect = container.getBoundingClientRect();
+    const factor = event.deltaY > 0 ? ZOOM_OUT_FACTOR : ZOOM_IN_FACTOR;
+    zoomTo(scale * factor, event.clientX - rect.left, event.clientY - rect.top);
+  }, { passive: false });
+
+  container.addEventListener('mousedown', event => {
+    if (event.target.closest('[data-info]') || event.target.closest('#zoom-controls')) return;
+    isPanning = true;
+    startX = event.clientX - panX;
+    startY = event.clientY - panY;
+    container.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove', event => {
+    if (!isPanning) return;
+    panX = event.clientX - startX;
+    panY = event.clientY - startY;
+    updateTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    isPanning = false;
+    container.classList.remove('grabbing');
+  });
+
+  container.addEventListener('touchstart', event => {
+    if (event.touches.length === 1) {
+      isPanning = true;
+      startX = event.touches[0].clientX - panX;
+      startY = event.touches[0].clientY - panY;
+    } else if (event.touches.length === 2) {
+      event.preventDefault();
+      isPanning = false;
+      const dx = event.touches[0].clientX - event.touches[1].clientX;
+      const dy = event.touches[0].clientY - event.touches[1].clientY;
+      lastTouchDist = Math.hypot(dx, dy);
+    }
+  }, { passive: false });
+
+  container.addEventListener('touchmove', event => {
+    event.preventDefault();
+    if (event.touches.length === 1 && isPanning) {
+      panX = event.touches[0].clientX - startX;
+      panY = event.touches[0].clientY - startY;
+      updateTransform();
+    } else if (event.touches.length === 2) {
+      const dx = event.touches[0].clientX - event.touches[1].clientX;
+      const dy = event.touches[0].clientY - event.touches[1].clientY;
+      const distance = Math.hypot(dx, dy);
+      const rect = container.getBoundingClientRect();
+      const centerX = (event.touches[0].clientX + event.touches[1].clientX) / 2 - rect.left;
+      const centerY = (event.touches[0].clientY + event.touches[1].clientY) / 2 - rect.top;
+      if (lastTouchDist) zoomTo(scale * (distance / lastTouchDist), centerX, centerY);
+      lastTouchDist = distance;
+    }
+  }, { passive: false });
+
+  container.addEventListener('touchend', () => {
+    isPanning = false;
+    lastTouchDist = 0;
+  });
+
+  window.addEventListener('keydown', event => {
+    if (event.key === 'Escape') hideTip();
+    if (!event.ctrlKey || !event.shiftKey) return;
+    if (event.key === '+' || event.key === '=') {
+      event.preventDefault();
+      zoomIn();
+    } else if (event.key === '-' || event.key === '_') {
+      event.preventDefault();
+      zoomOut();
+    } else if (event.key === '0' || event.key === ')') {
+      event.preventDefault();
+      fitToScreen();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(fitToScreen, 120);
+  });
+
+  function getSvgStringThemed() {
+    const clone = document.getElementById('schematic-svg').cloneNode(true);
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    const styleTag = document.querySelector('style');
+    style.textContent = styleTag ? styleTag.textContent : '';
+    defs.appendChild(style);
+    const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    const backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim();
+    background.setAttribute('width', '100%');
+    background.setAttribute('height', '100%');
+    background.setAttribute('fill', backgroundColor);
+    clone.insertBefore(background, clone.firstChild);
+    clone.insertBefore(defs, clone.firstChild);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    return new XMLSerializer().serializeToString(clone);
+  }
+
+  function getSvgStringPrint() {
+    const clone = document.getElementById('schematic-svg').cloneNode(true);
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = `
+      svg { background: transparent !important; }
+      .comp, .sec-border-dash,
+      [class~="w12v"], [class~="w12v-bus"],
+      [class~="wgnd"], [class~="wgnd-bus"],
+      [class~="w5v"], [class~="w5v-bus"],
+      [class~="w3v3"], [class~="w3v3-bus"],
+      [class*="wdata"] { stroke: #000 !important; fill: none !important; }
+      [class^="j"], [class*=" j"], .pin { fill: #000 !important; stroke: none !important; }
+      text { fill: #000 !important; }
+      line[stroke], path[stroke], polyline[stroke], rect[stroke], circle[stroke] { stroke: #000 !important; }
+      [fill]:not(text):not([class^="j"]):not([class*=" j"]):not(.pin) { fill: none !important; }
+    `;
+    defs.appendChild(style);
+    clone.insertBefore(defs, clone.firstChild);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    return new XMLSerializer().serializeToString(clone);
+  }
+
+  function downloadBlob(content, mimeType, filename) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('export-svg').addEventListener('click', () => {
+    downloadBlob(getSvgStringPrint(), 'image/svg+xml;charset=utf-8', `${EXPORT_BASENAME}.svg`);
+  });
+
+  document.getElementById('export-png').addEventListener('click', () => {
+    const button = document.getElementById('export-png');
+    const originalText = button.textContent;
+    button.textContent = 'WAIT...';
+    button.style.opacity = '.5';
+    const canvas = document.createElement('canvas');
+    canvas.width = SVG_W;
+    canvas.height = SVG_H;
+    const context = canvas.getContext('2d');
+    const image = new Image();
+    const url = URL.createObjectURL(new Blob([getSvgStringThemed()], { type: 'image/svg+xml;charset=utf-8' }));
+    image.onload = () => {
+      context.drawImage(image, 0, 0, SVG_W, SVG_H);
+      URL.revokeObjectURL(url);
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png', 1);
+      link.download = `${EXPORT_BASENAME}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      button.textContent = originalText;
+      button.style.opacity = '1';
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      button.textContent = originalText;
+      button.style.opacity = '1';
+      console.error('PNG export failed to load the themed SVG.');
+    };
+    image.src = url;
+  });
+
+  window.addEventListener('load', () => {
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(fitToScreen);
+  });
+</script>
+</body>
+</html>
+
