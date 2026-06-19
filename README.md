@@ -21,6 +21,7 @@ naodec/
 ├── index.html                                     # GitHub Pages auto-index
 ├── NaoDec_WS2815_LED_Controller_Rev1.6.html       # Full controller schematic (interactive)
 ├── NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.2.html  # 3D LED position & channel map
+├── NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html  # 3D LED map + Series Coil circuit overlay
 ├── NaoDec_Series_Coil_Build_Rev0_Pre-Release.html # Series coil / electromagnet subsystem (pre-release)
 ├── Simple_WS2815_Controller_Rev_1.0.html          # Simplified single-controller reference
 └── Archived/                                      # Previous revisions
