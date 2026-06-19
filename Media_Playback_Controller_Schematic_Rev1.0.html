@@ -219,9 +219,9 @@
       <text x="530" y="494" font-size="22" fill="var(--accent)" text-anchor="middle" class="black-text">ESP32-S3</text>
       <text x="530" y="516" font-size="14" fill="var(--text-primary)" text-anchor="middle" class="bold-text">DevKitC-1 · N8R8 / N16R8</text>
       <text x="530" y="544" font-size="12" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">2.4 GHz Wi-Fi → OSC / UDP</text>
-      <!-- left edge: 5 V / USB-C input -->
+      <!-- left edge: 5 V input pin -->
       <circle cx="340" cy="460" r="3" class="pin"/>
-      <text x="352" y="464" font-size="11" fill="var(--wire-5v)" text-anchor="start" class="bold-text">5V · USB-C</text>
+      <text x="352" y="464" font-size="11" fill="var(--wire-5v)" text-anchor="start" class="bold-text">5V</text>
       <!-- right edge pins -->
       <circle cx="720" cy="280" r="3" class="pin"/>
       <text x="712" y="284" font-size="12" fill="var(--wire-3v3)" text-anchor="end" class="bold-text">3V3</text>
@@ -326,9 +326,9 @@
          WIRING
          =========================== -->
 
-    <!-- 5 V supply: PSU1 → U1 USB-C input -->
-    <line x1="260" y1="460" x2="340" y2="460" class="w5v" data-info="BUS_5V|PSU1 +5V → U1 USB-C|USB-C 5 V (J1)"/>
-    <text x="300" y="452" class="channel-label" text-anchor="middle">USB-C 5V · J1</text>
+    <!-- 5 V supply: PSU1 → U1 5V pin -->
+    <line x1="260" y1="460" x2="340" y2="460" class="w5v" data-info="BUS_5V|PSU1 +5V → U1 5V pin|5 V input"/>
+    <text x="300" y="452" class="channel-label" text-anchor="middle">5V IN</text>
 
     <!-- 3V3 pull-up bus -->
     <line x1="720" y1="280" x2="1220" y2="280" class="w3v3-bus" data-info="BUS_3V3|3.3 V pull-up bus|ESP32 3V3 → R1–R5"/>
