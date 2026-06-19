@@ -110,7 +110,7 @@ flowchart LR
 | Cable | 24 AWG 2-core flat, ~26 m+ | Inter-group runs + 6 m return; marginal at ~4 A |
 | Connectors | 20 × JST SM 2-pin | Both pins paralleled onto the series conductor; OK once the buck caps the loop at ~3 A (single SM pin = 3 A). VH (10 A) / XT30 / Anderson are higher-margin alternatives |
 | PSU | 12 V DC | Feeds the buck input; may be a shared rail, but keep this branch fused and V+ isolated |
-| CC/CV buck module | XL4015, 12 V in, CC set ~3 A | **The current limiter.** 5 A-rated board (avoid 3 A-peak LM2596); caps the loop regardless of load resistance, removing the runaway risk |
+| CC/CV buck module | XL4015, 12 V in, CC set ~3 A | **The current limiter.** 5 A-rated board (avoid 3 A-peak LM2596); caps the loop regardless of load resistance, removing the runaway risk; **bench-verified 11.68 V / 2.75 A** at the output |
 | Fuse | 3–5 A inline at buck input | **Still required:** the buck's CC limit is regulation, not fault protection, and bucks fail *shorted* |
 | Crystal cores | 1 per coil | Per design — non-magnetic, no field boost |
 | Flyback diode *(opt.)* | 1N4007 / 1N5819 | Kick is tiny (~0.4 mJ); only if switched electronically |
@@ -125,6 +125,7 @@ flowchart LR
 | Power | ~47 W total (~34 W in cable) | coils stay cool (~0.22 W each) |
 | Field per coil | ~28 AT | 7 turns × 4 A, crystal (non-magnetic) core → weak |
 | With buck (recommended) | capped ~3 A | XL4015 CC limit → ~9 V / 3 A into the loop, ~27 W out, ~2.5 A at the 12 V input |
+| Bench-verified | 11.68 V / 2.75 A | measured at the buck output (~32 W); real loop ~4.3 Ω, so current settles just under the 3 A cap |
 
 > **⚠ Safety:** current-limit it with a CC/CV buck (XL4015, CC ~3 A) — caps the loop and removes the runaway risk; **still fuse the buck input** (3–5 A): its CC limit is regulation, not fault protection, and bucks fail *shorted*; JST SM 2-pin with both pins paralleled is fine at the capped ~3 A (VH/XT30/Anderson for more margin); keep the 6 m run and slack **uncoiled**; **never** run the string without the buck (each coil is ~0.014 Ω, a near-short — the cable resistance is all that holds current down); keep the straight bare-copper leads from touching; keep this V+ rail **isolated** from the LED rails.
 
