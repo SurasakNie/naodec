@@ -62,10 +62,14 @@ jobs:
           </head>
           <body>
             <h1>NaoDec — Wiring and Schematics Index</h1>
-            <p>Rendered HTML documents in this repository. Click to open.</p>
+            <p>Rendered HTML and selected Markdown documents in this repository. Click to open.</p>
             <ul>
           HEAD
-            for f in $(ls *.html 2>/dev/null | grep -v '^index\.html$' | sort); do
+            {
+              ls *.html 2>/dev/null | grep -v '^index\.html$' || true
+              printf '%s\n' NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md
+            } | sort | while read -r f; do
+              [ -f "$f" ] || continue
               printf '    <li><a href="%s">%s</a></li>\n' "$f" "$f"
             done
             cat <<'TAIL'
