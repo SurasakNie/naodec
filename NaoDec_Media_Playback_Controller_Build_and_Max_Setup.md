@@ -122,9 +122,9 @@ Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, or the encoder module s
 Store Wi-Fi and Max destination settings in a local config file that is excluded from Git.
 
 ```text
-WIFI_SSID=<ASUS 2.4 GHz SSID>
-WIFI_PASSWORD=<password>
-MAX_HOST=192.168.50.10
+WIFI_SSID=ASUS_NAODEC
+WIFI_PASSWORD=<see router credentials reference — not stored in this file>
+MAX_HOST=192.168.50.2
 MAX_OSC_PORT=9000
 ```
 
@@ -159,22 +159,25 @@ Default UDP destination port: `9000`.
 
 ## 8. ASUS Router Setup
 
-1. Enable a 2.4 GHz SSID.
-2. Connect the Max computer to an ASUS LAN port by Ethernet.
-3. Make sure the ESP32 Wi-Fi network and wired Max computer are on the same LAN or VLAN.
-4. Disable wireless client isolation or AP isolation for this SSID.
-5. Reserve a DHCP address for the Max computer.
-6. Reserve a DHCP address for the ESP32 controller.
-7. Record the final SSID, controller IP, Max IP, and UDP port.
+This project's ASUS RT-AX1800HP is already configured per the NaoDec network setup guide. Reuse that configuration rather than creating a new one.
 
-Example addressing:
+1. 2.4 GHz SSID `ASUS_NAODEC` is enabled (see the router credentials reference for the password; do not commit it to this repo).
+2. The Max computer (Mac Mini) connects to an ASUS LAN port by Ethernet, static IP `192.168.50.2`, with the Router field left blank so the Mac keeps using its Wi-Fi interface for internet (see the network setup guide, section 3).
+3. The ESP32 Wi-Fi network and the wired Max computer share the same LAN, gateway `192.168.50.1`.
+4. Wireless client isolation / AP isolation must remain disabled for this SSID.
+5. DHCP pool is `192.168.50.100`-`192.168.50.199`; the Max computer's `192.168.50.2` is a static address outside the pool, not a reservation.
+6. Reserve a DHCP address for the media playback controller by MAC address under LAN -> DHCP Server -> Manually Assigned IP.
+7. Record the controller's MAC address and confirm the reservation with `ping 192.168.50.114`.
 
-| Device | Example IP |
+Addressing for this LAN:
+
+| Device | IP |
 |---|---|
-| Max computer | `192.168.50.10` |
-| Media playback controller | `192.168.50.31` |
+| ASUS RT-AX1800HP (gateway) | `192.168.50.1` |
+| Max computer (Mac Mini, Ethernet, static) | `192.168.50.2` |
+| Media playback controller (this build, DHCP reservation) | `192.168.50.114` |
 
-Do not hard-code these example addresses unless they match the real ASUS LAN.
+`192.168.50.114` follows the existing NaoDec convention of assigning each new ESP32 the next `.11x` address (`.111`, `.112`, `.113` are already in use by other NaoDec ESP32 modules).
 
 ## 9. Connect to Max/MSP
 
