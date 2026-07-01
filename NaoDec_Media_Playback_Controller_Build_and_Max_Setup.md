@@ -121,10 +121,20 @@ Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, or the encoder module s
 
 Store Wi-Fi and Max destination settings in a local config file that is excluded from Git.
 
+Project network assignment:
+
+| Device / Setting | Value |
+|---|---|
+| Media playback controller reserved IP | `192.168.50.114` |
+| Max player computer IP | Confirm from the ASUS router setup |
+| OSC UDP port | `9000` |
+
+The controller IP `192.168.50.114` should normally be assigned by ASUS DHCP reservation using the ESP32 MAC address. `MAX_HOST` is different: it must be the IP address of the Max player computer that receives OSC.
+
 ```text
 WIFI_SSID=<ASUS 2.4 GHz SSID>
 WIFI_PASSWORD=<password>
-MAX_HOST=192.168.50.10
+MAX_HOST=<Max player computer IP>
 MAX_OSC_PORT=9000
 ```
 
@@ -164,17 +174,17 @@ Default UDP destination port: `9000`.
 3. Make sure the ESP32 Wi-Fi network and wired Max computer are on the same LAN or VLAN.
 4. Disable wireless client isolation or AP isolation for this SSID.
 5. Reserve a DHCP address for the Max computer.
-6. Reserve a DHCP address for the ESP32 controller.
+6. Reserve the ESP32 media playback controller at `192.168.50.114`.
 7. Record the final SSID, controller IP, Max IP, and UDP port.
 
-Example addressing:
+Project addressing:
 
 | Device | Example IP |
 |---|---|
-| Max computer | `192.168.50.10` |
-| Media playback controller | `192.168.50.31` |
+| Max computer | Confirm from ASUS router setup |
+| Media playback controller | `192.168.50.114` |
 
-Do not hard-code these example addresses unless they match the real ASUS LAN.
+Do not set `MAX_HOST` to `192.168.50.114`; that address belongs to the ESP32 controller. Set `MAX_HOST` to the Max player computer's IP.
 
 ## 9. Connect to Max/MSP
 
@@ -232,7 +242,7 @@ If Max receives nothing:
 
 | Symptom | Check |
 |---|---|
-| No UDP messages | Confirm ESP32 `MAX_HOST` is the Max computer IP |
+| No UDP messages | Confirm ESP32 `MAX_HOST` is the Max computer IP, not `192.168.50.114` |
 | Wrong port | Confirm both firmware and Max use UDP `9000` |
 | ESP32 not reachable | Confirm same LAN/VLAN and AP isolation disabled |
 | Duplicate button messages | Increase firmware debounce or check switch wiring |
@@ -247,7 +257,7 @@ Run these before calling the controller ready.
 |---|---|---|
 | ELEC-01 | Visual inspection | No shorts, loose wires, or exposed conductors |
 | ELEC-02 | 3.3 V rail | 3.20 V to 3.40 V |
-| NET-01 | Wi-Fi join | Controller gets DHCP address within 15 seconds |
+| NET-01 | Wi-Fi join | Controller gets DHCP address `192.168.50.114` within 15 seconds |
 | NET-02 | Max reachability | Max computer and ESP32 are on same LAN/VLAN |
 | NET-03 | UDP receive | Max receives only on the configured IP and port |
 | NET-04 | Reconnect | Controller reconnects after Wi-Fi/router interruption |
@@ -273,7 +283,7 @@ Fill this out for each built controller.
 | Firmware version / commit | |
 | ASUS SSID | |
 | Controller MAC address | |
-| Controller reserved IP | |
+| Controller reserved IP | `192.168.50.114` |
 | Max computer IP | |
 | OSC UDP port | |
 | Max patch filename / revision | |
