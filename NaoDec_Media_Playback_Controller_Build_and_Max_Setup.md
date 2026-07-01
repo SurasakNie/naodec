@@ -25,7 +25,7 @@ The Max computer should be connected to the ASUS router by wired Ethernet. The E
 | Ref | Qty | Item | Description |
 |---|---:|---|---|
 | U1 | 1 | ESP32-S3-DevKitC-1 | Main controller board, USB-C, N8R8 or N16R8 preferred |
-| ENC1 | 1 | NEBDS-01 / EC11 encoder module | Rotary encoder module with Schmitt trigger / anti-bounce, pins `A`, `B`, `SW`, `VCC`, `GND` |
+| ENC1 | 1 | NEBDS-01 / EC11 encoder module | Preferred rotary encoder module with Schmitt trigger / anti-bounce, pins `A`, `B`, `SW`, `VCC`, `GND`; KY-040 may be used as an optional replacement |
 | SW1-SW3 | 3 | Normally-open momentary pushbutton | Play, Pause, Stop panel buttons |
 | R3-R5 | 3 | 10 kOhm resistor | Pull-ups for Play/Pause/Stop buttons |
 | C3-C5 | 3 | 100 nF capacitor | Button debounce capacitors, X7R ceramic, 25 V or higher |
@@ -41,7 +41,7 @@ Recommended spares:
 
 | Item | Qty |
 |---|---:|
-| NEBDS-01 / EC11 encoder module | 1 |
+| NEBDS-01 / EC11 encoder module, or KY-040 module for bench/prototype replacement | 1 |
 | Momentary pushbutton | 1 |
 | 10 kOhm resistor | 2 |
 | 100 nF capacitor | 2 |
@@ -52,26 +52,38 @@ Recommended spares:
 
 | Function | ESP32-S3 Pin | Wire Color | Notes |
 |---|---|---|---|
-| Encoder A | GPIO7 | Green | Connect to `ENC1 A` |
-| Encoder B | GPIO8 | Blue | Connect to `ENC1 B` |
+| Encoder A | GPIO7 | Green | Connect to `ENC1 A` on NEBDS-01, or `CLK` on KY-040 |
+| Encoder B | GPIO8 | Blue | Connect to `ENC1 B` on NEBDS-01, or `DT` on KY-040 |
 | Play | GPIO9 | White | Button input, active low |
 | Pause | GPIO10 | Yellow | Button input, active low |
 | Stop | GPIO11 | Orange | Button input, active low |
-| Encoder/module power | 3V3 | Red | Connect to `ENC1 VCC` |
+| Encoder/module power | 3V3 | Red | Connect to `ENC1 VCC` on NEBDS-01, or `+` on KY-040 |
 | Ground | GND | Black | Common ground for encoder and buttons |
 | Power input | USB-C | USB cable | Use USB-C input path, not GPIO or 3V3 pin |
 
-### NEBDS-01 / EC11 Encoder Module
+### Encoder Module: NEBDS-01 Preferred, KY-040 Optional
 
-| Encoder Pin | Connect To | Notes |
-|---|---|---|
-| `A` | ESP32 GPIO7 | Encoder channel A |
-| `B` | ESP32 GPIO8 | Encoder channel B |
-| `SW` | Not connected | Rev 1.0 does not use knob press |
-| `VCC` | ESP32 3V3 | Use 3.3 V only |
-| `GND` | ESP32 GND | Common ground |
+| Function | NEBDS-01 / EC11 Schmitt Pin | KY-040 Pin | ESP32-S3 Connection |
+|---|---|---|---|
+| Encoder channel A | `A` | `CLK` | GPIO7 |
+| Encoder channel B | `B` | `DT` | GPIO8 |
+| Encoder switch | `SW` | `SW` | Not connected in Rev 1.0 |
+| Module power | `VCC` | `+` | ESP32 3V3 |
+| Ground | `GND` | `GND` | ESP32 GND |
 
 Do not add external 100 nF capacitors to encoder `A` or `B` when using this Schmitt trigger module. The original bare-encoder RC parts `R1`, `R2`, `C1`, and `C2` are not populated for this build.
+
+KY-040 optional replacement notes:
+
+| Topic | NEBDS-01 / EC11 Schmitt Module | KY-040 Optional Replacement |
+|---|---|---|
+| Signal conditioning | Schmitt trigger / anti-bounce output | Usually raw or lightly pulled-up mechanical encoder output |
+| Wiring | `A -> GPIO7`, `B -> GPIO8`, `VCC -> 3V3`, `GND -> GND`, `SW -> NC` | `CLK -> GPIO7`, `DT -> GPIO8`, `+ -> 3V3`, `GND -> GND`, `SW -> NC` |
+| External A/B RC parts | Do not populate `R1`, `R2`, `C1`, or `C2` | Leave `R1`, `R2`, `C1`, and `C2` unpopulated first; use firmware filtering and test rotation behavior |
+| Firmware requirement | Normal quadrature validation | Stronger transition validation / debounce is recommended |
+| Best use | Final installed controller | Bench test or replacement when NEBDS-01 is unavailable |
+
+Power any module-style encoder from ESP32 `3V3`, not 5 V. If the KY-040 is powered from 5 V, its `CLK`, `DT`, or `SW` outputs may also pull up to 5 V, which is not safe for ESP32-S3 GPIO.
 
 ### Play / Pause / Stop Buttons
 
@@ -89,7 +101,7 @@ Each button is a normally-open switch from its GPIO input to ground.
 2. Arrange controls left to right as `VOLUME`, `PLAY`, `PAUSE`, `STOP`.
 3. Mount the ESP32-S3 board so the antenna end faces plastic, not metal.
 4. Keep at least 10 mm clearance around the ESP32 antenna area.
-5. Mount the NEBDS-01 / EC11 encoder module and fit the knob.
+5. Mount the NEBDS-01 / EC11 encoder module and fit the knob. If using the optional KY-040 module, mount it in the same volume encoder position.
 6. Mount the three normally-open pushbuttons.
 7. Build the 3.3 V and GND buses on the prototype PCB.
 8. Install R3-R5 from 3.3 V to GPIO9/GPIO10/GPIO11.
@@ -110,10 +122,10 @@ Perform these checks before plugging the controller into a computer or router se
 | Visual inspection | Inspect PCB and connectors | No shorts, loose strands, or unlabeled harnesses |
 | Unpowered resistance | Measure 5 V-to-GND and 3.3 V-to-GND | No near-short |
 | 3.3 V rail | Power by USB-C and measure 3V3 to GND | 3.20 V to 3.40 V |
-| Encoder module VCC | Measure `ENC1 VCC` to GND | 3.20 V to 3.40 V |
+| Encoder module VCC | Measure `ENC1 VCC` or KY-040 `+` to GND | 3.20 V to 3.40 V |
 | Button idle voltage | Release Play/Pause/Stop and measure GPIO9-11 | Above 3.0 V |
 | Button active voltage | Press each button and measure its GPIO | Below 0.3 V |
-| Encoder A/B level | Rotate encoder and measure A/B | Logic should stay within 0 V to 3.3 V |
+| Encoder A/B level | Rotate encoder and measure A/B, or KY-040 CLK/DT | Logic should stay within 0 V to 3.3 V |
 
 Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, or the encoder module signal pins.
 
@@ -146,7 +158,7 @@ Firmware behavior required for Rev 1.0:
 | Logging | Report assigned IP, Max host, and events over USB serial |
 | Credentials | Never print the Wi-Fi password |
 | Buttons | Send one OSC command on the debounced press edge only |
-| Encoder | Decode valid quadrature transitions from GPIO7/GPIO8 |
+| Encoder | Decode valid quadrature transitions from GPIO7/GPIO8; apply stronger filtering if KY-040 is used |
 | Volume | Maintain integer volume `0...100` |
 | Volume step | Change volume by 2 percentage points per detent |
 | OSC volume | Send normalized float `0.0...1.0` |
