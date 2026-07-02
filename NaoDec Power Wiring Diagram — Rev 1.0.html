@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NaoDec — Power Wiring Diagram Rev 1.5</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#060a0b;--panel:rgba(10,24,26,.94);
+    --12v:#eaddaa;--5v:#c9a86a;--gnd:#4a9ba8;
+    --24v:#e07070;--50a:#e8a030;--usb:#88e2d6;
+    --txt:#d4e8e9;--mute:#8eb5b8;--acc:#eaddaa;
+    --cs:#4a6b6d;--bdr:#1e3a3c;
+  }
+  body{background:var(--bg);color:var(--txt);font-family:'Roboto',sans-serif;
+    display:flex;flex-direction:column;align-items:center;padding:18px 10px 48px}
+  h1{font-size:17px;font-weight:700;letter-spacing:4px;color:var(--acc);text-transform:uppercase;margin-bottom:3px}
+  .sub{color:var(--mute);font-size:11px;letter-spacing:2px;margin-bottom:14px}
+  .leg{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+    background:var(--panel);border:1px solid var(--bdr);border-radius:6px;
+    padding:8px 18px;margin-bottom:16px}
+  .li{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mute)}
+  .ll{width:26px;height:3px;border-radius:2px}
+  .diag{width:100%;max-width:1220px;position:relative}
+  svg{width:100%;height:auto;display:block}
+  .tip{position:absolute;background:var(--bg);border:1px solid var(--cs);border-radius:6px;
+    padding:10px 14px;font-size:11px;color:var(--txt);pointer-events:none;opacity:0;
+    transition:opacity .15s;z-index:100;max-width:300px;line-height:1.65}
+  .tip.on{opacity:1}
+  .tt{font-weight:700;color:var(--acc);font-size:12px;margin-bottom:5px}
+</style>
+</head>
+<body>
+<h1>NaoDec — Power Wiring Diagram</h1>
+<div class="sub">Rev 1.5 · Playback on isolated USB-C · all others from ATX</div>
+<div class="leg">
+  <div class="li"><div class="ll" style="background:#e07070"></div>24 V Mean Well</div>
+  <div class="li"><div class="ll" style="background:#eaddaa"></div>12 V ATX</div>
+  <div class="li"><div class="ll" style="background:#e8a030"></div>12 V · 50A LED</div>
+  <div class="li"><div class="ll" style="background:#c9a86a"></div>5 V Logic</div>
+  <div class="li"><div class="ll" style="background:#4a9ba8"></div>GND Star</div>
+  <div class="li"><div class="ll" style="background:#88e2d6;border:1px dashed;height:2px"></div>USB-C Isolated</div>
+  <div class="li"><div class="ll" style="background:#d4d080;border:1px dashed;height:2px"></div>AC Mains</div>
+</div>
+
+<div class="diag">
+<svg id="D" viewBox="0 0 1220 980" xmlns="http://www.w3.org/2000/svg" font-family="'Roboto',sans-serif">
+<defs>
+  <marker id="m12"  markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#eaddaa"/></marker>
+  <marker id="m50"  markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#e8a030"/></marker>
+  <marker id="m5"   markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#c9a86a"/></marker>
+  <marker id="mgnd" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#4a9ba8"/></marker>
+  <marker id="m24"  markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#e07070"/></marker>
+  <marker id="musb" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#88e2d6"/></marker>
+  <marker id="mac"  markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#d4d080"/></marker>
+  <marker id="mwht" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0L0,6L8,3z" fill="#8eb5b8"/></marker>
+</defs>
+
+<rect width="1220" height="980" fill="#060a0b"/>
+
+<!-- TITLE -->
+<rect width="1220" height="32" fill="#0a1214"/>
+<line x1="0" y1="32" x2="1220" y2="32" stroke="#4a6b6d"/>
+<text x="16" y="20" fill="#eaddaa" font-size="12" font-weight="700" letter-spacing="4">NAODEC — POWER WIRING DIAGRAM</text>
+<text x="610" y="20" text-anchor="middle" fill="#8eb5b8" font-size="10" letter-spacing="2">PLAYBACK ISOLATED · Rev 1.5</text>
+<text x="1204" y="20" text-anchor="end" fill="#8eb5b8" font-size="10">2026-06</text>
+
+<!-- ════════════════════════════════════════════════════════
+     SECTION A — ATX PSU (left, x=14)
+     Shows physical connectors coming out of the PSU
+     ════════════════════════════════════════════════════════ -->
+
+<!-- ATX PSU outer shell -->
+<g data-tip="ATX PSU&#10;Standard desktop power supply unit&#10;Enable standalone: jumper PS_ON# (pin 16 green) → GND&#10;  OR use ATX breakout board's built-in toggle switch&#10;&#10;Physical connectors on cable bundle:&#10;  · 1× 24-pin Molex Mini-Fit Jr. (main)&#10;  · 3–5× Molex 4-pin peripheral&#10;  · 2–4× SATA 15-pin&#10;  · 1–2× PCIe 6/8-pin (if present)&#10;  · 1× EPS 8-pin (CPU power)&#10;&#10;We use: 24-pin → breakout board&#10;         Molex ×3 → 12V bus bar (LED strips)&#10;         SATA/5V → optional 5V logic tap">
+<rect x="14" y="44" width="168" height="500" rx="8" fill="#161407" stroke="#5a4a20" stroke-width="2"/>
+<text x="98" y="64" text-anchor="middle" fill="#eaddaa" font-size="11" font-weight="700" letter-spacing="2">ATX PSU</text>
+<text x="98" y="78" text-anchor="middle" fill="#8eb5b8" font-size="9">Cable bundle exits right →</text>
+<!-- PS ON label -->
+<rect x="26" y="86" width="144" height="24" rx="3" fill="#1a1700" stroke="#5a4a20"/>
+<text x="98" y="103" text-anchor="middle" fill="#eaddaa" font-size="9">PS_ON# pin 16 → GND to start</text>
+</g>
+
+<!-- ── Connector 1: 24-pin Molex Mini-Fit Jr. ── -->
+<g data-tip="24-pin Molex Mini-Fit Jr.&#10;This is the MAIN ATX connector — large rectangular plug&#10;Carries: 12V · 5V · 3.3V · GND · PS_ON# · power-good&#10;&#10;How to connect:&#10;  Push 24-pin plug straight into ATX Breakout Board socket&#10;  The breakout board socket is the matching 24-pin female&#10;  No tools needed — just press until it clicks&#10;&#10;Wire colours inside this connector:&#10;  Yellow = 12V (multiple pins)&#10;  Red    = 5V  (multiple pins)&#10;  Black  = GND (multiple pins)&#10;  Green  = PS_ON# (pin 16, jumper to GND)&#10;  Orange = 3.3V&#10;  Purple = 5V standby&#10;&#10;After breakout board: use its labelled screw terminals&#10;→ ① 12V+ for Scent and Vertex Coil&#10;→ ② 5V+ for ESP32 logic">
+<!-- connector body -->
+<rect x="182" y="118" width="48" height="72" rx="3" fill="#1a1800" stroke="#d4d080" stroke-width="1.5"/>
+<text x="206" y="136" text-anchor="middle" fill="#d4d080" font-size="8" font-weight="700">24-pin</text>
+<text x="206" y="148" text-anchor="middle" fill="#8eb5b8" font-size="7">Mini-Fit</text>
+<text x="206" y="159" text-anchor="middle" fill="#8eb5b8" font-size="7">Jr. plug</text>
+<!-- pin dots 4×6 -->
+<g fill="#d4d080" opacity="0.6">
+  <rect x="188" y="166" width="5" height="5" rx="1"/><rect x="196" y="166" width="5" height="5" rx="1"/>
+  <rect x="204" y="166" width="5" height="5" rx="1"/><rect x="212" y="166" width="5" height="5" rx="1"/>
+  <rect x="188" y="174" width="5" height="5" rx="1"/><rect x="196" y="174" width="5" height="5" rx="1"/>
+  <rect x="204" y="174" width="5" height="5" rx="1"/><rect x="212" y="174" width="5" height="5" rx="1"/>
+  <rect x="188" y="182" width="5" height="5" rx="1"/><rect x="196" y="182" width="5" height="5" rx="1"/>
+  <rect x="204" y="182" width="5" height="5" rx="1"/><rect x="212" y="182" width="5" height="5" rx="1"/>
+</g>
+<!-- connector label -->
+<text x="206" y="207" text-anchor="middle" fill="#d4d080" font-size="9" font-weight="700">24-pin</text>
+<text x="206" y="218" text-anchor="middle" fill="#8eb5b8" font-size="8">Mini-Fit Jr.</text>
+<!-- wire to ATX body -->
+<line x1="182" y1="154" x2="182" y2="154"/>
+<line x1="14" y1="154" x2="182" y2="154" stroke="#d4d080" stroke-width="2" stroke-dasharray="3,2"/>
+</g>
+
+<!-- ── Molex 4-pin connector group (×3) ── -->
+<!-- Molex #1 -->
+<g data-tip="Molex 4-pin Peripheral Connector&#10;Standard white rectangular plug on ATX cable bundle&#10;One of 3–5 identical plugs on the peripheral cable string&#10;&#10;Pin assignments (looking at pins face-on, left→right):&#10;  Pin 1 — Black  (GND)&#10;  Pin 2 — Black  (GND)&#10;  Pin 3 — Yellow (12V) ← THIS ONE feeds bus bar&#10;  Pin 4 — Red    (5V)  ← optional logic tap&#10;&#10;How to connect to bus bar:&#10;  Option A (easiest): Buy a pre-made Molex-to-bare-wire&#10;    pigtail adapter (~$3). Strip wire end, insert into&#10;    bus bar screw terminal and tighten.&#10;  Option B: Use a Molex-to-ring-terminal cable, bolt ring&#10;    terminal onto bus bar bolt post.&#10;&#10;Do this for 3 separate Molex connectors in parallel.&#10;3× Molex pin 3 (yellow, 12V) → all into V+ bus rail&#10;3× Molex pin 1 (black, GND)  → all into GND bus rail">
+<rect x="182" y="310" width="44" height="42" rx="3" fill="#1a1a10" stroke="#b0b040" stroke-width="1.5"/>
+<text x="204" y="326" text-anchor="middle" fill="#c8c840" font-size="8" font-weight="700">Molex</text>
+<text x="204" y="337" text-anchor="middle" fill="#8eb5b8" font-size="7">4-pin #1</text>
+<!-- 4 pins -->
+<g fill="#c8c840" opacity="0.7">
+  <rect x="186" y="342" width="7" height="7" rx="1"/>
+  <rect x="196" y="342" width="7" height="7" rx="1"/>
+  <rect x="206" y="342" width="7" height="7" rx="1"/>
+  <rect x="216" y="342" width="7" height="7" rx="1"/>
+</g>
+<!-- pin color labels -->
+<text x="189" y="360" fill="#4a9ba8" font-size="7">GND</text>
+<text x="199" y="360" fill="#4a9ba8" font-size="7">GND</text>
+<text x="209" y="360" fill="#eaddaa" font-size="7">12V</text>
+<text x="218" y="360" fill="#c9a86a" font-size="7">5V</text>
+<line x1="14" y1="331" x2="182" y2="331" stroke="#b0b040" stroke-width="1.5" stroke-dasharray="3,2"/>
+</g>
+
+<!-- Molex #2 -->
+<g data-tip="Molex 4-pin Peripheral Connector #2&#10;Same pin-out as #1&#10;Pin 3 (Yellow 12V) → same V+ bus rail as #1&#10;Pin 1 (Black GND)  → same GND bus rail as #1&#10;All yellow wires land on same bus terminal&#10;All black wires land on same GND terminal">
+<rect x="182" y="378" width="44" height="42" rx="3" fill="#1a1a10" stroke="#b0b040" stroke-width="1.5"/>
+<text x="204" y="394" text-anchor="middle" fill="#c8c840" font-size="8" font-weight="700">Molex</text>
+<text x="204" y="405" text-anchor="middle" fill="#8eb5b8" font-size="7">4-pin #2</text>
+<g fill="#c8c840" opacity="0.7">
+  <rect x="186" y="410" width="7" height="7" rx="1"/>
+  <rect x="196" y="410" width="7" height="7" rx="1"/>
+  <rect x="206" y="410" width="7" height="7" rx="1"/>
+  <rect x="216" y="410" width="7" height="7" rx="1"/>
+</g>
+<text x="189" y="428" fill="#4a9ba8" font-size="7">GND</text>
+<text x="199" y="428" fill="#4a9ba8" font-size="7">GND</text>
+<text x="209" y="428" fill="#eaddaa" font-size="7">12V</text>
+<text x="218" y="428" fill="#c9a86a" font-size="7">5V</text>
+<line x1="14" y1="399" x2="182" y2="399" stroke="#b0b040" stroke-width="1.5" stroke-dasharray="3,2"/>
+</g>
+
+<!-- Molex #3 -->
+<g data-tip="Molex 4-pin Peripheral Connector #3&#10;Same pin-out as #1 and #2&#10;3 connectors in parallel on 12V gives ~18–24A capacity&#10;Add a 4th if your PSU has a 4th Molex cable&#10;&#10;Wire to bus bar: strip the yellow wire (12V pin 3),&#10;twist all 3 yellow wire ends together, insert into&#10;a single large-gauge bus bar terminal and tighten.&#10;Do the same for all GND wires.&#10;&#10;Recommended wire: 16AWG pigtail per Molex&#10;Final bus-bar run: 12AWG from bus to FB1">
+<rect x="182" y="446" width="44" height="42" rx="3" fill="#1a1a10" stroke="#b0b040" stroke-width="1.5"/>
+<text x="204" y="462" text-anchor="middle" fill="#c8c840" font-size="8" font-weight="700">Molex</text>
+<text x="204" y="473" text-anchor="middle" fill="#8eb5b8" font-size="7">4-pin #3</text>
+<g fill="#c8c840" opacity="0.7">
+  <rect x="186" y="478" width="7" height="7" rx="1"/>
+  <rect x="196" y="478" width="7" height="7" rx="1"/>
+  <rect x="206" y="478" width="7" height="7" rx="1"/>
+  <rect x="216" y="478" width="7" height="7" rx="1"/>
+</g>
+<text x="189" y="496" fill="#4a9ba8" font-size="7">GND</text>
+<text x="199" y="496" fill="#4a9ba8" font-size="7">GND</text>
+<text x="209" y="496" fill="#eaddaa" font-size="7">12V</text>
+<text x="218" y="496" fill="#c9a86a" font-size="7">5V</text>
+<line x1="14" y1="467" x2="182" y2="467" stroke="#b0b040" stroke-width="1.5" stroke-dasharray="3,2"/>
+</g>
+
+<!-- 5V logic tap label -->
+<text x="98" y="530" text-anchor="middle" fill="#8eb5b8" font-size="8">5V logic: use SATA red wire</text>
+<text x="98" y="542" text-anchor="middle" fill="#8eb5b8" font-size="8">or Molex pin 4 (red)</text>
+
+<!-- USB-C adapter (separate, isolated) -->
+<g data-tip="USB 5V/2A Wall Adapter — ISOLATED&#10;Completely separate from ATX — own mains plug&#10;Connector OUT: USB-C cable → ESP32-S3 USB-C port&#10;&#10;Why isolated?&#10;Playback sends AUDIO SIGNAL into GAB8 amplifier.&#10;Sharing ATX GND with GAB8 power GND can create&#10;a ground loop → 50/60Hz hum through speakers.&#10;An isolated adapter breaks that loop entirely.&#10;&#10;What to buy: any 5V/2A USB wall plug (~$5)&#10;Cable: standard USB-A to USB-C data cable">
+<rect x="14" y="600" width="168" height="80" rx="6" fill="#0a1214" stroke="#2a5060" stroke-width="1.5"/>
+<text x="98" y="619" text-anchor="middle" fill="#88e2d6" font-size="10" font-weight="700">USB ADAPTER</text>
+<text x="98" y="633" text-anchor="middle" fill="#8eb5b8" font-size="9">5V / 2A · Isolated from ATX</text>
+<rect x="26" y="640" width="144" height="30" rx="3" fill="#0a181e" stroke="#2a5060"/>
+<text x="98" y="653" text-anchor="middle" fill="#88e2d6" font-size="9" font-weight="700">USB-C → Playback ESP32</text>
+<text x="98" y="665" text-anchor="middle" fill="#8eb5b8" font-size="8">Prevents audio ground loop</text>
+<circle cx="182" cy="655" r="4" fill="#88e2d6"/>
+</g>
+
+<!-- Mean Well (for GAB8, separate) -->
+<g data-tip="Mean Well LRS-600-24 · 24V 25A 600W&#10;Connector OUT: Screw terminal V+ / GND&#10;→ GAB8 Amplifier only · own IEC mains feed">
+<rect x="14" y="700" width="168" height="78" rx="6" fill="#170d0d" stroke="#6b2a2a" stroke-width="1.5"/>
+<text x="98" y="720" text-anchor="middle" fill="#e07070" font-size="10" font-weight="700">PSU 24V</text>
+<text x="98" y="733" text-anchor="middle" fill="#8eb5b8" font-size="9">Mean Well LRS-600-24</text>
+<rect x="26" y="738" width="144" height="28" rx="3" fill="#1a0808" stroke="#6b2a2a"/>
+<text x="98" y="751" text-anchor="middle" fill="#e07070" font-size="11" font-weight="700">24V · 25A · 600W</text>
+<text x="98" y="762" text-anchor="middle" fill="#8eb5b8" font-size="8">OUT: Screw terminal V+/GND</text>
+<circle cx="182" cy="751" r="4" fill="#e07070"/>
+</g>
+
+<!-- ════════════════════════════════════════════════════════
+     SECTION B — ATX Breakout Board (center-top)
+     ════════════════════════════════════════════════════════ -->
+<g data-tip="ATX Breakout Board&#10;Connector IN: 24-pin Mini-Fit Jr. socket (female)&#10;  Just push the ATX 24-pin plug in — it clicks in place&#10;&#10;Screw Terminals OUT (labelled on board):&#10;  ① 12V+ (yellow wires) → Scent VIN+ · Vertex Coil 12V in&#10;  ② 5V+  (red wires)   → WS2815 ESP logic Vin pins&#10;  ③ GND  (black wires) → star ground&#10;  Toggle switch: controls PS_ON# line (starts/stops ATX)&#10;&#10;Current handled by breakout board: ~5A max on 12V&#10;  (Scent ~0.8A + Vertex Coil input ~1.5A + margin)&#10;⚠ Do NOT run LED strip power through breakout PCB traces&#10;  Those 25A+ must go via Molex → bus bar path">
+<rect x="248" y="96" width="192" height="190" rx="8" fill="#141a0a" stroke="#6a8020" stroke-width="2"/>
+<text x="344" y="116" text-anchor="middle" fill="#d4e060" font-size="11" font-weight="700" letter-spacing="2">ATX BREAKOUT</text>
+<text x="344" y="130" text-anchor="middle" fill="#8eb5b8" font-size="9">24-pin socket IN · Screw Terminals OUT</text>
+
+<!-- Socket drawing -->
+<rect x="258" y="138" width="52" height="76" rx="3" fill="#0f1408" stroke="#6a8020"/>
+<text x="284" y="154" text-anchor="middle" fill="#d4e060" font-size="8">24-pin</text>
+<text x="284" y="165" text-anchor="middle" fill="#8eb5b8" font-size="7">socket</text>
+<text x="284" y="176" text-anchor="middle" fill="#8eb5b8" font-size="7">(female)</text>
+<g fill="#d4e060" opacity="0.55">
+  <rect x="264" y="182" width="5" height="5" rx="1"/><rect x="273" y="182" width="5" height="5" rx="1"/>
+  <rect x="282" y="182" width="5" height="5" rx="1"/><rect x="291" y="182" width="5" height="5" rx="1"/>
+  <rect x="264" y="191" width="5" height="5" rx="1"/><rect x="273" y="191" width="5" height="5" rx="1"/>
+  <rect x="282" y="191" width="5" height="5" rx="1"/><rect x="291" y="191" width="5" height="5" rx="1"/>
+  <rect x="264" y="200" width="5" height="5" rx="1"/><rect x="273" y="200" width="5" height="5" rx="1"/>
+  <rect x="282" y="200" width="5" height="5" rx="1"/><rect x="291" y="200" width="5" height="5" rx="1"/>
+</g>
+
+<!-- Terminal block -->
+<rect x="318" y="138" width="114" height="130" rx="3" fill="#0f1408" stroke="#6a8020"/>
+<text x="375" y="152" text-anchor="middle" fill="#d4e060" font-size="8" font-weight="700">SCREW TERMINALS</text>
+<!-- 12V terminal - Scent -->
+<rect x="322" y="157" width="106" height="16" rx="2" fill="#1a1800" stroke="#6a8020"/>
+<text x="326" y="169" fill="#eaddaa" font-size="8" font-weight="700">① 12V+</text>
+<text x="424" y="169" text-anchor="end" fill="#8eb5b8" font-size="7">→ Scent</text>
+<circle cx="440" cy="165" r="4" fill="#eaddaa"/>
+<!-- 12V terminal - Vertex Coil -->
+<rect x="322" y="176" width="106" height="16" rx="2" fill="#1a1800" stroke="#6a8020"/>
+<text x="326" y="188" fill="#eaddaa" font-size="8" font-weight="700">① 12V+</text>
+<text x="424" y="188" text-anchor="end" fill="#8eb5b8" font-size="7">→ Coil</text>
+<circle cx="440" cy="184" r="4" fill="#eaddaa"/>
+<!-- 5V terminal -->
+<rect x="322" y="195" width="106" height="16" rx="2" fill="#141a08" stroke="#6a8020"/>
+<text x="326" y="207" fill="#c9a86a" font-size="8" font-weight="700">② 5V+</text>
+<text x="424" y="207" text-anchor="end" fill="#8eb5b8" font-size="7">→ Logic</text>
+<circle cx="440" cy="203" r="4" fill="#c9a86a"/>
+<!-- GND terminal -->
+<rect x="322" y="214" width="106" height="16" rx="2" fill="#0a1414" stroke="#6a8020"/>
+<text x="326" y="226" fill="#4a9ba8" font-size="8" font-weight="700">③ GND</text>
+<text x="424" y="226" text-anchor="end" fill="#4a9ba8" font-size="7">star</text>
+<text x="344" y="264" fill="#8eb5b8" font-size="8">PS_ON# toggle switch</text>
+<text x="344" y="276" fill="#8eb5b8" font-size="8">(starts / stops ATX)</text>
+</g>
+
+<!-- ════════════════════════════════════════════════════════
+     SECTION C — 12V Bus Bar / Barrier Terminal Strip
+     ════════════════════════════════════════════════════════ -->
+<g data-tip="12V Distribution Bus Bar&#10;(also called: barrier terminal strip / distribution block)&#10;&#10;This is the HIGH-CURRENT hub for LED strip power.&#10;Do NOT use the ATX breakout board for this — its PCB&#10;traces cannot handle 25A for the LED strips.&#10;&#10;Connector IN: 3× Molex pin-3 (yellow, 12V) bare wire ends&#10;  → All screw into the SAME V+ bus terminal row&#10;  → Each Molex gives ~6A, 3× = ~18A (add 4th if available)&#10;  Wire gauge: 16 AWG per Molex pigtail&#10;&#10;Connector IN GND: 3× Molex pin-1 (black) bare wires&#10;  → All screw into GND bus terminal row&#10;&#10;Connector OUT (12V heavy):&#10;  → F1 7.5A inline ATC fuse → CH1 Vertex strip&#10;  → NTC1 10Ω inrush → FB1 6-ch fuse block → CH2–7 Edge strips&#10;  Wire gauge on output runs: 12 AWG minimum&#10;&#10;What to buy:&#10;  · Automotive/marine fused bus bar (6–12 pos, 30A+ rated)&#10;  · OR: DIN rail terminal block + bridging links&#10;  · OR: copper bus bar with bolt posts (~$8–15)">
+<rect x="248" y="310" width="192" height="250" rx="8" fill="#1a1800" stroke="#8a7030" stroke-width="2"/>
+<text x="344" y="330" text-anchor="middle" fill="#e8d060" font-size="11" font-weight="700" letter-spacing="2">12V BUS BAR</text>
+<text x="344" y="344" text-anchor="middle" fill="#8eb5b8" font-size="9">High-current · 30A+ rated</text>
+
+<!-- Input side label -->
+<text x="260" y="362" fill="#8eb5b8" font-size="9" font-weight="700">INPUT (from Molex)</text>
+
+<!-- V+ bus rail (physical bar graphic) -->
+<rect x="258" y="368" width="172" height="20" rx="3" fill="#2a2200" stroke="#eaddaa" stroke-width="1.5"/>
+<text x="344" y="382" text-anchor="middle" fill="#eaddaa" font-size="9" font-weight="700">V+ BUS RAIL (12V) — all Molex yellows land here</text>
+<!-- Molex wire inputs (left side = inputs) -->
+<circle cx="258" cy="378" r="4" fill="#eaddaa"/>   <!-- Molex 1 input -->
+<circle cx="270" cy="378" r="4" fill="#eaddaa"/>   <!-- Molex 2 input -->
+<circle cx="282" cy="378" r="4" fill="#eaddaa"/>   <!-- Molex 3 input -->
+<text x="260" y="364" fill="#eaddaa" font-size="7">M1</text>
+<text x="272" y="364" fill="#eaddaa" font-size="7">M2</text>
+<text x="284" y="364" fill="#eaddaa" font-size="7">M3</text>
+
+<!-- GND bus rail -->
+<rect x="258" y="396" width="172" height="20" rx="3" fill="#0a1a1a" stroke="#4a9ba8" stroke-width="1.5"/>
+<text x="344" y="410" text-anchor="middle" fill="#4a9ba8" font-size="9" font-weight="700">GND BUS RAIL — all Molex blacks land here</text>
+<circle cx="258" cy="406" r="4" fill="#4a9ba8"/>
+<circle cx="270" cy="406" r="4" fill="#4a9ba8"/>
+<circle cx="282" cy="406" r="4" fill="#4a9ba8"/>
+
+<!-- Output side label -->
+<text x="260" y="432" fill="#8eb5b8" font-size="9" font-weight="700">OUTPUT (to LED fuses)</text>
+
+<!-- Output terminal 1: F1 → CH1 Vertex strip -->
+<rect x="258" y="438" width="172" height="18" rx="3" fill="#1a1700" stroke="#8a7030"/>
+<text x="262" y="451" fill="#eaddaa" font-size="8" font-weight="700">OUT-A:</text>
+<text x="305" y="451" fill="#8eb5b8" font-size="8">F1 7.5A inline ATC → CH1 Vertex strip</text>
+<circle cx="440" cy="447" r="4" fill="#eaddaa"/>
+
+<!-- Output terminal 2: NTC1 → FB1 → CH2-7 -->
+<rect x="258" y="460" width="172" height="18" rx="3" fill="#1a1700" stroke="#8a7030"/>
+<text x="262" y="473" fill="#e8a030" font-size="8" font-weight="700">OUT-B:</text>
+<text x="305" y="473" fill="#8eb5b8" font-size="8">NTC1 10Ω → FB1 6-ch → CH2–7 Edge</text>
+<circle cx="440" cy="469" r="4" fill="#e8a030"/>
+
+<!-- wire gauge note -->
+<rect x="258" y="484" width="172" height="64" rx="3" fill="#1a1400" stroke="#6a5020"/>
+<text x="344" y="498" text-anchor="middle" fill="#e8a030" font-size="9" font-weight="700">WIRE GAUGES</text>
+<text x="262" y="512" fill="#8eb5b8" font-size="8">Molex pigtail → bus bar:  16 AWG each</text>
+<text x="262" y="525" fill="#8eb5b8" font-size="8">Bus bar → FB1/F1 runs:   12 AWG</text>
+<text x="262" y="538" fill="#8eb5b8" font-size="8">Each strip branch:        14 AWG</text>
+<text x="262" y="541" fill="#8eb5b8" font-size="8">Mid-injection wires:      14 AWG</text>
+</g>
+
+<!-- ════════════════════════════════════════════════════════
+     FB1 FUSE BLOCK
+     ════════════════════════════════════════════════════════ -->
+<g data-tip="FB1 — 6-ch ATC/ATO Automotive Fuse Block&#10;IN: from Bus Bar OUT-B via NTC1 10Ω/10A inrush limiter&#10;  NTC1 is wired IN SERIES between bus bar and FB1 input&#10;  It limits inrush current on startup (protects PSU)&#10;&#10;Connector IN: screw terminal or ring terminal on fuse block input&#10;Fuses F2–F7: 7.5A ATC blade (automotive standard)&#10;  Insert blade fuses from top — no tools&#10;&#10;Connector OUT each branch: screw terminal → 14AWG wire&#10;  Each wire goes to one strip V+ head&#10;  Add a second wire to same terminal for mid-injection&#10;&#10;GND: all strip GNDs → GND bus rail → star point">
+<rect x="248" y="590" width="192" height="148" rx="8" fill="#1a1400" stroke="#8a6020" stroke-width="2"/>
+<text x="344" y="610" text-anchor="middle" fill="#e8a030" font-size="11" font-weight="700" letter-spacing="2">FB1 FUSE BLOCK</text>
+<text x="344" y="624" text-anchor="middle" fill="#8eb5b8" font-size="9">6-ch ATC/ATO · NTC1 on input</text>
+<g font-size="9" font-weight="700">
+  <rect x="256" y="630" width="82" height="16" rx="2" fill="#1a1200" stroke="#8a6020"/>
+  <text x="297" y="642" text-anchor="middle" fill="#e8a030">F2 · 7.5A</text>
+  <rect x="350" y="630" width="82" height="16" rx="2" fill="#1a1200" stroke="#8a6020"/>
+  <text x="391" y="642" text-anchor="middle" fill="#e8a030">F3 · 7.5A</text>
+  <rect x="256" y="650" width="82" height="16" rx="2" fill="#1a1200" stroke="#8a6020"/>
+  <text x="297" y="662" text-anchor="middle" fill="#e8a030">F4 · 7.5A</text>
+  <rect x="350" y="650" width="82" height="16" rx="2" fill="#1a1200" stroke="#8a6020"/>
+  <text x="391" y="662" text-anchor="middle" fill="#e8a030">F5 · 7.5A</text>
+  <rect x="256" y="670" width="82" height="16" rx="2" fill="#1a1200" stroke="#8a6020"/>
+  <text x="297" y="682" text-anchor="middle" fill="#e8a030">F6 · 7.5A</text>
+  <rect x="350" y="670" width="82" height="16" rx="2" fill="#1a1200" stroke="#8a6020"/>
+  <text x="391" y="682" text-anchor="middle" fill="#e8a030">F7 · 7.5A</text>
+</g>
+<text x="344" y="704" text-anchor="middle" fill="#8eb5b8" font-size="8">NTC1 10Ω/10A wired in series at input</text>
+<text x="344" y="716" text-anchor="middle" fill="#8eb5b8" font-size="8">OUT each branch: screw terminal → strip V+</text>
+<circle cx="440" cy="650" r="4" fill="#e8a030"/>
+</g>
+
+<!-- ════════════════════════════════════════════════════════
+     WIRES — ATX connectors to intermediates
+     ════════════════════════════════════════════════════════ -->
+
+<!-- 24-pin plug → Breakout Board socket (just push in) -->
+<path d="M 230 154 L 248 154" fill="none" stroke="#d4d080" stroke-width="3" marker-end="url(#mac)"/>
+<rect x="232" y="140" width="112" height="18" rx="3" fill="#141a0a" stroke="#6a8020"/>
+<text x="288" y="152" text-anchor="middle" fill="#d4d080" font-size="9" font-weight="700">Push plug into socket</text>
+
+<!-- Molex #1 pin3 (12V) → bus bar V+ rail -->
+<path d="M 218 349 L 240 349 L 240 378 L 258 378" fill="none" stroke="#eaddaa" stroke-width="2" marker-end="url(#m12)"/>
+<!-- Molex #2 pin3 (12V) → bus bar V+ rail -->
+<path d="M 218 417 L 248 417 L 248 378 L 258 378" fill="none" stroke="#eaddaa" stroke-width="2"/>
+<!-- Molex #3 pin3 (12V) → bus bar V+ rail -->
+<path d="M 218 485 L 256 485 L 256 378 L 258 378" fill="none" stroke="#eaddaa" stroke-width="2"/>
+
+<!-- Molex GND wires → bus bar GND rail -->
+<path d="M 218 331 L 236 331 L 236 406 L 258 406" fill="none" stroke="#4a9ba8" stroke-width="1.5"/>
+<path d="M 218 399 L 244 399 L 244 406 L 258 406" fill="none" stroke="#4a9ba8" stroke-width="1.5"/>
+<path d="M 218 467 L 252 467 L 252 406 L 258 406" fill="none" stroke="#4a9ba8" stroke-width="1.5"/>
+
+<!-- WIRE LABELS on Molex → bus bar section -->
+<rect x="218" y="452" width="28" height="14" rx="2" fill="#060a0b" stroke="#8a7030"/>
+<text x="232" y="462" text-anchor="middle" fill="#eaddaa" font-size="7" font-weight="700">12V</text>
+<rect x="218" y="436" width="28" height="14" rx="2" fill="#060a0b" stroke="#4a8b8e"/>
+<text x="232" y="446" text-anchor="middle" fill="#4a9ba8" font-size="7">GND</text>
+
+<!-- Bus bar OUT-A → F1 inline → CH1 Vertex strip wire to right -->
+<path d="M 440 447 L 660 447" fill="none" stroke="#eaddaa" stroke-width="2.5" marker-end="url(#m12)"/>
+<rect x="446" y="432" width="172" height="18" rx="3" fill="#0a181a" stroke="#3a6b70"/>
+<text x="532" y="444" text-anchor="middle" fill="#eaddaa" font-size="9" font-weight="700">F1 7.5A ATC inline → 14 AWG → CH1 strip V+</text>
+
+<!-- Bus bar OUT-B → NTC1 → FB1 -->
+<path d="M 440 469 L 450 469 L 450 620 L 440 650" fill="none" stroke="#e8a030" stroke-width="2.5"/>
+<path d="M 440 650 L 248 650" fill="none" stroke="#e8a030" stroke-width="1" stroke-dasharray="3,2"/>
+<!-- label: already shown in FB1 box -->
+<rect x="452" y="460" width="90" height="18" rx="3" fill="#1a1400" stroke="#6a5020"/>
+<text x="497" y="472" text-anchor="middle" fill="#e8a030" font-size="9" font-weight="700">NTC1 → FB1</text>
+
+<!-- FB1 OUT → LED strips (right, CH2-7) -->
+<path d="M 440 650 L 660 650" fill="none" stroke="#e8a030" stroke-width="2.5" marker-end="url(#m50)"/>
+<rect x="446" y="634" width="172" height="18" rx="3" fill="#1a1400" stroke="#6a5020"/>
+<text x="532" y="646" text-anchor="middle" fill="#e8a030" font-size="9" font-weight="700">F2–F7 7.5A branches → 14 AWG → strips V+</text>
+
+<!-- Breakout 12V → Scent and Vertex Coil -->
+<path d="M 440 165 L 660 165" fill="none" stroke="#eaddaa" stroke-width="2.5" marker-end="url(#m12)"/>
+<rect x="446" y="150" width="172" height="18" rx="3" fill="#0a1c0e" stroke="#2a5a38"/>
+<text x="532" y="162" text-anchor="middle" fill="#eaddaa" font-size="9" font-weight="700">12V → Scent DC screw terminal VIN+</text>
+
+<path d="M 440 184 L 540 184 L 540 290 L 660 290" fill="none" stroke="#eaddaa" stroke-width="2.5" marker-end="url(#m12)"/>
+<rect x="446" y="195" width="172" height="18" rx="3" fill="#170d0d" stroke="#6b2a2a"/>
+<text x="532" y="207" text-anchor="middle" fill="#eaddaa" font-size="9" font-weight="700">12V → 3A fuse → JST SM 2-pin (Vertex Coil)</text>
+
+<!-- Breakout 5V → WS2815 logic only -->
+<path d="M 440 203 L 550 203 L 550 548 L 660 548" fill="none" stroke="#c9a86a" stroke-width="2" marker-end="url(#m5)"/>
+<rect x="466" y="218" width="172" height="18" rx="3" fill="#0a180e" stroke="#2a5a38"/>
+<text x="552" y="230" text-anchor="middle" fill="#c9a86a" font-size="9" font-weight="700">5V → ESP Vin header pins (3× boards)</text>
+
+<!-- USB adapter → Playback (isolated, dashed) -->
+<path d="M 182 655 L 610 655 L 610 830 L 660 830" fill="none" stroke="#88e2d6" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#musb)"/>
+<rect x="232" y="660" width="192" height="18" rx="3" fill="#0a1214" stroke="#2a5060"/>
+<text x="328" y="672" text-anchor="middle" fill="#88e2d6" font-size="9" font-weight="700">USB-C 5V/2A · isolated · own mains plug</text>
+
+<!-- Mean Well → GAB8 -->
+<path d="M 182 751 L 610 751 L 610 740 L 660 740" fill="none" stroke="#e07070" stroke-width="2.5" marker-end="url(#m24)"/>
+<rect x="232" y="756" width="192" height="18" rx="3" fill="#170d0d" stroke="#6b2a2a"/>
+<text x="328" y="768" text-anchor="middle" fill="#e07070" font-size="9" font-weight="700">24V · Screw terminal → GAB8 V+</text>
+
+<!-- ════════════════════════════════════════════════════════
+     CONTROLLER BOXES (right, x=660)
+     ════════════════════════════════════════════════════════ -->
+
+<!-- WS2815 LED Controller -->
+<g data-tip="WS2815 LED Controller · Rev 1.6&#10;Three separate power inputs (all from ATX path):&#10;  5V logic: Breakout 5V+ → ESP header Vin pins&#10;  12V 5A: Bus bar OUT-A → F1 → strip V+ screw/spade&#10;  12V 50A: Bus bar OUT-B → NTC1 → FB1 → strip V+ screws&#10;All strip GNDs → common GND bus → star point">
+<rect x="660" y="400" width="360" height="330" rx="8" fill="#0a181a" stroke="#2a5a6a" stroke-width="2"/>
+<text x="840" y="422" text-anchor="middle" fill="#88c4d0" font-size="11" font-weight="700" letter-spacing="3">WS2815 LED CONTROLLER</text>
+
+<!-- 5V sub -->
+<rect x="672" y="430" width="336" height="66" rx="4" fill="#0f1c14" stroke="#2a5a38"/>
+<text x="840" y="446" text-anchor="middle" fill="#c9a86a" font-size="9" font-weight="700">5V LOGIC — from Breakout ② 5V+</text>
+<text x="678" y="462" fill="#8eb5b8" font-size="9">Input: ESP32-S3 Master/Slave Vin pins · U2 SN74AHCT245 VCC</text>
+<text x="678" y="476" fill="#c9a86a" font-size="8" font-weight="700">Connector: 2.54mm header pin (Vin) · bare wire into header</text>
+<rect x="656" y="458" width="10" height="10" rx="2" fill="#c9a86a"/>
+
+<!-- 12V 5A sub -->
+<rect x="672" y="504" width="336" height="76" rx="4" fill="#111f21" stroke="#3a6b70"/>
+<text x="840" y="520" text-anchor="middle" fill="#eaddaa" font-size="9" font-weight="700">12V 5A — Strip #1 VERTEX · Bus bar OUT-A</text>
+<text x="678" y="536" fill="#8eb5b8" font-size="9">Path: Bus bar V+ → F1 7.5A ATC inline → C1 1000µF → Strip V+</text>
+<text x="678" y="550" fill="#eaddaa" font-size="8" font-weight="700">Connector at strip: Screw terminal or spade lug · 14AWG</text>
+<text x="678" y="564" fill="#8eb5b8" font-size="8">⚠ V+ isolated — no bridge to 50A bus</text>
+<rect x="656" y="530" width="10" height="10" rx="2" fill="#eaddaa"/>
+
+<!-- 12V 50A sub -->
+<rect x="672" y="588" width="336" height="128" rx="4" fill="#1a1400" stroke="#6a5020"/>
+<text x="840" y="604" text-anchor="middle" fill="#e8a030" font-size="9" font-weight="700">12V 50A — Strips #2–#7 EDGE · Bus bar OUT-B via FB1</text>
+<text x="678" y="620" fill="#8eb5b8" font-size="9">6 strips · 280 LEDs each · ~4.2A max each</text>
+<text x="678" y="634" fill="#8eb5b8" font-size="9">FB1 branch → strip head V+ (14AWG) + mid-inject at S2/S3</text>
+<text x="678" y="648" fill="#e8a030" font-size="8" font-weight="700">Connector at strip: Screw terminal · 14AWG per branch</text>
+<text x="678" y="662" fill="#8eb5b8" font-size="8">⚠ V+ isolated — no bridge between strips</text>
+<text x="678" y="676" fill="#8eb5b8" font-size="8">⚠ GND: all strips share GND bus → star point</text>
+<rect x="656" y="642" width="10" height="10" rx="2" fill="#e8a030"/>
+</g>
+
+<!-- Scent Controller -->
+<g data-tip="Scent Controller · Rev 2.0&#10;Input: 12V from ATX Breakout ① 12V+&#10;Connector IN: DC Screw Terminal Block VIN+/GND (on board)&#10;Wire: ATX Breakout screw → 18AWG ferrule-crimped → VIN+&#10;Range: 7–36V DC · 12V ✓">
+<rect x="660" y="100" width="360" height="110" rx="8" fill="#0a180e" stroke="#2a5a3a" stroke-width="2"/>
+<text x="840" y="122" text-anchor="middle" fill="#6ab88a" font-size="11" font-weight="700" letter-spacing="3">SCENT CONTROLLER</text>
+<rect x="672" y="130" width="336" height="66" rx="4" fill="#0a1c0e" stroke="#2a5a38"/>
+<text x="840" y="146" text-anchor="middle" fill="#eaddaa" font-size="9" font-weight="700">12V from ATX Breakout ① 12V+ screw terminal</text>
+<text x="678" y="162" fill="#8eb5b8" font-size="9">Connector IN: DC Screw Terminal Block VIN+/GND</text>
+<text x="678" y="176" fill="#eaddaa" font-size="8" font-weight="700">Wire: 18AWG ferrule crimp → from breakout ① 12V+ terminal</text>
+<rect x="656" y="156" width="10" height="10" rx="2" fill="#eaddaa"/>
+</g>
+
+<!-- Vertex Series Coil -->
+<g data-tip="Vertex Series Coil · Rev 1.0a&#10;Input: 12V from ATX Breakout ① 12V+&#10;Connector IN: JST SM 2-pin (locking)&#10;Wire: 18AWG from breakout → inline 3A fast-blow fuse → JST SM female&#10;⚠ JST SM housing must be crimped — not JST PH or ZH">
+<rect x="660" y="240" width="360" height="126" rx="8" fill="#170d0d" stroke="#6b2a2a" stroke-width="2"/>
+<text x="840" y="262" text-anchor="middle" fill="#e07070" font-size="11" font-weight="700" letter-spacing="3">VERTEX SERIES COIL</text>
+<rect x="672" y="270" width="336" height="82" rx="4" fill="#1a0808" stroke="#6b2a2a"/>
+<text x="840" y="286" text-anchor="middle" fill="#eaddaa" font-size="9" font-weight="700">12V from ATX Breakout ① 12V+ screw terminal</text>
+<text x="678" y="302" fill="#8eb5b8" font-size="9">Connector IN: JST SM 2-pin (locking, weatherproof)</text>
+<text x="678" y="316" fill="#eaddaa" font-size="8" font-weight="700">Wire: 18AWG → 3A fast-blow inline → JST SM female → board JST SM male</text>
+<text x="678" y="330" fill="#8eb5b8" font-size="8">Board internal: JST → F1 3A → TCO1 → XL4015 buck → coils</text>
+<text x="678" y="344" fill="#e07070" font-size="8">⚠ Crimp JST SM female housing onto wire (not JST PH — different pitch)</text>
+<rect x="656" y="300" width="10" height="10" rx="2" fill="#eaddaa"/>
+</g>
+
+<!-- Playback Controller -->
+<g data-tip="Media Playback Controller · Rev 1.0&#10;Board: ESP32-S3-DevKitC-1&#10;Power: isolated USB-C 5V/2A wall adapter (NOT ATX)&#10;&#10;Connector IN: USB-C port on ESP32-S3 board&#10;Source: dedicated USB wall adapter → USB-C cable&#10;&#10;Why NOT ATX?&#10;Playback sends audio signal into GAB8 amplifier.&#10;Sharing ATX GND with GAB8 power can create a&#10;ground loop → 50/60Hz hum in speakers/transducers.&#10;Isolated adapter breaks the loop completely.&#10;&#10;GND: floating from ATX — do not connect to star ground">
+<rect x="660" y="790" width="360" height="120" rx="8" fill="#0a181a" stroke="#2a5a6a" stroke-width="2"/>
+<text x="840" y="812" text-anchor="middle" fill="#88c4d0" font-size="11" font-weight="700" letter-spacing="3">PLAYBACK CTRL</text>
+<text x="840" y="826" text-anchor="middle" fill="#8eb5b8" font-size="9">ESP32-S3-DevKitC-1 · Rev 1.0</text>
+<rect x="672" y="832" width="336" height="40" rx="4" fill="#0a1a1a" stroke="#88e2d6" stroke-width="1.5" stroke-dasharray="5,3"/>
+<text x="840" y="848" text-anchor="middle" fill="#88e2d6" font-size="10" font-weight="700">⚠ ISOLATED — NOT on ATX rails</text>
+<text x="840" y="862" text-anchor="middle" fill="#88e2d6" font-size="9">Prevents audio ground loop into GAB8</text>
+<rect x="672" y="878" width="336" height="24" rx="4" fill="#0a1214" stroke="#2a5a6a"/>
+<text x="840" y="894" text-anchor="middle" fill="#88e2d6" font-size="9" font-weight="700">USB-C wall adapter → ESP32-S3 USB-C port</text>
+<rect x="656" y="846" width="10" height="10" rx="2" fill="#88e2d6"/>
+</g>
+
+<!-- GAB8 Amplifier -->
+<g data-tip="GAB8 Amplifier · own Mean Well PSU&#10;Input: 24V screw terminal V+/GND from Mean Well&#10;NOT connected to ATX at all">
+<rect x="660" y="710" width="360" height="70" rx="8" fill="#161407" stroke="#5a4a20" stroke-width="2"/>
+<text x="840" y="732" text-anchor="middle" fill="#d4b86a" font-size="11" font-weight="700" letter-spacing="3">GAB8 AMPLIFIER</text>
+<text x="840" y="748" text-anchor="middle" fill="#8eb5b8" font-size="9">24V from Mean Well · Screw terminal V+/GND · Own PSU</text>
+<text x="840" y="762" text-anchor="middle" fill="#e07070" font-size="8">⚠ NOT connected to ATX · own IEC mains feed</text>
+<rect x="656" y="732" width="10" height="10" rx="2" fill="#e07070"/>
+</g>
+
+<!-- ════════════════════════════════════════════════════════
+     CONNECTOR VISUAL GUIDE (bottom)
+     ════════════════════════════════════════════════════════ -->
+<rect x="14" y="760" width="630" height="200" rx="8" fill="#0f1a1c" stroke="#4a6b6d" stroke-width="1.5"/>
+<text x="329" y="778" text-anchor="middle" fill="#eaddaa" font-size="11" font-weight="700" letter-spacing="2">ATX CONNECTOR GUIDE — HOW TO FEED THE BUS BAR</text>
+
+<!-- divider between two options -->
+<line x1="329" y1="786" x2="329" y2="952" stroke="#2a4040" stroke-width="1" stroke-dasharray="4,3"/>
+
+<!-- ── LEFT: MOLEX 4-pin ── -->
+<text x="171" y="796" text-anchor="middle" fill="#c8c840" font-size="10" font-weight="700">OPTION A — Molex 4-pin × 3  (Alternative)</text>
+
+<!-- Step 1: ATX cable label -->
+<rect x="22" y="803" width="68" height="28" rx="3" fill="#161407" stroke="#5a4a20"/>
+<text x="56" y="815" text-anchor="middle" fill="#eaddaa" font-size="8" font-weight="700">ATX PSU</text>
+<text x="56" y="825" text-anchor="middle" fill="#8eb5b8" font-size="7">cable bundle</text>
+<!-- arrow right -->
+<line x1="90" y1="817" x2="102" y2="817" stroke="#8eb5b8" stroke-width="1.5" marker-end="url(#mwht)"/>
+
+<!-- Molex plug drawing (side profile) -->
+<rect x="102" y="803" width="52" height="28" rx="2" fill="#1a1a10" stroke="#c8c840" stroke-width="1.5"/>
+<text x="128" y="813" text-anchor="middle" fill="#c8c840" font-size="7" font-weight="700">MOLEX</text>
+<text x="128" y="822" text-anchor="middle" fill="#8eb5b8" font-size="7">4-pin plug</text>
+<!-- 4 pin slots on right face -->
+<rect x="151" y="806" width="5" height="5" rx="1" fill="#c8c840" opacity="0.7"/>
+<rect x="151" y="814" width="5" height="5" rx="1" fill="#c8c840" opacity="0.7"/>
+<rect x="151" y="822" width="5" height="5" rx="1" fill="#c8c840" opacity="0.7"/>
+
+<!-- pigtail adapter label below -->
+<text x="128" y="840" text-anchor="middle" fill="#8eb5b8" font-size="7">Large rectangular white plug</text>
+<text x="128" y="850" text-anchor="middle" fill="#8eb5b8" font-size="7">on ATX cable bundle</text>
+
+<!-- arrow right -->
+<line x1="156" y1="817" x2="168" y2="817" stroke="#8eb5b8" stroke-width="1.5" marker-end="url(#mwht)"/>
+
+<!-- Pigtail adapter box -->
+<rect x="168" y="803" width="60" height="28" rx="2" fill="#0a1a0a" stroke="#4a8040"/>
+<text x="198" y="813" text-anchor="middle" fill="#88c880" font-size="7" font-weight="700">PIGTAIL</text>
+<text x="198" y="822" text-anchor="middle" fill="#8eb5b8" font-size="7">ADAPTER</text>
+<text x="128" y="862" text-anchor="middle" fill="#88c880" font-size="7">Buy: "Molex female → bare wire"</text>
+<text x="128" y="872" text-anchor="middle" fill="#8eb5b8" font-size="7">~$3 each · plug + 4 free wires</text>
+
+<!-- arrow right -->
+<line x1="228" y1="817" x2="240" y2="817" stroke="#8eb5b8" stroke-width="1.5" marker-end="url(#mwht)"/>
+
+<!-- Wires coming out -->
+<g font-size="7">
+  <!-- Yellow wire (12V) goes up to bus bar -->
+  <line x1="240" y1="817" x2="260" y2="817" stroke="#eaddaa" stroke-width="2.5"/>
+  <text x="242" y="810" fill="#eaddaa" font-weight="700">YEL=12V</text>
+  <!-- Black wire (GND) -->
+  <line x1="240" y1="817" x2="260" y2="826" stroke="#4a9ba8" stroke-width="1.5"/>
+  <text x="242" y="836" fill="#4a9ba8">BLK=GND</text>
+  <!-- Red wire (ignore) -->
+  <line x1="240" y1="817" x2="260" y2="835" stroke="#666" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="242" y="847" fill="#555">RED=5V (unused)</text>
+</g>
+
+<!-- arrow to bus bar -->
+<line x1="260" y1="817" x2="280" y2="817" stroke="#eaddaa" stroke-width="2" marker-end="url(#m12)"/>
+<line x1="260" y1="826" x2="280" y2="826" stroke="#4a9ba8" stroke-width="1.5" marker-end="url(#mgnd)"/>
+
+<!-- Bus bar terminal graphic -->
+<rect x="280" y="803" width="38" height="38" rx="2" fill="#1a1800" stroke="#8a7030" stroke-width="1.5"/>
+<text x="299" y="816" text-anchor="middle" fill="#e8d060" font-size="7" font-weight="700">BUS</text>
+<text x="299" y="826" text-anchor="middle" fill="#e8d060" font-size="7">BAR</text>
+<rect x="284" y="830" width="30" height="8" rx="1" fill="#eaddaa" opacity="0.3"/>
+<text x="299" y="837" text-anchor="middle" fill="#eaddaa" font-size="6">V+ rail</text>
+
+<!-- × 3 parallel note -->
+<rect x="22" y="882" width="296" height="36" rx="3" fill="#1a1a08" stroke="#6a6020"/>
+<text x="170" y="895" text-anchor="middle" fill="#c8c840" font-size="9" font-weight="700">Use 3 Molex connectors in parallel on same V+ terminal</text>
+<text x="170" y="908" text-anchor="middle" fill="#8eb5b8" font-size="8">Each Molex pin 3 = ~6A  →  3× parallel = ~18A total on bus</text>
+
+<!-- ── RIGHT: PCIe 8-pin (recommended) ── -->
+<text x="480" y="796" text-anchor="middle" fill="#88e2d6" font-size="10" font-weight="700">OPTION B — PCIe 8-pin × 2  ★ RECOMMENDED</text>
+
+<!-- ATX label -->
+<rect x="337" y="803" width="68" height="28" rx="3" fill="#161407" stroke="#5a4a20"/>
+<text x="371" y="815" text-anchor="middle" fill="#eaddaa" font-size="8" font-weight="700">ATX PSU</text>
+<text x="371" y="825" text-anchor="middle" fill="#8eb5b8" font-size="7">cable bundle</text>
+<!-- arrow -->
+<line x1="405" y1="817" x2="417" y2="817" stroke="#8eb5b8" stroke-width="1.5" marker-end="url(#mwht)"/>
+
+<!-- PCIe 8-pin plug drawing -->
+<rect x="417" y="800" width="58" height="34" rx="2" fill="#0a1a1a" stroke="#88e2d6" stroke-width="1.5"/>
+<text x="446" y="812" text-anchor="middle" fill="#88e2d6" font-size="7" font-weight="700">PCIe 8-pin</text>
+<text x="446" y="822" text-anchor="middle" fill="#8eb5b8" font-size="7">6+2 plug</text>
+<!-- 8 pin slots 2 rows of 4 -->
+<g fill="#88e2d6" opacity="0.6">
+  <rect x="421" y="826" width="5" height="5" rx="1"/>
+  <rect x="429" y="826" width="5" height="5" rx="1"/>
+  <rect x="437" y="826" width="5" height="5" rx="1"/>
+  <rect x="445" y="826" width="5" height="5" rx="1"/>
+  <rect x="421" y="825" width="5" height="4" rx="1" opacity="0"/>
+  <rect x="453" y="826" width="5" height="5" rx="1"/>
+  <rect x="461" y="826" width="5" height="5" rx="1"/>
+  <rect x="469" y="826" width="5" height="5" rx="1"/>
+</g>
+
+<!-- label below -->
+<text x="446" y="845" text-anchor="middle" fill="#8eb5b8" font-size="7">Wider plug — used for GPU</text>
+<text x="446" y="855" text-anchor="middle" fill="#8eb5b8" font-size="7">in normal PC · free here (no GPU)</text>
+
+<!-- arrow -->
+<line x1="475" y1="817" x2="487" y2="817" stroke="#8eb5b8" stroke-width="1.5" marker-end="url(#mwht)"/>
+
+<!-- Pigtail adapter -->
+<rect x="487" y="803" width="58" height="28" rx="2" fill="#0a1a0a" stroke="#4a8040"/>
+<text x="516" y="813" text-anchor="middle" fill="#88c880" font-size="7" font-weight="700">PIGTAIL</text>
+<text x="516" y="822" text-anchor="middle" fill="#8eb5b8" font-size="7">ADAPTER</text>
+<text x="446" y="866" text-anchor="middle" fill="#88c880" font-size="7">Buy: "PCIe 8-pin female → bare wire"</text>
+<text x="446" y="876" text-anchor="middle" fill="#8eb5b8" font-size="7">~$4 each · 12V + GND wires out</text>
+
+<!-- arrow + wires -->
+<line x1="545" y1="817" x2="557" y2="817" stroke="#8eb5b8" stroke-width="1.5" marker-end="url(#mwht)"/>
+<line x1="557" y1="817" x2="577" y2="817" stroke="#eaddaa" stroke-width="2.5"/>
+<line x1="557" y1="817" x2="577" y2="826" stroke="#4a9ba8" stroke-width="1.5"/>
+<text x="559" y="810" fill="#eaddaa" font-size="7" font-weight="700">YEL=12V</text>
+<text x="559" y="836" fill="#4a9ba8" font-size="7">BLK=GND</text>
+
+<!-- arrow to bus bar -->
+<line x1="577" y1="817" x2="593" y2="817" stroke="#eaddaa" stroke-width="2" marker-end="url(#m12)"/>
+<line x1="577" y1="826" x2="593" y2="826" stroke="#4a9ba8" stroke-width="1.5" marker-end="url(#mgnd)"/>
+
+<!-- Bus bar -->
+<rect x="593" y="803" width="38" height="38" rx="2" fill="#1a1800" stroke="#8a7030" stroke-width="1.5"/>
+<text x="612" y="816" text-anchor="middle" fill="#e8d060" font-size="7" font-weight="700">BUS</text>
+<text x="612" y="826" text-anchor="middle" fill="#e8d060" font-size="7">BAR</text>
+<rect x="597" y="830" width="30" height="8" rx="1" fill="#eaddaa" opacity="0.3"/>
+<text x="612" y="837" text-anchor="middle" fill="#eaddaa" font-size="6">V+ rail</text>
+
+<!-- × 2 parallel note -->
+<rect x="337" y="882" width="296" height="36" rx="3" fill="#0a1a1a" stroke="#2a5060"/>
+<text x="485" y="895" text-anchor="middle" fill="#88e2d6" font-size="9" font-weight="700">Use 2 PCIe 8-pin connectors in parallel on same V+ terminal</text>
+<text x="485" y="908" text-anchor="middle" fill="#8eb5b8" font-size="8">Each PCIe 8-pin = ~12.5A  →  2× parallel = ~25A total on bus ✓</text>
+
+<!-- WHY PARALLEL explanation bottom -->
+<rect x="14" y="924" width="630" height="28" rx="4" fill="#0a1414" stroke="#2a4040"/>
+<text x="329" y="934" text-anchor="middle" fill="#8eb5b8" font-size="8" font-weight="700">WHY PARALLEL?</text>
+<text x="329" y="946" text-anchor="middle" fill="#8eb5b8" font-size="8">Each connector wire has a current limit. Connecting multiple connectors to the SAME bus bar terminal adds their amps together — like adding lanes to a road.</text>
+
+<!-- GND STAR -->
+<line x1="344" y1="900" x2="840" y2="900" stroke="#4a9ba8" stroke-width="1.5" stroke-dasharray="4,2"/>
+<text x="570" y="916" text-anchor="middle" fill="#4a9ba8" font-size="9" font-weight="700">★ GND STAR — all GND returns tied here · one wire to ATX GND via breakout</text>
+
+</svg>
+<div class="tip" id="tip"><div class="tt" id="tt"></div><div id="tb"></div></div>
+</div>
+<script>
+const tip=document.getElementById('tip'),tt=document.getElementById('tt'),tb=document.getElementById('tb');
+document.getElementById('D').querySelectorAll('[data-tip]').forEach(el=>{
+  el.style.cursor='pointer';
+  el.addEventListener('mouseenter',e=>show(el,e));
+  el.addEventListener('mousemove',mv);
+  el.addEventListener('mouseleave',()=>tip.classList.remove('on'));
+});
+function show(el,e){
+  const r=el.getAttribute('data-tip').split('\n');
+  tt.textContent=r[0];
+  tb.innerHTML=r.slice(1).map(l=>l?`<div style="color:#8eb5b8">${l}</div>`:'<br>').join('');
+  tip.classList.add('on');mv(e);
+}
+function mv(e){
+  const b=tip.parentElement.getBoundingClientRect();
+  let x=e.clientX-b.left+18,y=e.clientY-b.top+18;
+  if(x+310>b.width)x=e.clientX-b.left-310;
+  if(y+320>b.height)y=e.clientY-b.top-320;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+}
+</script>
+</body>
+</html>

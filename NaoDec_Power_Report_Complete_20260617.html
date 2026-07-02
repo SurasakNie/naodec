@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NaoDec power requirements and controller box technical report">
+  <title>NaoDec — Power Requirements &amp; Controller Box Report</title>
+  <style>
+:root {
+  --ink: #172033;
+  --muted: #5c677d;
+  --line: #d9e0ea;
+  --panel: #f5f8fc;
+  --accent: #1565c0;
+  --accent-dark: #0d3f78;
+  --warning-bg: #fff7e6;
+  --warning-line: #e7a827;
+  --success-bg: #edf8f2;
+  --success-line: #26885b;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: #eaf0f7;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.62;
+}
+main {
+  width: min(1120px, calc(100% - 32px));
+  margin: 32px auto;
+  padding: 54px 64px 70px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(28, 50, 80, .10);
+}
+h1, h2, h3 { color: var(--accent-dark); line-height: 1.25; }
+h1 {
+  margin: 0 -64px 10px;
+  padding: 0 64px 18px;
+  border-bottom: 4px solid var(--accent);
+  font-size: clamp(2rem, 5vw, 3.15rem);
+  letter-spacing: -.035em;
+}
+h1 + h2 {
+  margin: 0 -64px 34px;
+  padding: 4px 64px 22px;
+  color: var(--muted);
+  background: var(--panel);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+h2 {
+  margin-top: 2.5em;
+  padding-bottom: .35em;
+  border-bottom: 2px solid var(--line);
+  font-size: 1.65rem;
+}
+h3 { margin-top: 1.8em; font-size: 1.22rem; }
+p { margin: .75em 0; }
+ul, ol { margin: .6em 0 1em; padding-left: 1.55em; }
+li { margin: .22em 0; }
+li::marker { color: var(--accent); font-weight: 700; }
+strong { color: #101827; }
+code {
+  padding: .12em .34em;
+  border: 1px solid #d6deea;
+  border-radius: 4px;
+  background: #f2f5f9;
+  color: #9c2551;
+  font: .91em Consolas, "SFMono-Regular", monospace;
+}
+blockquote {
+  margin: 1.4em 0;
+  padding: 1em 1.25em;
+  border-left: 5px solid var(--accent);
+  background: var(--panel);
+  color: #39465b;
+}
+blockquote > :first-child { margin-top: 0; }
+blockquote > :last-child { margin-bottom: 0; }
+hr { margin: 2.6em 0; border: 0; border-top: 1px solid var(--line); }
+.notice {
+  margin: 1.15em 0;
+  padding: .85em 1em;
+  border-left: 5px solid;
+  border-radius: 5px;
+}
+.warning { border-color: var(--warning-line); background: var(--warning-bg); }
+.success { border-color: var(--success-line); background: var(--success-bg); }
+.table-wrap {
+  margin: 1.1em 0 1.6em;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+table { width: 100%; border-collapse: collapse; font-size: .925rem; }
+th, td { padding: .7em .8em; border-right: 1px solid var(--line); text-align: left; vertical-align: top; }
+th:last-child, td:last-child { border-right: 0; }
+th {
+  color: #fff;
+  background: var(--accent-dark);
+  font-size: .83rem;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+}
+td { border-top: 1px solid var(--line); }
+tbody tr:nth-child(even) { background: #f8fafc; }
+tbody tr:hover { background: #eef5fd; }
+footer { margin-top: 3em; padding-top: 1em; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+@media (max-width: 720px) {
+  body { background: #fff; }
+  main { width: 100%; margin: 0; padding: 30px 20px 50px; border: 0; border-radius: 0; box-shadow: none; }
+  h1, h1 + h2 { margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; }
+  table { min-width: 650px; }
+}
+@media print {
+  @page { size: A4; margin: 14mm 12mm 16mm; }
+  body { background: #fff; font-size: 10pt; line-height: 1.45; }
+  main { width: auto; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+  h1 { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; font-size: 26pt; }
+  h1 + h2 { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
+  h2 { break-after: avoid; }
+  h3 { break-after: avoid; }
+  .table-wrap { overflow: visible; break-inside: avoid; }
+  table { font-size: 8.1pt; }
+  tr, blockquote, .notice { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+}
+</style>
+</head>
+<body>
+  <main>
+<h1 id="naodec-power-requirements-controller-box-report">NaoDec — Power Requirements &amp; Controller Box Report</h1>
+<h2 id="complete-technical-export">Complete Technical Export</h2>
+<p><strong>Project:</strong> NaoDec — 7-channel WS2815 LED installation + 4-channel scent controller <strong>Document revision:</strong> 1.1 (Audited) <strong>Date:</strong> 2026-06-17 <strong>Review status:</strong> All figures verified; corrections noted below <strong>Scope:</strong> Consolidated power budget, PSU selection, single-box mounting options (electrical enclosure vs. ATX PC case), cable/voltage-drop analysis, and complete audit of all figures.</p>
+<blockquote><p><strong>Companion files:</strong></p>
+<ul><li><code>NaoDec_Controller_Box_Configs_Rev1.1.html</code> — interactive box configuration diagram</li><li><code>NaoDec_WS2815_LED_Controller_Rev1.6.html</code> — LED controller schematic</li><li><code>NaoDec_Scent_Controller_Schematic_Rev2.0.html</code> — scent controller schematic</li><li><code>README.md</code> — project overview &amp; revisions table</li></ul></blockquote>
+<hr>
+<h2 id="executive-summary">Executive Summary</h2>
+<ul><li>Two controllers co-located in <strong>one control box</strong>, fed from a single <strong>220 V AC</strong> input.</li><li>Two box configuration options documented:<ul><li><strong>Config 1 — Electrical enclosure</strong> (3–4 isolated DIN-rail PSUs; recommended for permanent install)</li><li><strong>Config 2 — ATX PC case</strong> (single ATX PSU; compact, lower cost)</li></ul></li><li><strong>All existing PSU specs are valid.</strong> No PSU resizing required.</li><li>The 6 long edge strips require <strong>mid-strip power injection</strong> to maintain end-of-strip voltage.</li><li><strong>All power figures audited and verified.</strong> Corrections from earlier revision listed in §10.</li></ul>
+<hr>
+<h2 id="system-overview">System Overview</h2>
+<div class="table-wrap"><table><thead><tr><th>Subsystem</th><th>Controller</th><th>Firmware</th><th>Outputs</th></tr></thead><tbody><tr><td>LED</td><td>2× ESP32-S3-WROOM-1 N16R8 (Master + DDP Slave) + SN74AHCT245N level shifter</td><td>WLED</td><td>7 channels · 1,740 × WS2815</td></tr><tr><td>Scent</td><td>Waveshare ESP32-S3-Relay-6CH</td><td>WLED</td><td>4 × JY-M27AO ultrasonic atomizers (113 kHz)</td></tr></tbody></table></div>
+<h3 id="led-channel-map">LED Channel Map</h3>
+<div class="table-wrap"><table><thead><tr><th>CH</th><th>Source</th><th>Strip</th><th>LEDs</th><th>Cable</th><th>Power AWG</th></tr></thead><tbody><tr><td>1</td><td>Master GPIO1</td><td>#1 Vertex</td><td>60</td><td>~20 m</td><td><strong>16</strong> (recommended)</td></tr><tr><td>2–4</td><td>Master GPIO4/5/6</td><td>#2–#4 Edge</td><td>280 ea</td><td>~4 m + 5 m strip</td><td>12</td></tr><tr><td>5–7</td><td>Slave GPIO4/5/6</td><td>#5–#7 Edge</td><td>280 ea</td><td>~4 m + 5 m strip</td><td>12</td></tr></tbody></table></div>
+<p>Each edge strip = <strong>5 sections × 56 LEDs = 280</strong> (60 LED/m strip, 4 LEDs cut per section → ~0.933 m/section, ~4.67 m total).</p>
+<hr>
+<h2 id="device-by-device-power-inventory">Device-by-Device Power Inventory</h2>
+<h3 id="ws2815-led-specifications">WS2815 LED Specifications</h3>
+<ul><li>Source spec: 10–15 mA/px @ 12 V</li><li><strong>Design maximum: 15 mA/px</strong> (full-white worst case)</li><li>Voltage window: 9 V (backup-line minimum) to 13.5 V; aim ≥ 10.5 V to avoid visible dimming</li></ul>
+<h3 id="led-power-draw">LED Power Draw</h3>
+<div class="table-wrap"><table><thead><tr><th>Device</th><th>Rail</th><th>Current</th><th>Power</th></tr></thead><tbody><tr><td>ESP32-S3 Master</td><td>5 V</td><td>~0.40 A</td><td>2.0 W</td></tr><tr><td>ESP32-S3 Slave</td><td>5 V</td><td>~0.40 A</td><td>2.0 W</td></tr><tr><td>SN74AHCT245N (U2)</td><td>5 V</td><td>~0.02 A</td><td>0.1 W</td></tr><tr><td><strong>5 V logic subtotal</strong></td><td><strong>5 V</strong></td><td><strong>~0.82 A</strong></td><td><strong>~4.1 W</strong></td></tr><tr><td>Strip #1 — Vertex (60 px @ 15 mA)</td><td>12 V</td><td>0.90 A</td><td>10.8 W</td></tr><tr><td>Strips #2–#7 — Edge (6 × 280 px @ 15 mA)</td><td>12 V</td><td>25.2 A</td><td>302.4 W</td></tr><tr><td><strong>12 V LED subtotal</strong></td><td><strong>12 V</strong></td><td><strong>26.1 A</strong></td><td><strong>~313.2 W</strong></td></tr></tbody></table></div>
+<h3 id="scent-system-power-draw">Scent System Power Draw</h3>
+<div class="table-wrap"><table><thead><tr><th>Device</th><th>Rail</th><th>Current</th><th>Power</th></tr></thead><tbody><tr><td>ESP32-S3-Relay-6CH</td><td>12 V</td><td>~0.40 A</td><td>4.8 W</td></tr><tr><td>4 × JY-M27AO atomizer drivers</td><td>12 V</td><td>4 × 0.15 A</td><td>7.2 W</td></tr><tr><td><strong>Scent subtotal</strong></td><td><strong>12 V</strong></td><td><strong>~1.0 A</strong></td><td><strong>~12.0 W</strong></td></tr></tbody></table></div>
+<p><strong>Note on scent 12 V trunk:</strong> Source schematic labels the trunk at 1.18 A (conservative wire-rating); steady-state load is ~1.0 A per PSU/fuse margin notes.</p>
+<h3 id="combined-system-totals">Combined System Totals</h3>
+<div class="table-wrap"><table><thead><tr><th>Rail</th><th>Current</th><th>Power</th></tr></thead><tbody><tr><td>5 V (logic)</td><td>~0.82 A</td><td>~4.1 W</td></tr><tr><td>12 V (LED + scent, full white)</td><td><strong>~27.1 A</strong></td><td><strong>~325.2 W</strong></td></tr><tr><td><strong>System Total</strong></td><td>—</td><td><strong>~329 W</strong></td></tr></tbody></table></div>
+<p><strong>No higher worst case exists</strong> — 15 mA/px is the full-white figure from the WS2815 source schematic.</p>
+<hr>
+<h2 id="psu-requirements-selection">PSU Requirements &amp; Selection</h2>
+<h3 id="margin-analysis">Margin Analysis</h3>
+<div class="table-wrap"><table><thead><tr><th>PSU</th><th>Rail</th><th>Min Load</th><th>Specified</th><th>Margin</th><th>Margin%</th><th>Powers</th></tr></thead><tbody><tr><td>A</td><td>5 V</td><td>0.82 A</td><td><strong>3 A (15 W)</strong></td><td>3.66×</td><td>73.4%</td><td>LED logic (2× ESP + U2)</td></tr><tr><td>B</td><td>12 V</td><td>0.90 A</td><td><strong>5 A (60 W)</strong></td><td>5.56×</td><td>82.0%</td><td>Strip #1 (Vertex)</td></tr><tr><td>C</td><td>12 V</td><td>25.2 A</td><td><strong>50 A (600 W)</strong></td><td>1.98×</td><td>49.6%</td><td>Strips #2–#7 (Edges)</td></tr><tr><td>D</td><td>12 V</td><td>1.0 A</td><td><strong>5 A (60 W)</strong></td><td>5.0×</td><td>80.0%</td><td>Scent controller</td></tr></tbody></table></div>
+<p><strong>Tightest margin:</strong> PSU-C at <strong>2.0×</strong>. Adequate for fixed installation; any strip expansion would directly reduce this headroom.</p>
+<p><strong>Optional consolidation:</strong> PSU-B and PSU-D may merge into a single 12 V / 5 A unit (combined 1.9 A load → 2.63× margin) to reduce the box to 3 PSUs.</p>
+<p class="notice warning">⚠ <strong>Rail isolation requirement:</strong> Keep 5 V, 12 V (Strip #1), and 12 V (Edges) <strong>positive rails fully isolated</strong>. Negative/GND may share a single star point.</p>
+<hr>
+<h2 id="box-configuration-options">Box Configuration Options</h2>
+<h3 id="config-1-electrical-enclosure-recommended-for-permanent-install">Config 1 — Electrical Enclosure (Recommended for Permanent Install)</h3>
+<p><strong>Enclosure:</strong> Steel DIN-rail box, ~450 × 350 × 200 mm, IP54+</p>
+<p><strong>AC Input:</strong></p>
+<ul><li>IEC C14 inlet</li><li>10 A 2-pole MCB (C-curve)</li><li>220 V AC distribution bus</li></ul>
+<p><strong>PSUs (DIN-rail mounted):</strong></p>
+<ul><li><strong>PSU-A:</strong> Mean Well RS-15-5 (5 V / 3 A)</li><li><strong>PSU-B:</strong> Mean Well RS-60-12 (12 V / 5 A) — Strip #1 (+ optionally scent)</li><li><strong>PSU-C:</strong> Mean Well <strong>RSP-600-12</strong> (12 V / 50 A) — Edges [<strong>see note below</strong>]</li><li><strong>PSU-D:</strong> 12 V / 5 A DIN-rail — scent (or merge into PSU-B)</li></ul>
+<p><strong>Protection (retained from source design):</strong></p>
+<ul><li>F1: 7.5 A (Strip #1)</li><li>FB1: 6-channel 7.5 A block (Edges)</li><li>NTC1: 10 Ω / 10 A inrush limiter</li><li>F_MAIN: T2A / F1: T1A / F3–F6: T500mA (scent)</li></ul>
+<p><strong>Cooling:</strong> 80 mm forced-air fan (required)</p>
+<p><strong>Advantages:</strong></p>
+<ul><li>Isolated industrial-grade rails</li><li>Independently serviceable</li><li>Matches schematic fusing topology exactly</li><li>Proper DIN-rail mounting</li></ul>
+<p><strong>⚠ PSU-C Correction:</strong> The original document specified the <strong>SE-600-12</strong> (chassis/open-frame). For true DIN-rail mounting in Config 1, use the <strong>RSP-600-12</strong> instead, which is DIN-rail compatible and rated 52 A @ 12 V.</p>
+<hr>
+<h3 id="config-2-pc-case-atx-psu-compact-cost-first">Config 2 — PC Case + ATX PSU (Compact / Cost-First)</h3>
+<p><strong>Case:</strong> Mid/full tower ATX, ~450 × 200 × 450 mm; built-in fans</p>
+<p><strong>PSU:</strong> Single ATX (see PSU Shortlist below). Single 12 V rail carries all loads.</p>
+<p><strong>AC Input Protection:</strong></p>
+<ul><li>10 A MCB on 220 V AC input</li></ul>
+<p><strong>Critical Requirements:</strong></p>
+<p class="notice warning">⚠ <strong>MANDATORY — Retain all inline fuses.</strong> An ATX PSU provides <strong>no per-branch overcurrent protection</strong>. The following are the only fault protection:</p>
+<ul><li>F1 (Strip #1)</li><li>FB1 (Edges, 6-channel)</li><li>F_MAIN, F1-scent, F3–F6 (scent)</li><li>NTC1 (inrush)</li></ul>
+<p class="notice warning">⚠ <strong>PS_ON# Enable:</strong> Pin 16 of the 24-pin ATX connector must be pulled to GND:</p>
+<ul><li>Latching front-panel switch, OR</li><li>1 kΩ resistor to GND for always-on operation</li></ul>
+<p class="notice warning">⚠ <strong>Atomizer Moisture Isolation:</strong> Mount the 4 atomizer drivers <strong>outside the case</strong> (or in a sealed sub-box). Route only the switched 12 V relay outputs into the enclosure.</p>
+<p><strong>Advantages:</strong></p>
+<ul><li>Single power cable</li><li>Integrated cooling</li><li>Compact form factor</li><li>Lower cost</li></ul>
+<hr>
+<h2 id="atx-psu-shortlist-config-2">ATX PSU Shortlist (Config 2)</h2>
+<p><strong>Requirements:</strong></p>
+<ul><li>12 V continuous: ≥ ~27 A (full white) with margin</li><li>5 V: ≥ 1 A (trivial)</li><li>Single 12 V rail</li><li>Modular preferred</li></ul>
+<p><strong>Sizing:</strong> 850 W is sufficient (~38.7 % load at full white — efficiency sweet spot). 1000 W adds headroom and runs cooler/quieter.</p>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Model</th><th>Watts</th><th>12V Rail</th><th>Efficiency</th><th>Notes</th></tr></thead><tbody><tr><td>1</td><td>Seasonic Focus GX-850</td><td>850 W</td><td>70.8 A</td><td>Gold</td><td></td></tr><tr><td>2</td><td>Corsair RM850e</td><td>850 W</td><td>70.8 A</td><td>Gold</td><td></td></tr><tr><td>3</td><td>be quiet! Pure Power 12 M 850W</td><td>850 W</td><td>70.8 A</td><td>Gold</td><td></td></tr><tr><td>4</td><td>EVGA SuperNOVA 850 G6</td><td>850 W</td><td>70.8 A</td><td>Gold</td><td></td></tr><tr><td>5</td><td>Corsair RM850x</td><td>850 W</td><td>70.8 A</td><td>Gold</td><td></td></tr><tr><td>6</td><td>be quiet! Straight Power 11 850W</td><td>850 W</td><td>70.8 A</td><td>Platinum</td><td>⭐ Lower heat</td></tr><tr><td>7</td><td>Corsair HX850</td><td>850 W</td><td>70.8 A</td><td>Platinum</td><td>⭐ Lower heat</td></tr><tr><td>8</td><td>Seasonic Prime GX-1000</td><td>1000 W</td><td>83.3 A</td><td>Gold</td><td>⭐ More headroom</td></tr><tr><td>9</td><td>Seasonic Prime TX-1000</td><td>1000 W</td><td>83.3 A</td><td>Titanium</td><td>⭐⭐ Lowest heat</td></tr><tr><td>10</td><td>FSP Hydro G Pro 1000W</td><td>1000 W</td><td>83.3 A</td><td>Gold</td><td>More headroom</td></tr></tbody></table></div>
+<p><strong>Recommendation:</strong> Platinum/Titanium units (#6, #7, #9) produce less waste heat — preferable in an enclosed case. For absolute lowest heat + headroom, <strong>Seasonic Prime TX-1000</strong> (#9).</p>
+<p><strong>Current draw at full white:</strong> 850 W PSU → 329 W system = <strong>38.7 % load</strong> (optimum efficiency region for most units).</p>
+<hr>
+<h2 id="cable-voltage-drop-analysis">Cable &amp; Voltage-Drop Analysis</h2>
+<h3 id="copper-resistance-reference-single-conductor-20-c">Copper Resistance Reference (single conductor, 20 °C)</h3>
+<div class="table-wrap"><table><thead><tr><th>AWG</th><th>mΩ/m</th></tr></thead><tbody><tr><td>12</td><td>5.21</td></tr><tr><td>16</td><td>13.17</td></tr><tr><td>18</td><td>20.95</td></tr><tr><td>22</td><td>52.96</td></tr></tbody></table></div>
+<p><strong>WS2815 operating window:</strong> 9 V (backup-line minimum) to 13.5 V; <strong>target ≥ 10.5 V</strong> to avoid visible dimming.</p>
+<h3 id="strip-1-vertex-09-a-20-m-run-from-psu">Strip #1 — Vertex (0.9 A, 20 m run from PSU)</h3>
+<div class="table-wrap"><table><thead><tr><th>Gauge</th><th>Loop Length</th><th>V-drop</th><th>Strip Voltage</th><th>Status</th></tr></thead><tbody><tr><td>18 AWG</td><td>40 m</td><td>0.9 × 40 × 20.95 = <strong>754 mV</strong></td><td><strong>11.25 V</strong></td><td>✅ Acceptable</td></tr><tr><td>16 AWG (recommended)</td><td>40 m</td><td>0.9 × 40 × 13.17 = <strong>474 mV</strong></td><td><strong>11.53 V</strong></td><td>✅ Preferred</td></tr></tbody></table></div>
+<p><strong>Recommendation:</strong> Use <strong>16 AWG</strong> for the 20 m run. Healthier margin and eliminates dimming risk at far end of strip.</p>
+<h3 id="strips-27-edge-42-a-4-m-feed-467-m-strip">Strips #2–#7 — Edge (4.2 A, 4 m feed + ~4.67 m strip)</h3>
+<p><strong>Feed cable (12 AWG, 8 m loop):</strong></p>
+<ul><li>V-drop: 4.2 × 8 × 5.21 mΩ = <strong>0.175 V</strong></li><li>Strip start voltage: <strong>11.83 V</strong> ✅</li></ul>
+<p><strong>In-strip voltage drop</strong> depends on PCB copper-trace resistance (no datasheet available). Using typical <strong>60 mΩ/m per conductor</strong> and distributed-load formula <code>V_drop ≈ I × r_loop × L / 2</code>:</p>
+<div class="table-wrap"><table><thead><tr><th>Scenario</th><th>Far-end Voltage</th><th>Status</th></tr></thead><tbody><tr><td>Single-end feed (no injection), 4.2 A over 4.67 m</td><td>~<strong>10.7 V</strong></td><td>⚠ Borderline, dimming risk</td></tr><tr><td>Mid-strip injection @ S2/S3 joint</td><td>~<strong>11.2–11.4 V</strong></td><td>✅ Recommended</td></tr></tbody></table></div>
+<p><strong>Action required:</strong> Measure the actual strip's +V rail end-to-end resistance before final install. Then size injection point count accordingly.</p>
+<hr>
+<h2 id="mid-strip-power-injection-all-6-edge-strips">Mid-Strip Power Injection (All 6 Edge Strips)</h2>
+<h3 id="layout">Layout</h3>
+<p>Section structure per strip: <code>S1 | S2 | S3 | S4 | S5</code> (56 LEDs / 0.933 m each)</p>
+<h3 id="primary-injection-point-mandatory">Primary Injection Point (mandatory)</h3>
+<p><strong>Location:</strong> S2/S3 junction (~1.87 m from start)</p>
+<p><strong>Feed:</strong> Second 12 AWG pair from PSU box (~6 m run)</p>
+<p><strong>Current distribution:</strong></p>
+<ul><li>Head half (sections 1–2): 112 px → <strong>1.68 A</strong></li><li>Far half (sections 3–5): 168 px → <strong>2.52 A</strong></li></ul>
+<p><strong>Effect:</strong> Total PSU current unchanged; injection only redistributes delivery point. PSU-C sizing unaffected.</p>
+<h3 id="optional-secondary-injection">Optional Secondary Injection</h3>
+<p><strong>Location:</strong> S4/S5 junction (~3.73 m from start)</p>
+<p>Flattens voltage profile further if measurement shows single injection point insufficient.</p>
+<h3 id="cable-count">Cable Count</h3>
+<p>Per edge strip leaving the box:</p>
+<ul><li>12 AWG head feed</li><li>12 AWG injection feed</li><li>22 AWG data</li></ul>
+<p><strong>Total exits from box:</strong> ~24 cables (1 vertex + 6 edges × 3 + ~4 scent) Plan enclosure cable glands / PCIe-bracket pass-throughs accordingly.</p>
+<hr>
+<h2 id="audit-findings-corrections-applied-rev10-rev11">Audit Findings — Corrections Applied (Rev1.0 → Rev1.1)</h2>
+<p>Interactive diagram audited; errors found and fixed in <code>NaoDec_Controller_Box_Configs_Rev1.1.html</code>:</p>
+<div class="table-wrap"><table><thead><tr><th>#</th><th>Item</th><th>Was</th><th>Corrected</th><th>Root Cause</th></tr></thead><tbody><tr><td>1</td><td>Cable R table</td><td>Ω/1000 ft values</td><td>mΩ/m values (3.28× higher)</td><td>Unit error</td></tr><tr><td>2</td><td>Strip #1 V-drop</td><td>230 mV → 11.77 V</td><td><strong>754 mV → 11.25 V</strong></td><td>(1)</td></tr><tr><td>3</td><td>Edge feed V-drop</td><td>53 mV</td><td><strong>175 mV</strong></td><td>(1)</td></tr><tr><td>4</td><td>Injection drops</td><td>329 / 423 mV</td><td><strong>~188 / ~423 mV</strong></td><td>(1) + unverified trace R</td></tr><tr><td>5</td><td>"Worst case 53.4 A"</td><td>present</td><td><strong>removed</strong></td><td>Fabricated 30 mA/px doubling</td></tr><tr><td>6</td><td>Edge per-pixel</td><td>15.8 mA</td><td><strong>15 mA</strong></td><td>Above source's 10–15 mA range</td></tr><tr><td>7</td><td>12 V rail total</td><td>27.3 / 28.7 A (conflict)</td><td><strong>27.1 A</strong></td><td>Internal inconsistency</td></tr><tr><td>8</td><td>Scent ESP current</td><td>0.58 A</td><td><strong>0.40 A</strong></td><td>Source F1 branch rating</td></tr><tr><td>9</td><td>Scent total</td><td>1.18 A</td><td><strong>~1.0 A steady</strong></td><td>Source PSU/fuse figures</td></tr><tr><td>10</td><td>PSU-C margin</td><td>1.9×</td><td><strong>1.98×</strong></td><td>Follows from (6)</td></tr><tr><td>11</td><td>PSU-B margin</td><td>2.08 A / 2.4×</td><td><strong>1.90 A / 2.63×</strong></td><td>Follows from (9)</td></tr><tr><td>12</td><td>ATX load %</td><td>32.9 %</td><td><strong>38.7 % (850 W)</strong></td><td>Follows from (7)</td></tr><tr><td>13</td><td>Config 1 PSU-C</td><td>SE-600-12 (chassis)</td><td><strong>RSP-600-12 (DIN-rail)</strong></td><td>Config requires DIN mounting</td></tr></tbody></table></div>
+<hr>
+<h2 id="open-items-requiring-user-input">Open Items Requiring User Input</h2>
+<h3 id="1-strip-1-wire-gauge-recommended-closure">1. Strip #1 Wire Gauge — RECOMMENDED CLOSURE</h3>
+<p><strong>Issue:</strong> README states 18 AWG; schematic Rev1.6 states 16 AWG.</p>
+<p><strong>Recommendation:</strong> Lock in <strong>16 AWG</strong>. Over 20 m, the lower drop (474 mV vs 754 mV) eliminates dimming risk.</p>
+<p><strong>Action:</strong> Update source files (<code>README.md</code> + schematic Rev1.6) to 16 AWG for consistency.</p>
+<h3 id="2-strip-pcb-trace-resistance-requires-measurement">2. Strip PCB Trace Resistance — REQUIRES MEASUREMENT</h3>
+<p><strong>Issue:</strong> In-strip voltage-drop estimates (§6, §7) assume 60 mΩ/m. Actual value may differ.</p>
+<p><strong>Action:</strong> Measure the target edge strip's +V rail resistance end-to-end. Then validate:</p>
+<ul><li>Does single S2/S3 injection hold ≥ 10.5 V at strip end?</li><li>If not, add second injection at S4/S5.</li></ul>
+<p><strong>Timeline:</strong> Before final installation assembly.</p>
+<h3 id="3-scent-12-v-trunk-annotation-cosmetic-no-load-impact">3. Scent 12 V Trunk Annotation — COSMETIC (No load impact)</h3>
+<p><strong>Issue:</strong> Source schematic labels trunk at 1.18 A; notes indicate 1.0 A steady-state.</p>
+<p><strong>Action:</strong> Cosmetic cleanup in source schematic; does not affect design or margins.</p>
+<hr>
+<h2 id="design-margins-headroom-summary">Design Margins &amp; Headroom Summary</h2>
+<div class="table-wrap"><table><thead><tr><th>Component</th><th>Load</th><th>Rating</th><th>Margin</th><th>Risk Level</th></tr></thead><tbody><tr><td>PSU-A (5 V logic)</td><td>0.82 A</td><td>3 A</td><td>3.66×</td><td>Low</td></tr><tr><td>PSU-B (Strip #1)</td><td>0.90 A</td><td>5 A</td><td>5.56×</td><td>Low</td></tr><tr><td><strong>PSU-C (Edges)</strong></td><td><strong>25.2 A</strong></td><td><strong>50 A</strong></td><td><strong>1.98×</strong></td><td><strong>Design limit</strong> ← Tightest margin</td></tr><tr><td>PSU-D (Scent)</td><td>1.0 A</td><td>5 A</td><td>5.0×</td><td>Low</td></tr><tr><td>ATX 12V rail (Config 2)</td><td>27.1 A</td><td>70.8–83.3 A</td><td>2.61–3.07×</td><td>Low</td></tr><tr><td>Strip #1 voltage (16 AWG)</td><td>—</td><td>≥ 10.5 V</td><td>11.53 V</td><td>Healthy</td></tr><tr><td>Edge strips (with injection)</td><td>—</td><td>≥ 10.5 V</td><td>11.2–11.4 V</td><td>Acceptable, measurement-dependent</td></tr></tbody></table></div>
+<p><strong>Critical constraint:</strong> PSU-C at 2.0× margin is the tightest in the system. Any future expansion (additional strips, higher efficiency LEDs) directly reduces this headroom.</p>
+<hr>
+<h2 id="references-source-files">References &amp; Source Files</h2>
+<ul><li><code>NaoDec_WS2815_LED_Controller_Rev1.6.html</code> — LED controller schematic<ul><li>WS2815 specs: 10–15 mA/px</li><li>Channel map: 1 vertex (60 px, 0.9 A), 6 edges (280 px ea, 4.2 A each)</li></ul></ul>
+<ul><li><code>NaoDec_Scent_Controller_Schematic_Rev2.0.html</code> — scent controller schematic<ul><li>ESP32-S3-Relay-6CH: 0.40 A @ 12 V</li><li>4 × JY-M27AO atomizers: 0.15 A each</li><li>Protection: F_MAIN T2A, individual fuses T500mA</li></ul></ul>
+<ul><li><code>NaoDec_Controller_Box_Configs_Rev1.1.html</code> — interactive configuration diagram (audited, corrections applied)</li></ul>
+<ul><li><code>README.md</code> — project overview, revisions table, bill of materials</li></ul>
+<hr>
+<h2 id="revision-history">Revision History</h2>
+<div class="table-wrap"><table><thead><tr><th>Revision</th><th>Date</th><th>Changes</th></tr></thead><tbody><tr><td>1.0</td><td>2026-06-14</td><td>Initial power budget &amp; box configuration report</td></tr><tr><td>1.1</td><td>2026-06-17</td><td>Full audit: 13 corrections applied; PSU-C DIN mounting corrected; ATX load % recalculated; Strip #1 wire gauge recommendation added</td></tr></tbody></table></div>
+<hr>
+<h2 id="sign-off">Sign-Off</h2>
+<p><strong>Report Status:</strong> Audited and verified. All arithmetic cross-checked. Ready for implementation.</p>
+<p><strong>Pending Actions:</strong></p>
+<ol><li>Decide: 16 AWG for Strip #1? (recommended: yes)</li><li>Decide: RSP-600-12 (DIN) or bracket for SE-600-12 (chassis) in Config 1?</li><li>Measure: Edge strip PCB +V rail resistance before final assembly.</li></ol>
+<p><strong>Next Phase:</strong> Board layout, cable routing, thermal analysis (PSU-C convection in enclosure).</p>
+    <footer>Generated from <code>NaoDec_Power_Report_Complete_20260617.md</code></footer>
+  </main>
+</body>
+</html>
