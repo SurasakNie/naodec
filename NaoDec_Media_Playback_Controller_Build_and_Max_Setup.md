@@ -8,7 +8,8 @@
 > Rev 2.0 — Design hardening: LED1 Wi-Fi status indicator (GPIO12 via R11 330 Ω),
 > R6–R10 100 Ω series protection on every off-board GPIO line, H1 keyed JST-XH 5-pin
 > encoder connector, encoder shaft-to-GND continuity check, USB-C cable spec ≤ 1 m.
-> Rev 1.0 schematic remains in the repo for reference.
+> Also folds in the KY-040 optional encoder-replacement documentation. Rev 1.0
+> schematic remains in the repo for reference.
 >
 > Rev 1.1 — Sections 6 and 8 aligned with the real ASUS RT-AX1800HP LAN: Max host
 > `192.168.50.2`, controller reserved at `192.168.50.114` per the `.11x` convention.
@@ -33,7 +34,7 @@ The Max computer should be connected to the ASUS router by wired Ethernet. The E
 | Ref | Qty | Item | Description |
 |---|---:|---|---|
 | U1 | 1 | ESP32-S3-DevKitC-1 | Main controller board, USB-C, N8R8 or N16R8 preferred |
-| ENC1 | 1 | NEBDS-01 / EC11 encoder module | Rotary encoder module with Schmitt trigger / anti-bounce, pins `A`, `B`, `SW`, `VCC`, `GND` |
+| ENC1 | 1 | NEBDS-01 / EC11 encoder module | Preferred rotary encoder module with Schmitt trigger / anti-bounce, pins `A`, `B`, `SW`, `VCC`, `GND`; KY-040 may be used as an optional replacement |
 | SW1-SW3 | 3 | Normally-open momentary pushbutton | Play, Pause, Stop panel buttons |
 | R3-R5 | 3 | 10 kOhm resistor | Pull-ups for Play/Pause/Stop buttons |
 | R6-R10 | 5 | 100 Ohm resistor | Series protection between each GPIO and its panel wire (ESD / short protection, edge damping) |
@@ -53,7 +54,7 @@ Recommended spares:
 
 | Item | Qty |
 |---|---:|
-| NEBDS-01 / EC11 encoder module | 1 |
+| NEBDS-01 / EC11 encoder module, or KY-040 module for bench/prototype replacement | 1 |
 | Momentary pushbutton | 1 |
 | 10 kOhm resistor | 2 |
 | 100 Ohm resistor | 2 |
@@ -66,29 +67,29 @@ Recommended spares:
 
 | Function | ESP32-S3 Pin | Wire Color | Notes |
 |---|---|---|---|
-| Encoder A | GPIO7 | Green | To `ENC1 A` through R6 (100 Ohm) |
-| Encoder B | GPIO8 | Blue | To `ENC1 B` through R7 (100 Ohm) |
+| Encoder A | GPIO7 | Green | To `ENC1 A` (or `CLK` on KY-040) through R6 (100 Ohm) |
+| Encoder B | GPIO8 | Blue | To `ENC1 B` (or `DT` on KY-040) through R7 (100 Ohm) |
 | Play | GPIO9 | White | Button input, active low, through R8 (100 Ohm) |
 | Pause | GPIO10 | Yellow | Button input, active low, through R9 (100 Ohm) |
 | Stop | GPIO11 | Orange | Button input, active low, through R10 (100 Ohm) |
 | Status LED | GPIO12 | Grey | To LED1 anode through R11 (330 Ohm), active high |
-| Encoder/module power | 3V3 | Red | Connect to `ENC1 VCC` |
+| Encoder/module power | 3V3 | Red | Connect to `ENC1 VCC` on NEBDS-01, or `+` on KY-040 |
 | Ground | GND | Black | Common ground for encoder, buttons, and LED1 |
 | Power input | USB-C | USB cable | Use USB-C input path, not GPIO or 3V3 pin |
 
 Every signal that leaves the PCB (GPIO7-GPIO11) passes through a 100 Ohm series resistor
 (R6-R10) mounted on the PCB, close to the ESP32. These protect the GPIOs against ESD and
-wiring shorts and damp reflections on the panel runs.
+wiring shorts and damp reflections on the panel runs, regardless of which encoder module is fitted.
 
-### NEBDS-01 / EC11 Encoder Module
+### Encoder Module: NEBDS-01 Preferred, KY-040 Optional
 
-| Encoder Pin | Connect To | Notes |
-|---|---|---|
-| `A` | ESP32 GPIO7 via R6 | Encoder channel A |
-| `B` | ESP32 GPIO8 via R7 | Encoder channel B |
-| `SW` | Not connected | Knob press is not used |
-| `VCC` | ESP32 3V3 | Use 3.3 V only |
-| `GND` | ESP32 GND | Common ground |
+| Function | NEBDS-01 / EC11 Schmitt Pin | KY-040 Pin | ESP32-S3 Connection |
+|---|---|---|---|
+| Encoder channel A | `A` | `CLK` | GPIO7 via R6 (100 Ohm) |
+| Encoder channel B | `B` | `DT` | GPIO8 via R7 (100 Ohm) |
+| Encoder switch | `SW` | `SW` | Not connected |
+| Module power | `VCC` | `+` | ESP32 3V3 |
+| Ground | `GND` | `GND` | ESP32 GND |
 
 The encoder harness terminates in `H1`, a keyed JST-XH 5-pin connector (A, B, VCC, GND,
 plus one spare position for `SW`). A single keyed connector makes it impossible to swap
@@ -96,9 +97,23 @@ power against signal pins at reassembly.
 
 Do not add external 100 nF capacitors to encoder `A` or `B` when using this Schmitt trigger module. The original bare-encoder RC parts `R1`, `R2`, `C1`, and `C2` are not populated for this build.
 
-The EC11 metal frame and shaft normally ground through the module mounting pins. After
-mounting, verify continuity from the encoder shaft to GND — the knob is the most-touched,
-most ESD-exposed part of a plastic enclosure.
+KY-040 optional replacement notes:
+
+| Topic | NEBDS-01 / EC11 Schmitt Module | KY-040 Optional Replacement |
+|---|---|---|
+| Signal conditioning | Schmitt trigger / anti-bounce output | Usually raw or lightly pulled-up mechanical encoder output |
+| Wiring | `A -> R6 -> GPIO7`, `B -> R7 -> GPIO8`, `VCC -> 3V3`, `GND -> GND`, `SW -> NC` | `CLK -> R6 -> GPIO7`, `DT -> R7 -> GPIO8`, `+ -> 3V3`, `GND -> GND`, `SW -> NC` |
+| External A/B RC parts | Do not populate `R1`, `R2`, `C1`, or `C2` | Leave `R1`, `R2`, `C1`, and `C2` unpopulated first; use firmware filtering and test rotation behavior |
+| Firmware requirement | Normal quadrature validation | Stronger transition validation / debounce is recommended |
+| Best use | Final installed controller | Bench test or replacement when NEBDS-01 is unavailable |
+
+Power any module-style encoder from ESP32 `3V3`, not 5 V. If the KY-040 is powered from 5 V, its `CLK`, `DT`, or `SW` outputs may also pull up to 5 V, which is not safe for ESP32-S3 GPIO. R6/R7 (100 Ohm) apply to either module and do not substitute for using the correct 3.3 V supply.
+
+The NEBDS-01 / EC11's metal frame and shaft normally ground through the module mounting
+pins. After mounting, verify continuity from the encoder shaft to GND — the knob is the
+most-touched, most ESD-exposed part of a plastic enclosure. Most KY-040 breakout boards use
+a plastic shaft with no frame ground path; this check applies only if the fitted module has
+a metal shaft or frame.
 
 ### Play / Pause / Stop Buttons
 
@@ -133,7 +148,7 @@ resistor sits between that node and the panel wire to the button.
 2. Arrange controls left to right as `VOLUME`, `PLAY`, `PAUSE`, `STOP`, with `LED1` visible from the operator position.
 3. Mount the ESP32-S3 board so the antenna end faces plastic, not metal.
 4. Keep at least 10 mm clearance around the ESP32 antenna area.
-5. Mount the NEBDS-01 / EC11 encoder module and fit the knob.
+5. Mount the NEBDS-01 / EC11 encoder module and fit the knob. If using the optional KY-040 module, mount it in the same volume encoder position.
 6. Mount the three normally-open pushbuttons and LED1.
 7. Build the 3.3 V and GND buses on the prototype PCB.
 8. Install R3-R5 from 3.3 V to GPIO9/GPIO10/GPIO11.
@@ -159,10 +174,10 @@ Perform these checks before plugging the controller into a computer or router se
 | Series resistors | Measure from each GPIO pad to its panel-side point, unpowered | ~100 Ohm (GPIO7-11), ~330 Ohm (GPIO12) — not 0 Ohm |
 | Encoder shaft ground | Measure encoder shaft/frame to GND | Continuity (near 0 Ohm) |
 | 3.3 V rail | Power by USB-C and measure 3V3 to GND | 3.20 V to 3.40 V |
-| Encoder module VCC | Measure `ENC1 VCC` to GND | 3.20 V to 3.40 V |
+| Encoder module VCC | Measure `ENC1 VCC` or KY-040 `+` to GND | 3.20 V to 3.40 V |
 | Button idle voltage | Release Play/Pause/Stop and measure GPIO9-11 | Above 3.0 V |
 | Button active voltage | Press each button and measure its GPIO | Below 0.3 V |
-| Encoder A/B level | Rotate encoder and measure A/B | Logic should stay within 0 V to 3.3 V |
+| Encoder A/B level | Rotate encoder and measure A/B, or KY-040 CLK/DT | Logic should stay within 0 V to 3.3 V |
 | Status LED | Drive GPIO12 high (or run test firmware) | LED1 lights; current ~4 mA |
 
 Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, GPIO12, or the encoder module signal pins.
@@ -170,6 +185,16 @@ Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, GPIO12, or the encoder 
 ## 6. Firmware Configuration
 
 Store Wi-Fi and Max destination settings in a local config file that is excluded from Git.
+
+Project network assignment:
+
+| Device / Setting | Value |
+|---|---|
+| Media playback controller reserved IP | `192.168.50.114` |
+| Max player computer IP | Confirm from the ASUS router setup |
+| OSC UDP port | `9000` |
+
+The controller IP `192.168.50.114` should normally be assigned by ASUS DHCP reservation using the ESP32 MAC address. `MAX_HOST` is different: it must be the IP address of the Max player computer that receives OSC.
 
 ```text
 WIFI_SSID=ASUS_NAODEC
@@ -186,7 +211,7 @@ Firmware behavior required for Rev 2.0:
 | Logging | Report assigned IP, Max host, and events over USB serial |
 | Credentials | Never print the Wi-Fi password |
 | Buttons | Send one OSC command on the debounced press edge only |
-| Encoder | Decode valid quadrature transitions from GPIO7/GPIO8 |
+| Encoder | Decode valid quadrature transitions from GPIO7/GPIO8; apply stronger filtering if KY-040 is used |
 | Volume | Maintain integer volume `0...100` |
 | Volume step | Change volume by 2 percentage points per detent |
 | OSC volume | Send normalized float `0.0...1.0` |
@@ -217,7 +242,7 @@ This project's ASUS RT-AX1800HP is already configured per the NaoDec network set
 3. The ESP32 Wi-Fi network and the wired Max computer share the same LAN, gateway `192.168.50.1`.
 4. Wireless client isolation / AP isolation must remain disabled for this SSID.
 5. DHCP pool is `192.168.50.100`-`192.168.50.199`; the Max computer's `192.168.50.2` is a static address outside the pool, not a reservation.
-6. Reserve a DHCP address for the media playback controller by MAC address under LAN -> DHCP Server -> Manually Assigned IP.
+6. Reserve a DHCP address for the media playback controller by MAC address under LAN -> DHCP Server -> Manually Assigned IP, at `192.168.50.114`.
 7. Record the controller's MAC address and confirm the reservation with `ping 192.168.50.114`.
 
 Addressing for this LAN:
@@ -229,6 +254,8 @@ Addressing for this LAN:
 | Media playback controller (this build, DHCP reservation) | `192.168.50.114` |
 
 `192.168.50.114` follows the existing NaoDec convention of assigning each new ESP32 the next `.11x` address (`.111`, `.112`, `.113` are already in use by other NaoDec ESP32 modules).
+
+Do not set `MAX_HOST` to `192.168.50.114`; that address belongs to the ESP32 controller. Set `MAX_HOST` to the Max player computer's IP (`192.168.50.2`).
 
 ## 9. Connect to Max/MSP
 
@@ -286,7 +313,7 @@ If Max receives nothing:
 
 | Symptom | Check |
 |---|---|
-| No UDP messages | Confirm ESP32 `MAX_HOST` is the Max computer IP |
+| No UDP messages | Confirm ESP32 `MAX_HOST` is the Max computer IP, not `192.168.50.114` |
 | Wrong port | Confirm both firmware and Max use UDP `9000` |
 | ESP32 not reachable | Confirm same LAN/VLAN and AP isolation disabled |
 | Duplicate button messages | Increase firmware debounce or check switch wiring |
@@ -302,7 +329,7 @@ Run these before calling the controller ready.
 | ELEC-01 | Visual inspection | No shorts, loose wires, or exposed conductors |
 | ELEC-02 | 3.3 V rail | 3.20 V to 3.40 V |
 | ELEC-03 | Encoder shaft ground | Continuity from shaft/frame to GND |
-| NET-01 | Wi-Fi join | Controller gets DHCP address within 15 seconds |
+| NET-01 | Wi-Fi join | Controller gets DHCP address `192.168.50.114` within 15 seconds |
 | NET-02 | Max reachability | Max computer and ESP32 are on same LAN/VLAN |
 | NET-03 | UDP receive | Max receives only on the configured IP and port |
 | NET-04 | Reconnect | Controller reconnects after Wi-Fi/router interruption |
@@ -329,7 +356,7 @@ Fill this out for each built controller.
 | Firmware version / commit | |
 | ASUS SSID | |
 | Controller MAC address | |
-| Controller reserved IP | |
+| Controller reserved IP | `192.168.50.114` |
 | Max computer IP | |
 | OSC UDP port | |
 | Max patch filename / revision | |
