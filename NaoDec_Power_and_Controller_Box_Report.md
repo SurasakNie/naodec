@@ -1,7 +1,7 @@
 # NaoDec — Power Requirements & Controller Box Report
 
 **Project:** NaoDec — 7-channel WS2815 LED installation + 4-channel scent controller
-**Document revision:** 1.2
+**Document revision:** 1.3
 **Date:** 2026-07-02
 **Scope:** Consolidated power budget, PSU selection, single-box mounting options
 (electrical enclosure vs. ATX PC case), cable/voltage-drop analysis, and the
@@ -203,11 +203,50 @@ for ~24 total cable exits.
 
 Required: 12 V continuous ≥ ~27 A (full white) with margin; 5 V ≥ 1 A (trivial);
 **every 12 V rail actually used must individually clear ~27.1 A** (don't let
-the combined load span rails whose *individual* limits are below that);
-modular preferred. **850 W is sufficient** (~38.7 % load — the efficiency
-sweet spot); **1000 W** adds headroom and runs cooler/quieter. Load % is the
-full **329 W system total** (§3: 325.2 W @ 12 V + 4.1 W @ 5 V logic) over the
-PSU's rated wattage, since the ATX PSU supplies both rails.
+the combined load span rails whose *individual* limits are below that); single
+12 V rail strongly preferred. Load % is the full **329 W system total** (§3:
+325.2 W @ 12 V + 4.1 W @ 5 V logic) over the PSU's rated wattage, since the ATX
+PSU supplies both rails.
+
+> **Sizing decision (2026-07-02): right-sized to ~650 W.** The 329 W figure is a
+> *full-white worst case* — every LED at 15 mA/px at once. Real content averages
+> ~25–40 % of that (**realistic sustained draw ≈ 110 W**). Two facts remove the
+> reason the earlier drafts reached for 850–1000 W:
+> - **The controller box is remote** (away from the LEDs/audience), so PSU **fan
+>   noise is not in the room** — the "silent zero-RPM headroom" that drove the
+>   850/1000 W pick no longer applies.
+> - **Sessions are short**, so there is no continuous-duty thermal soak to derate
+>   for. Running ~50 % loaded for a short show is the efficiency sweet spot, not a
+>   strain.
+>
+> The only hard floor is **27.1 A on the 12 V rail**. A **650 W single-rail** unit
+> gives ~54 A on 12 V → the build sits at **~50.6 % load** (329 W ÷ 650 W), ~17 %
+> at realistic content. **Recommended: a quality 650 W 80+ Bronze single-rail PSU
+> (see below).** The 850/1000 W tables are retained as alternatives *only if the
+> box ends up sharing the room, or the duty cycle becomes continuous.*
+
+### Recommended tier — 650 W 80+ Bronze, single 12 V rail (~50.6 % load)
+
+| # | Model | Watts | 12 V rail | Modular | Warranty | Efficiency | Availability |
+|---|-------|-------|-----------|---------|----------|-----------|--------------|
+| B1 | **Thermaltake Smart BM3 Bronze 650W** | 650 W | Single ~54 A | **Semi-modular** | — | Bronze (ATX 3.0) | Global · check TH stock |
+| B2 | **Corsair CV650** | 650 W | Single ~54 A | Non-modular | 3 yr | Bronze | ✅ Advice.co.th |
+| B3 | **SilverStone VIVA650** | 650 W | Single ~54 A | Non-modular | 3 yr | Bronze | ✅ ihavecpu.com |
+| B4 | MSI MAG A650BN | 650 W | Single 54 A | Non-modular | 5 yr | Bronze | Global · check TH stock |
+| B5 | Enermax MarbleBron 650 | 650 W | Single 54 A | Semi-modular | — | Bronze | Global · check TH stock |
+
+**Pick:** **B1 Thermaltake Smart BM3 650W** if locally stocked — semi-modular cabling is the one
+convenience that genuinely helps a ~24-cable box, and ATX 3.0 is current. Otherwise **B2 Corsair
+CV650** as the confirmed-in-Thailand fallback. Prices weren't text-extractable from the retailer
+pages (verify at checkout); all are budget-tier (well under the 850 W units). ⚠ Confirm **single
++12 V rail** on the box — a few budget Bronze lines ship multi-rail revisions, and 27.1 A must sit on
+one rail. Wiring these to the 12 V/5 V loads is covered in
+`NaoDec_ATX_PSU_Wiring_and_Connectors.md`.
+
+### Higher-wattage alternatives (850 / 1000 W) — only if the box shares the room or runs continuous
+
+At 850 W the load is ~38.7 %, at 1000 W ~32.9 % — both keep a semi-fanless PSU in its zero-RPM zone,
+which matters *only* if the PSU's fan is audible in the space. Retained from the prior survey:
 
 | # | Model | Watts | 12 V | 12 V rail config | Efficiency | Price (฿) | Load % |
 |---|-------|-------|------|-------------------|-----------|---:|---:|
@@ -250,19 +289,18 @@ without switching. Prefer #1, #2, #4, #5, #8, #9, #10 for the simplest,
 no-caveat wiring.
 
 Platinum/Titanium units (#7, #9, #14) produce less waste heat — preferable
-inside an enclosed case.
+inside an enclosed case. If you do go this tier (shared-room / continuous
+duty), **Corsair RM1000E (#15)** is the best-headroom silent pick (4,990 ฿) and
+**Corsair RM850e (#2)** the best value (3,690 ฿). Otherwise the 650 W Bronze
+tier above is the right size.
 
-**Recommended picks (from the verified 2026-06-25 ihavecpu survey):**
-**Corsair RM1000E (#15)** — best headroom, fan reliably off at 32.9% load,
-4,990 ฿. **Corsair RM850e (#2)** — best value, 3,690 ฿, borderline-silent at
-38.7% load.
+### 500 W / 550 W — smaller-still fallback
 
-### 500 W / 550 W cost-first fallback
-
-The 329 W system maximum would run a true 500 W PSU at **65.8% load** and a
-550 W PSU at **59.8% load** — electrically fine with a strong single 12 V
-rail, but outside the silent-operation target (fan will likely run
-continuously). Listed for completeness only; not recommended for this build.
+The 329 W maximum would run a true 500 W PSU at **65.8 % load** and a 550 W PSU
+at **59.8 % load** — electrically fine on a strong single 12 V rail. Since the
+box is remote and fan noise is a non-issue, these are *viable*, but the 650 W
+Bronze tier costs little more and leaves healthier 12 V margin (~50 % vs ~60 %
+of rail), so prefer 650 W. Listed for completeness:
 
 | # | Model | Watts | 12 V Rail | Efficiency | Load % | Price (฿) |
 |---|-------|------:|----------:|-----------|-------:|----------:|
@@ -322,6 +360,16 @@ following errors were found and fixed in
 
 ---
 
+## 9c. Sizing Revision (Doc Rev 1.3, 2026-07-02) — right-sized to 650 W
+
+| # | Item | Was | Now | Reason |
+|---|------|-----|-----|--------|
+| 20 | Recommended PSU wattage | 850 W (value) / 1000 W (headroom) | **~650 W 80+ Bronze, single 12 V rail** (~50.6 % load) | The 850/1000 W pick was driven by keeping a semi-fanless PSU silent in the room. The **controller box is remote** (fan not audible) and **sessions are short** (no continuous-duty thermal soak) — both premises removed. Only the 27.1 A / 12 V floor remains, which 650 W clears at ~50 % of rail. |
+| 21 | 850/1000 W tables | The recommendation | **Demoted to "alternatives — only if the box shares the room or runs continuous"** | Analysis retained, ranking corrected to match the actual install. |
+| 22 | Connector/wiring guidance | Not documented | **New companion `NaoDec_ATX_PSU_Wiring_and_Connectors.md`** | How to route 12 V / 5 V / 3.3 V from ATX connectors to each device was undocumented. |
+
+---
+
 ## 10. Open Items (require user input / source data)
 
 1. **Strip #1 wire gauge conflict in source files** — README states 18 AWG; the LED
@@ -340,4 +388,5 @@ following errors were found and fixed in
 - `NaoDec_WS2815_LED_Controller_Rev1.6.html` — LED controller schematic (WS2815 = 10–15 mA/px; 4.2 A/strip; 25.2 A edges; 0.9 A vertex)
 - `NaoDec_Scent_Controller_Schematic_Rev2.0.html` — scent controller (ESP 0.40 A; 4 × 150 mA atomizers; F_MAIN T2A)
 - `NaoDec_Controller_Box_Configs_Rev1.3.html` — interactive box-configuration diagram (audited)
+- `NaoDec_ATX_PSU_Wiring_and_Connectors.md` — how to route 12 V / 5 V / 3.3 V from the ATX PSU to each device
 - `README.md` — project overview & revisions table
