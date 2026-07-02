@@ -1,10 +1,15 @@
 # NaoDec Media Playback Controller Build and Max Setup
 
-**Revision:** 1.1  
+**Revision:** 2.0  
 **Date:** 2026-07-02  
 **Controller:** ESP32-S3 Wi-Fi OSC controller for Max/MSP media playback  
-**Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev1.0.html`
+**Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev2.0.html`
 
+> Rev 2.0 — Design hardening: LED1 Wi-Fi status indicator (GPIO12 via R11 330 Ω),
+> R6–R10 100 Ω series protection on every off-board GPIO line, H1 keyed JST-XH 5-pin
+> encoder connector, encoder shaft-to-GND continuity check, USB-C cable spec ≤ 1 m.
+> Rev 1.0 schematic remains in the repo for reference.
+>
 > Rev 1.1 — Sections 6 and 8 aligned with the real ASUS RT-AX1800HP LAN: Max host
 > `192.168.50.2`, controller reserved at `192.168.50.114` per the `.11x` convention.
 
@@ -31,12 +36,16 @@ The Max computer should be connected to the ASUS router by wired Ethernet. The E
 | ENC1 | 1 | NEBDS-01 / EC11 encoder module | Rotary encoder module with Schmitt trigger / anti-bounce, pins `A`, `B`, `SW`, `VCC`, `GND` |
 | SW1-SW3 | 3 | Normally-open momentary pushbutton | Play, Pause, Stop panel buttons |
 | R3-R5 | 3 | 10 kOhm resistor | Pull-ups for Play/Pause/Stop buttons |
+| R6-R10 | 5 | 100 Ohm resistor | Series protection between each GPIO and its panel wire (ESD / short protection, edge damping) |
+| R11 | 1 | 330 Ohm resistor | Series resistor for LED1 status LED |
+| LED1 | 1 | Panel-mount LED, 3-5 mm | Wi-Fi status indicator on the operator panel |
 | C3-C5 | 3 | 100 nF capacitor | Button debounce capacitors, X7R ceramic, 25 V or higher |
-| J1 | 1 | USB-C cable | Power cable for ESP32-S3 board |
+| J1 | 1 | USB-C cable | Power cable for ESP32-S3 board, quality cable, 1 m or shorter |
 | PSU1 | 1 | USB power adapter | Regulated 5 V, 2 A wall adapter |
 | PCB1 | 1 | Prototype PCB | 2.54 mm prototype PCB or custom PCB, approx. 70 x 50 mm |
 | ENCLOSURE | 1 | Nonconductive enclosure | Plastic controller box with strain relief and ventilation |
-| H1-H5 | 5 | 2-pin locking connectors | Optional removable front-panel connectors |
+| H1 | 1 | JST-XH 5-pin connector set | Keyed connector for the encoder harness (mis-plug-proof) |
+| H2-H5 | 4 | 2-pin locking connectors | Front-panel connectors for buttons and LED1 |
 | W1 | 1 lot | Hookup wire | 24 AWG stranded wire, 7 colors, 300 V insulation or better |
 | HW1 | 1 lot | Assembly hardware | Standoffs, M3 screws, encoder knob, labels, heat-shrink tubing |
 
@@ -47,7 +56,9 @@ Recommended spares:
 | NEBDS-01 / EC11 encoder module | 1 |
 | Momentary pushbutton | 1 |
 | 10 kOhm resistor | 2 |
+| 100 Ohm resistor | 2 |
 | 100 nF capacitor | 2 |
+| Panel-mount LED | 1 |
 
 ## 3. Pin Connections
 
@@ -55,54 +66,87 @@ Recommended spares:
 
 | Function | ESP32-S3 Pin | Wire Color | Notes |
 |---|---|---|---|
-| Encoder A | GPIO7 | Green | Connect to `ENC1 A` |
-| Encoder B | GPIO8 | Blue | Connect to `ENC1 B` |
-| Play | GPIO9 | White | Button input, active low |
-| Pause | GPIO10 | Yellow | Button input, active low |
-| Stop | GPIO11 | Orange | Button input, active low |
+| Encoder A | GPIO7 | Green | To `ENC1 A` through R6 (100 Ohm) |
+| Encoder B | GPIO8 | Blue | To `ENC1 B` through R7 (100 Ohm) |
+| Play | GPIO9 | White | Button input, active low, through R8 (100 Ohm) |
+| Pause | GPIO10 | Yellow | Button input, active low, through R9 (100 Ohm) |
+| Stop | GPIO11 | Orange | Button input, active low, through R10 (100 Ohm) |
+| Status LED | GPIO12 | Grey | To LED1 anode through R11 (330 Ohm), active high |
 | Encoder/module power | 3V3 | Red | Connect to `ENC1 VCC` |
-| Ground | GND | Black | Common ground for encoder and buttons |
+| Ground | GND | Black | Common ground for encoder, buttons, and LED1 |
 | Power input | USB-C | USB cable | Use USB-C input path, not GPIO or 3V3 pin |
+
+Every signal that leaves the PCB (GPIO7-GPIO11) passes through a 100 Ohm series resistor
+(R6-R10) mounted on the PCB, close to the ESP32. These protect the GPIOs against ESD and
+wiring shorts and damp reflections on the panel runs.
 
 ### NEBDS-01 / EC11 Encoder Module
 
 | Encoder Pin | Connect To | Notes |
 |---|---|---|
-| `A` | ESP32 GPIO7 | Encoder channel A |
-| `B` | ESP32 GPIO8 | Encoder channel B |
-| `SW` | Not connected | Rev 1.0 does not use knob press |
+| `A` | ESP32 GPIO7 via R6 | Encoder channel A |
+| `B` | ESP32 GPIO8 via R7 | Encoder channel B |
+| `SW` | Not connected | Knob press is not used |
 | `VCC` | ESP32 3V3 | Use 3.3 V only |
 | `GND` | ESP32 GND | Common ground |
 
+The encoder harness terminates in `H1`, a keyed JST-XH 5-pin connector (A, B, VCC, GND,
+plus one spare position for `SW`). A single keyed connector makes it impossible to swap
+power against signal pins at reassembly.
+
 Do not add external 100 nF capacitors to encoder `A` or `B` when using this Schmitt trigger module. The original bare-encoder RC parts `R1`, `R2`, `C1`, and `C2` are not populated for this build.
+
+The EC11 metal frame and shaft normally ground through the module mounting pins. After
+mounting, verify continuity from the encoder shaft to GND — the knob is the most-touched,
+most ESD-exposed part of a plastic enclosure.
 
 ### Play / Pause / Stop Buttons
 
 Each button is a normally-open switch from its GPIO input to ground.
 
-| Button | GPIO | Pull-Up | Debounce Capacitor | Switch Wiring |
-|---|---|---|---|---|
-| Play | GPIO9 | R3, 10 kOhm to 3V3 | C3, 100 nF to GND | Button closes GPIO9 to GND |
-| Pause | GPIO10 | R4, 10 kOhm to 3V3 | C4, 100 nF to GND | Button closes GPIO10 to GND |
-| Stop | GPIO11 | R5, 10 kOhm to 3V3 | C5, 100 nF to GND | Button closes GPIO11 to GND |
+| Button | GPIO | Pull-Up | Debounce Capacitor | Series Resistor | Switch Wiring |
+|---|---|---|---|---|---|
+| Play | GPIO9 | R3, 10 kOhm to 3V3 | C3, 100 nF to GND | R8, 100 Ohm | Button closes the line to GND |
+| Pause | GPIO10 | R4, 10 kOhm to 3V3 | C4, 100 nF to GND | R9, 100 Ohm | Button closes the line to GND |
+| Stop | GPIO11 | R5, 10 kOhm to 3V3 | C5, 100 nF to GND | R10, 100 Ohm | Button closes the line to GND |
+
+The pull-up and debounce capacitor sit at the GPIO node on the PCB; the 100 Ohm series
+resistor sits between that node and the panel wire to the button.
+
+### Status LED (LED1)
+
+| Item | Connection |
+|---|---|
+| LED1 anode | GPIO12 through R11 (330 Ohm), active high |
+| LED1 cathode | GND (operator-panel ground return) |
+| Drive current | ~4 mA from the 3.3 V GPIO — safe for any GPIO, bright enough indoors |
+
+| LED state | Meaning |
+|---|---|
+| Solid on | Wi-Fi connected, controller operational |
+| Blinking | Wi-Fi disconnected, reconnect in progress |
+| Off | No power (or firmware fault) |
 
 ## 4. Build Steps
 
-1. Drill the enclosure for the encoder, three buttons, USB cable, and any service access.
-2. Arrange controls left to right as `VOLUME`, `PLAY`, `PAUSE`, `STOP`.
+1. Drill the enclosure for the encoder, three buttons, the status LED, USB cable, and any service access.
+2. Arrange controls left to right as `VOLUME`, `PLAY`, `PAUSE`, `STOP`, with `LED1` visible from the operator position.
 3. Mount the ESP32-S3 board so the antenna end faces plastic, not metal.
 4. Keep at least 10 mm clearance around the ESP32 antenna area.
 5. Mount the NEBDS-01 / EC11 encoder module and fit the knob.
-6. Mount the three normally-open pushbuttons.
+6. Mount the three normally-open pushbuttons and LED1.
 7. Build the 3.3 V and GND buses on the prototype PCB.
 8. Install R3-R5 from 3.3 V to GPIO9/GPIO10/GPIO11.
 9. Install C3-C5 from GPIO9/GPIO10/GPIO11 to GND.
-10. Wire encoder `A`, `B`, `VCC`, and `GND` to the ESP32.
-11. Leave encoder `SW` unconnected and insulated.
-12. Wire each pushbutton between its GPIO input and GND.
-13. Add strain relief for the USB-C cable.
-14. Label both ends of every wire.
-15. Inspect for solder bridges, loose strands, reversed connectors, and accidental contact near the antenna.
+10. Install the series resistors on the PCB, close to the ESP32: R6-R10 (100 Ohm) in line with GPIO7-GPIO11, and R11 (330 Ohm) in line with GPIO12.
+11. Wire encoder `A`, `B`, `VCC`, and `GND` to the ESP32 through the keyed H1 JST-XH connector.
+12. Leave encoder `SW` unconnected and insulated (route it to the spare H1 position if you want it available later).
+13. Wire each pushbutton between its series resistor output and GND.
+14. Wire LED1 anode to the R11 output and LED1 cathode to GND.
+15. Verify continuity from the encoder shaft/frame to GND after mounting.
+16. Add strain relief for the USB-C cable. Use a quality cable no longer than 1 m.
+17. Label both ends of every wire.
+18. Inspect for solder bridges, loose strands, reversed connectors, and accidental contact near the antenna.
 
 ## 5. Electrical Checks Before Firmware
 
@@ -112,13 +156,16 @@ Perform these checks before plugging the controller into a computer or router se
 |---|---|---|
 | Visual inspection | Inspect PCB and connectors | No shorts, loose strands, or unlabeled harnesses |
 | Unpowered resistance | Measure 5 V-to-GND and 3.3 V-to-GND | No near-short |
+| Series resistors | Measure from each GPIO pad to its panel-side point, unpowered | ~100 Ohm (GPIO7-11), ~330 Ohm (GPIO12) — not 0 Ohm |
+| Encoder shaft ground | Measure encoder shaft/frame to GND | Continuity (near 0 Ohm) |
 | 3.3 V rail | Power by USB-C and measure 3V3 to GND | 3.20 V to 3.40 V |
 | Encoder module VCC | Measure `ENC1 VCC` to GND | 3.20 V to 3.40 V |
 | Button idle voltage | Release Play/Pause/Stop and measure GPIO9-11 | Above 3.0 V |
 | Button active voltage | Press each button and measure its GPIO | Below 0.3 V |
 | Encoder A/B level | Rotate encoder and measure A/B | Logic should stay within 0 V to 3.3 V |
+| Status LED | Drive GPIO12 high (or run test firmware) | LED1 lights; current ~4 mA |
 
-Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, or the encoder module signal pins.
+Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, GPIO12, or the encoder module signal pins.
 
 ## 6. Firmware Configuration
 
@@ -131,7 +178,7 @@ MAX_HOST=192.168.50.2
 MAX_OSC_PORT=9000
 ```
 
-Firmware behavior required for Rev 1.0:
+Firmware behavior required for Rev 2.0:
 
 | Area | Requirement |
 |---|---|
@@ -146,10 +193,11 @@ Firmware behavior required for Rev 1.0:
 | Limits | Clamp volume between `0.0` and `1.0` |
 | Memory | Save last volume after about 2 seconds of inactivity |
 | Boot | Do not send Play, Pause, or Stop on boot |
+| Status LED | GPIO12 solid high when Wi-Fi is connected; blink at ~2 Hz while disconnected or reconnecting |
 
 ## 7. OSC Message Contract
 
-These OSC messages are the Rev 1.0 proposed contract. Confirm that the final Max patch uses the same addresses and UDP port before acceptance testing.
+These OSC messages are the Rev 2.0 proposed contract (unchanged from Rev 1.0). Confirm that the final Max patch uses the same addresses and UDP port before acceptance testing.
 
 | Function | OSC Address | Argument | Example |
 |---|---|---:|---|
@@ -253,6 +301,7 @@ Run these before calling the controller ready.
 |---|---|---|
 | ELEC-01 | Visual inspection | No shorts, loose wires, or exposed conductors |
 | ELEC-02 | 3.3 V rail | 3.20 V to 3.40 V |
+| ELEC-03 | Encoder shaft ground | Continuity from shaft/frame to GND |
 | NET-01 | Wi-Fi join | Controller gets DHCP address within 15 seconds |
 | NET-02 | Max reachability | Max computer and ESP32 are on same LAN/VLAN |
 | NET-03 | UDP receive | Max receives only on the configured IP and port |
@@ -265,6 +314,7 @@ Run these before calling the controller ready.
 | FUNC-06 | Volume counterclockwise | Ten detents decrease by about 20 percentage points |
 | FUNC-07 | Volume limits | Output remains clamped from `0.0` to `1.0` |
 | FUNC-08 | Boot behavior | No Play, Pause, or Stop command on power-up |
+| FUNC-09 | Status LED | LED1 solid within 15 s of power-up; blinks when the router 2.4 GHz radio is disabled; returns to solid after re-enable (ties into NET-04) |
 | SYS-01 | Site range | Reliable control at final operator location |
 | SYS-02 | Soak | Stable operation for 8 hours with no unintended command |
 

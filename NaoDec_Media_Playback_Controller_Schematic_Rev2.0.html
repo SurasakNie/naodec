@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Media Playback Controller · Rev 2.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+  /* === THEME START — NaoDec ===
+     NaoDec house style: near-black teal canvas, warm pale gold accent,
+     muted teal component outlines, semantic wire palette.
+     Source: NaoDec_WS2815_LED_Controller_Rev1.6 design system. */
+  :root {
+    --bg-dark:          #060a0b;
+    --bg-panel:         rgba(10, 18, 20, 0.95);
+    --wire-12v:         #eaddaa;
+    --wire-5v:          #c9a86a;
+    --wire-3v3:         #a28854;
+    --wire-gnd:         #4a6b6d;
+    --wire-data:        #88e2d6;
+    --wire-data2:       #ffffff;
+    --wire-data3:       #7cb3ff;
+    --wire-data4:       #c8a2e8;
+    --wire-data5:       #f0997b;
+    --wire-data6:       #97c459;
+    --wire-data7:       #f0d060;
+    --text-primary:     #ffffff;
+    --text-secondary:   #8eb5b8;
+    --accent:           #eaddaa;
+    --border:           rgba(74, 107, 109, 0.6);
+    --comp-fill:        #0f1a1c;
+    --comp-fill-hover:  #142326;
+    --comp-stroke:      #4a6b6d;
+    --pin-dot:          #88e2d6;
+    --warn:             #ff5555;
+    --warn-bg:          #1f0a0a;
+  }
+  /* === THEME END === */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Roboto', sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .schematic-container {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+  }
+  .schematic-container.grabbing { cursor: grabbing; }
+  .svg-wrapper {
+    transform-origin: 0 0;
+    will-change: transform;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .comp {
+    fill: var(--comp-fill);
+    stroke: var(--comp-stroke);
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .comp:hover {
+    fill: #142326;
+    stroke: var(--accent);
+    stroke-width: 2;
+  }
+  .sec-border-dash { fill:none; stroke: var(--comp-stroke); stroke-width:1.5; stroke-dasharray:6 6; opacity: 0.8; }
+  .w12v      { stroke:var(--wire-12v);  stroke-width:2.5; fill:none; }
+  .w12v-bus  { stroke:var(--wire-12v);  stroke-width:4;   fill:none; }
+  .wgnd      { stroke:var(--wire-gnd);  stroke-width:2.5; fill:none; }
+  .wgnd-bus  { stroke:var(--wire-gnd);  stroke-width:4;   fill:none; }
+  .w5v       { stroke:var(--wire-5v);   stroke-width:2;   fill:none; }
+  .w5v-bus   { stroke:var(--wire-5v);   stroke-width:4;   fill:none; }
+  .w3v3      { stroke:var(--wire-3v3);  stroke-width:2;   fill:none; }
+  .w3v3-bus  { stroke:var(--wire-3v3);  stroke-width:4;   fill:none; }
+  .wdata     { stroke:var(--wire-data);  stroke-width:2;  fill:none; }
+  .wdata2    { stroke:var(--wire-data2); stroke-width:2;  fill:none; }
+  .wdata3    { stroke:var(--wire-data3); stroke-width:2;  fill:none; }
+  .wdata4    { stroke:var(--wire-data4); stroke-width:2;  fill:none; }
+  .wdata5    { stroke:var(--wire-data5); stroke-width:2;  fill:none; }
+  .wdata6    { stroke:var(--wire-data6); stroke-width:2;  fill:none; }
+  .wdata7    { stroke:var(--wire-data7); stroke-width:2;  fill:none; }
+  .j12v   { fill:var(--wire-12v); }
+  .jgnd   { fill:var(--wire-gnd); }
+  .j5v    { fill:var(--wire-5v);  }
+  .j3v3   { fill:var(--wire-3v3); }
+  .jdata  { fill:var(--wire-data); }
+  .jdata2 { fill:var(--wire-data2); }
+  .jdata3 { fill:var(--wire-data3); }
+  .jdata4 { fill:var(--wire-data4); }
+  .jdata5 { fill:var(--wire-data5); }
+  .jdata6 { fill:var(--wire-data6); }
+  .jdata7 { fill:var(--wire-data7); }
+  .pin    { fill:var(--pin-dot); }
+  .channel-label { font-family: 'Roboto Mono', ui-monospace, monospace; font-size: 9px; fill: var(--text-secondary); pointer-events: none; }
+  polyline[data-info], line[data-info], path[data-info] { cursor: pointer; pointer-events: visibleStroke; }
+  g[data-info], circle[data-info] { cursor: pointer; }
+  polyline[data-info]:hover, line[data-info]:hover, path[data-info]:hover { stroke-width: 6; filter: brightness(1.4); }
+  text { font-family: 'Roboto', sans-serif; font-weight: 500; }
+  .bold-text { font-weight: 700; }
+  .black-text { font-weight: 900; }
+  .tip {
+    position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+    background: #060a0b;
+    border: 1px solid var(--accent);
+    border-radius: 4px; padding: 16px 24px;
+    font-size: 15px; color: var(--text-primary);
+    opacity:0; pointer-events:none; z-index:100;
+    max-width:620px; text-align:center;
+    transition: opacity .2s, transform .2s;
+  }
+  .tip.on { opacity:1; transform:translateX(-50%) translateY(-8px); }
+  .tip .ttl { color:var(--accent); font-weight:900; margin-bottom:6px; font-size:16px; letter-spacing: 1px; text-transform: uppercase; }
+  .tip .desc { line-height: 1.5; color: var(--text-secondary); font-weight: 500; }
+  #zoom-controls {
+    position: fixed; bottom: 30px; left: 30px;
+    display: flex; gap: 6px; z-index: 100; align-items: center;
+  }
+  .zoom-btn {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    width: 40px; height: 40px; border-radius: 4px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; transition: all 0.2s;
+    font-family: 'Roboto', sans-serif;
+  }
+  .zoom-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .zoom-btn:active { transform: scale(0.95); }
+  .zoom-btn.fit-btn {
+    width: auto; padding: 0 14px; font-size: 13px; letter-spacing: 1px; font-weight: 700;
+  }
+  #zoom-level {
+    color: var(--text-primary); font-size: 13px; font-weight: 700;
+    min-width: 52px; text-align: center; padding: 0 6px; user-select: none;
+  }
+  .zoom-shortcut-hint {
+    position: fixed; bottom: 75px; left: 30px;
+    font-size: 11px; font-weight: 500; color: var(--text-secondary);
+    z-index: 100; letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+<div class="schematic-container" id="schematic-container">
+<div class="svg-wrapper" id="svg-wrapper">
+<svg width="2400" height="1800" viewBox="-180 -15 2420 1815" xmlns="http://www.w3.org/2000/svg" id="schematic-svg">
+
+  <!-- CANVAS REGISTRATION MARKS -->
+  <g stroke="var(--text-secondary)" stroke-width="2" opacity="0.6">
+    <path d="M -150 20 h 20 M -140 10 v 20"/>
+    <path d="M 2210 20 h 20 M 2220 10 v 20"/>
+    <path d="M -150 1840 h 20 M -140 1830 v 20"/>
+    <path d="M 2210 1840 h 20 M 2220 1830 v 20"/>
+  </g>
+
+  <g transform="translate(80, 0)">
+
+    <!-- ===========================
+         TITLE BLOCK
+         =========================== -->
+    <g id="title-block">
+      <text x="40" y="15" font-size="28" fill="var(--text-primary)" class="black-text" letter-spacing="4">P R O J E C T</text>
+      <text x="40" y="38" font-size="14" fill="var(--accent)" class="bold-text" letter-spacing="1">MEDIA PLAYBACK CONTROLLER · Rev 2.0</text>
+      <text x="40" y="56" font-size="13" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">ESP32-S3 Wi-Fi OSC controller · rotary encoder + Play / Pause / Stop + status LED</text>
+
+      <!-- Legend Box -->
+      <rect x="580" y="25" width="1420" height="46" rx="4" fill="var(--bg-panel)" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="600"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-5v)"/>
+      <text x="632"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">5V</text>
+      <rect x="690"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-gnd)"/>
+      <text x="722"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">GND</text>
+      <rect x="780"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-3v3)"/>
+      <text x="812"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">3.3V</text>
+      <rect x="880"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-data)"/>
+      <text x="912"  y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">ENC A</text>
+      <rect x="990"  y="46" width="24" height="3" rx="1.5" fill="var(--wire-data2)"/>
+      <text x="1022" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">ENC B</text>
+      <rect x="1100" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data3)"/>
+      <text x="1132" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">PLAY</text>
+      <rect x="1210" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data4)"/>
+      <text x="1242" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">PAUSE</text>
+      <rect x="1330" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data5)"/>
+      <text x="1362" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">STOP</text>
+      <rect x="1440" y="46" width="24" height="3" rx="1.5" fill="var(--wire-data6)"/>
+      <text x="1472" y="52" font-size="12" fill="var(--text-secondary)" class="bold-text" letter-spacing="1">STATUS</text>
+    </g>
+
+    <!-- ===========================
+         MAIN DIAGRAM AREA
+         =========================== -->
+
+    <!-- Section labels -->
+    <text x="150"  y="406" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1">5 V SUPPLY</text>
+    <text x="1020" y="250" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1">BUTTON INPUT CONDITIONING · ENCODER SCHMITT MODULE</text>
+    <text x="1435" y="318" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1">OPERATOR PANEL</text>
+
+    <!-- ===== PSU1 — USB 5 V / 2 A adapter ===== -->
+    <g id="PSU1">
+      <rect class="comp" data-info="PSU1|Regulated USB 5 V / 2 A wall adapter|Country-certified · USB-C output|Keep independent from 12 V LED rails"
+            rx="2" x="40" y="420" width="220" height="130"/>
+      <text x="150" y="478" font-size="20" fill="var(--accent)" text-anchor="middle" class="black-text">USB PSU</text>
+      <text x="150" y="500" font-size="14" fill="var(--text-primary)" text-anchor="middle" class="bold-text">5 V · 2 A</text>
+      <circle cx="260" cy="460" r="3" class="pin"/>
+      <text x="252" y="455" font-size="11" fill="var(--wire-5v)" text-anchor="end" class="bold-text">+5V</text>
+      <circle cx="260" cy="510" r="3" class="pin"/>
+      <text x="252" y="515" font-size="11" fill="var(--wire-gnd)" text-anchor="end" class="bold-text">GND</text>
+    </g>
+
+    <!-- ===== U1 — ESP32-S3-DevKitC-1 ===== -->
+    <g id="U1">
+      <rect class="comp" data-info="U1|ESP32-S3-DevKitC-1 dev board|USB-C · 2.4 GHz Wi-Fi · N8R8 / N16R8|GPIO0/3/45/46 avoided (boot-strapping pins)"
+            rx="2" x="340" y="190" width="380" height="710"/>
+      <text x="530" y="494" font-size="22" fill="var(--accent)" text-anchor="middle" class="black-text">ESP32-S3</text>
+      <text x="530" y="516" font-size="14" fill="var(--text-primary)" text-anchor="middle" class="bold-text">DevKitC-1 · N8R8 / N16R8</text>
+      <text x="530" y="544" font-size="12" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">2.4 GHz Wi-Fi → OSC / UDP</text>
+      <!-- left edge: USB-C 5 V input path -->
+      <circle cx="340" cy="460" r="3" class="pin"/>
+      <text x="352" y="464" font-size="11" fill="var(--wire-5v)" text-anchor="start" class="bold-text">USB-C</text>
+      <!-- right edge pins -->
+      <circle cx="720" cy="280" r="3" class="pin"/>
+      <text x="712" y="284" font-size="12" fill="var(--wire-3v3)" text-anchor="end" class="bold-text">3V3</text>
+      <circle cx="720" cy="370" r="3" class="pin"/>
+      <text x="712" y="374" font-size="12" fill="var(--wire-data)" text-anchor="end" class="bold-text">GPIO7</text>
+      <circle cx="720" cy="460" r="3" class="pin"/>
+      <text x="712" y="464" font-size="12" fill="var(--wire-data2)" text-anchor="end" class="bold-text">GPIO8</text>
+      <circle cx="720" cy="550" r="3" class="pin"/>
+      <text x="712" y="554" font-size="12" fill="var(--wire-data3)" text-anchor="end" class="bold-text">GPIO9</text>
+      <circle cx="720" cy="640" r="3" class="pin"/>
+      <text x="712" y="644" font-size="12" fill="var(--wire-data4)" text-anchor="end" class="bold-text">GPIO10</text>
+      <circle cx="720" cy="730" r="3" class="pin"/>
+      <text x="712" y="734" font-size="12" fill="var(--wire-data5)" text-anchor="end" class="bold-text">GPIO11</text>
+      <circle cx="720" cy="820" r="3" class="pin"/>
+      <text x="712" y="824" font-size="12" fill="var(--wire-data6)" text-anchor="end" class="bold-text">GPIO12</text>
+      <circle cx="720" cy="880" r="3" class="pin"/>
+      <text x="712" y="884" font-size="12" fill="var(--wire-gnd)" text-anchor="end" class="bold-text">GND</text>
+    </g>
+
+    <!-- ===== R1/R2 and C1/C2 are DNP with the Schmitt encoder module; R3–R5 serve the buttons ===== -->
+    <g id="R1">
+      <rect class="comp" data-info="R1|DNP with Schmitt encoder module|ENC1 A has onboard conditioning|Do not populate for NEBDS-01"
+            rx="2" x="803" y="320" width="34" height="40"/>
+      <text x="820" y="344" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">DNP</text>
+    </g>
+    <g id="R2">
+      <rect class="comp" data-info="R2|DNP with Schmitt encoder module|ENC1 B has onboard conditioning|Do not populate for NEBDS-01"
+            rx="2" x="903" y="410" width="34" height="40"/>
+      <text x="920" y="434" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">DNP</text>
+    </g>
+    <g id="R3">
+      <rect class="comp" data-info="R3|10 kΩ pull-up to 3V3|1% · 0.25 W metal film|Holds GPIO9 (PLAY) high"
+            rx="2" x="1003" y="500" width="34" height="40"/>
+      <text x="1020" y="524" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">10k</text>
+    </g>
+    <g id="R4">
+      <rect class="comp" data-info="R4|10 kΩ pull-up to 3V3|1% · 0.25 W metal film|Holds GPIO10 (PAUSE) high"
+            rx="2" x="1103" y="590" width="34" height="40"/>
+      <text x="1120" y="614" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">10k</text>
+    </g>
+    <g id="R5">
+      <rect class="comp" data-info="R5|10 kΩ pull-up to 3V3|1% · 0.25 W metal film|Holds GPIO11 (STOP) high"
+            rx="2" x="1203" y="680" width="34" height="40"/>
+      <text x="1220" y="704" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">10k</text>
+    </g>
+
+    <!-- ===== R6–R10 — 100 Ω series protection on every off-board GPIO run (Rev 2.0) ===== -->
+    <g id="R6">
+      <rect class="comp" data-info="R6|100 Ω series protection in ENC A run|1% · 0.25 W metal film|ESD / short protection + edge damping"
+            rx="2" x="1264" y="353" width="40" height="34"/>
+      <text x="1284" y="374" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">100</text>
+    </g>
+    <g id="R7">
+      <rect class="comp" data-info="R7|100 Ω series protection in ENC B run|1% · 0.25 W metal film|ESD / short protection + edge damping"
+            rx="2" x="1264" y="443" width="40" height="34"/>
+      <text x="1284" y="464" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">100</text>
+    </g>
+    <g id="R8">
+      <rect class="comp" data-info="R8|100 Ω series protection in PLAY run|1% · 0.25 W metal film|ESD / short protection + edge damping"
+            rx="2" x="1264" y="533" width="40" height="34"/>
+      <text x="1284" y="554" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">100</text>
+    </g>
+    <g id="R9">
+      <rect class="comp" data-info="R9|100 Ω series protection in PAUSE run|1% · 0.25 W metal film|ESD / short protection + edge damping"
+            rx="2" x="1264" y="623" width="40" height="34"/>
+      <text x="1284" y="644" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">100</text>
+    </g>
+    <g id="R10">
+      <rect class="comp" data-info="R10|100 Ω series protection in STOP run|1% · 0.25 W metal film|ESD / short protection + edge damping"
+            rx="2" x="1264" y="713" width="40" height="34"/>
+      <text x="1284" y="734" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">100</text>
+    </g>
+    <g id="R11">
+      <rect class="comp" data-info="R11|330 Ω LED series resistor|1% · 0.25 W metal film|Sets LED1 current ≈ 4 mA from 3.3 V GPIO"
+            rx="2" x="1240" y="803" width="40" height="34"/>
+      <text x="1260" y="824" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">330</text>
+    </g>
+
+    <!-- ===== C1/C2 are DNP with the Schmitt encoder module; C3–C5 serve the buttons ===== -->
+    <g id="C1">
+      <rect class="comp" data-info="C1|DNP with Schmitt encoder module|No external A-channel capacitor|Do not populate for NEBDS-01"
+            rx="2" x="803" y="386" width="34" height="30"/>
+      <text x="820" y="406" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">DNP</text>
+    </g>
+    <g id="C2">
+      <rect class="comp" data-info="C2|DNP with Schmitt encoder module|No external B-channel capacitor|Do not populate for NEBDS-01"
+            rx="2" x="903" y="476" width="34" height="30"/>
+      <text x="920" y="496" font-size="10" fill="var(--warn)" text-anchor="middle" class="bold-text">DNP</text>
+    </g>
+    <g id="C3">
+      <rect class="comp" data-info="C3|100 nF debounce to GND|X7R · ≥25 V ceramic|~1 ms RC with R3"
+            rx="2" x="1003" y="566" width="34" height="30"/>
+      <text x="1020" y="586" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">100n</text>
+    </g>
+    <g id="C4">
+      <rect class="comp" data-info="C4|100 nF debounce to GND|X7R · ≥25 V ceramic|~1 ms RC with R4"
+            rx="2" x="1103" y="656" width="34" height="30"/>
+      <text x="1120" y="676" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">100n</text>
+    </g>
+    <g id="C5">
+      <rect class="comp" data-info="C5|100 nF debounce to GND|X7R · ≥25 V ceramic|~1 ms RC with R5"
+            rx="2" x="1203" y="746" width="34" height="30"/>
+      <text x="1220" y="766" font-size="11" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">100n</text>
+    </g>
+
+    <!-- ===== Operator controls ===== -->
+    <g id="ENC1">
+      <rect class="comp" data-info="ENC1|NEBDS-01 / EC11 rotary encoder module|Schmitt trigger / anti-bounce · A/B/SW/VCC/GND|3V3 only · H1 keyed JST-XH 5-pin · verify frame/shaft-to-GND continuity"
+            rx="2" x="1340" y="330" width="190" height="170"/>
+      <text x="1435" y="386" font-size="16" fill="var(--accent)" text-anchor="middle" class="black-text">ENC1</text>
+      <text x="1435" y="406" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">NEBDS-01 · EC11</text>
+      <text x="1435" y="424" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">SCHMITT / ANTI-BOUNCE</text>
+      <text x="1356" y="346" font-size="10" fill="var(--wire-3v3)" text-anchor="start" class="bold-text">VCC · 3V3</text>
+      <text x="1356" y="366" font-size="10" fill="var(--wire-data)"  text-anchor="start" class="bold-text">A</text>
+      <text x="1356" y="456" font-size="10" fill="var(--wire-data2)" text-anchor="start" class="bold-text">B</text>
+      <text x="1524" y="456" font-size="10" fill="var(--warn)" text-anchor="end" class="bold-text">SW · NC</text>
+      <text x="1524" y="419" font-size="10" fill="var(--wire-gnd)"  text-anchor="end" class="bold-text">GND</text>
+    </g>
+    <g id="SW1">
+      <rect class="comp" data-info="SW1|Play pushbutton (NO momentary)|GPIO9 · panel mount|Active-low to GND"
+            rx="2" x="1340" y="520" width="190" height="60"/>
+      <text x="1435" y="546" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text">SW1</text>
+      <text x="1435" y="564" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">PLAY</text>
+    </g>
+    <g id="SW2">
+      <rect class="comp" data-info="SW2|Pause pushbutton (NO momentary)|GPIO10 · panel mount|Active-low to GND"
+            rx="2" x="1340" y="610" width="190" height="60"/>
+      <text x="1435" y="636" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text">SW2</text>
+      <text x="1435" y="654" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">PAUSE</text>
+    </g>
+    <g id="SW3">
+      <rect class="comp" data-info="SW3|Stop pushbutton (NO momentary)|GPIO11 · panel mount|Active-low to GND"
+            rx="2" x="1340" y="700" width="190" height="60"/>
+      <text x="1435" y="726" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text">SW3</text>
+      <text x="1435" y="744" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">STOP</text>
+    </g>
+    <g id="LED1">
+      <rect class="comp" data-info="LED1|Panel status LED (3–5 mm)|GPIO12 → R11 330 Ω → LED1 → GND · active-high|Solid = Wi-Fi connected · blink = reconnecting · off = no power"
+            rx="2" x="1340" y="790" width="190" height="60"/>
+      <text x="1435" y="816" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text">LED1</text>
+      <text x="1435" y="834" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">Wi-Fi STATUS</text>
+    </g>
+
+    <!-- ===========================
+         WIRING
+         =========================== -->
+
+    <!-- 5 V supply: PSU1 to U1 USB-C input -->
+    <line x1="260" y1="460" x2="340" y2="460" class="w5v" data-info="USB_5V|PSU1 USB-C output to U1 USB-C input|5 V input"/>
+    <text x="300" y="452" class="channel-label" text-anchor="middle">USB-C 5V IN</text>
+
+    <!-- 3V3 pull-up bus -->
+    <line x1="720" y1="280" x2="1220" y2="280" class="w3v3-bus" data-info="BUS_3V3|3.3 V bus|ESP32 3V3 → ENC1 VCC and R3–R5"/>
+    <circle cx="820"  cy="280" r="3.5" class="j3v3" data-info="BUS_3V3|DNP R1 tap with Schmitt module"/>
+    <circle cx="920"  cy="280" r="3.5" class="j3v3" data-info="BUS_3V3|DNP R2 tap with Schmitt module"/>
+    <circle cx="1020" cy="280" r="3.5" class="j3v3" data-info="BUS_3V3|R3 pull-up tap"/>
+    <circle cx="1120" cy="280" r="3.5" class="j3v3" data-info="BUS_3V3|R4 pull-up tap"/>
+    <circle cx="1220" cy="280" r="3.5" class="j3v3" data-info="BUS_3V3|R5 pull-up tap"/>
+    <path d="M 1220,280 L 1280,280 L 1280,345 L 1340,345" class="w3v3" fill="none" data-info="BUS_3V3|ESP32 3V3 → ENC1 VCC|24 AWG RED"/>
+
+    <!-- ===== Channel 1 — ENC A / GPIO7 (wdata) ===== -->
+    <line x1="820" y1="320" x2="820" y2="280" class="w3v3"  data-info="BUS_3V3|DNP R1 shown only for bare-encoder option|24 AWG RED"/>
+    <line x1="820" y1="360" x2="820" y2="370" class="wdata" data-info="ENC_A|DNP R1 not used with Schmitt module|24–26 AWG GREEN"/>
+    <line x1="720" y1="370" x2="820" y2="370" class="wdata" data-info="ENC_A|U1 GPIO7 → node|24–26 AWG GREEN"/>
+    <line x1="820" y1="370" x2="820" y2="386" class="wdata" data-info="ENC_A|DNP C1 not used with Schmitt module|24–26 AWG GREEN"/>
+    <line x1="820" y1="416" x2="820" y2="426" class="wgnd"  data-info="GND|DNP C1 ground stub|24 AWG BLACK"/>
+    <path d="M 820,426 L 820,430 M 811,430 L 829,430 M 814,434 L 826,434 M 817,438 L 823,438" class="deco" stroke="var(--wire-gnd)" stroke-width="1.5" fill="none"/>
+    <circle cx="820" cy="370" r="3" class="jdata" data-info="ENC_A|GPIO7 node|Schmitt module A output"/>
+    <path d="M 820,370 L 915,370 a 5,5 0 0,0 10,0 L 1015,370 a 5,5 0 0,0 10,0 L 1115,370 a 5,5 0 0,0 10,0 L 1215,370 a 5,5 0 0,0 10,0 L 1264,370"
+          class="wdata arc" fill="none" data-info="ENC_A|GPIO7 node → R6|24–26 AWG GREEN"/>
+    <line x1="1304" y1="370" x2="1340" y2="370" class="wdata" data-info="ENC_A|R6 → ENC1 A|24–26 AWG GREEN"/>
+
+    <!-- ===== Channel 2 — ENC B / GPIO8 (wdata2) ===== -->
+    <line x1="920" y1="410" x2="920" y2="280" class="w3v3"   data-info="BUS_3V3|DNP R2 shown only for bare-encoder option|24 AWG RED"/>
+    <line x1="920" y1="450" x2="920" y2="460" class="wdata2" data-info="ENC_B|DNP R2 not used with Schmitt module|24–26 AWG BLUE"/>
+    <line x1="720" y1="460" x2="920" y2="460" class="wdata2" data-info="ENC_B|U1 GPIO8 → node|24–26 AWG BLUE"/>
+    <line x1="920" y1="460" x2="920" y2="476" class="wdata2" data-info="ENC_B|DNP C2 not used with Schmitt module|24–26 AWG BLUE"/>
+    <line x1="920" y1="506" x2="920" y2="516" class="wgnd"   data-info="GND|DNP C2 ground stub|24 AWG BLACK"/>
+    <path d="M 920,516 L 920,520 M 911,520 L 929,520 M 914,524 L 926,524 M 917,528 L 923,528" class="deco" stroke="var(--wire-gnd)" stroke-width="1.5" fill="none"/>
+    <circle cx="920" cy="460" r="3" class="jdata2" data-info="ENC_B|GPIO8 node|Schmitt module B output"/>
+    <path d="M 920,460 L 1015,460 a 5,5 0 0,0 10,0 L 1115,460 a 5,5 0 0,0 10,0 L 1215,460 a 5,5 0 0,0 10,0 L 1264,460"
+          class="wdata2 arc" fill="none" data-info="ENC_B|GPIO8 node → R7|24–26 AWG BLUE"/>
+    <line x1="1304" y1="460" x2="1340" y2="460" class="wdata2" data-info="ENC_B|R7 → ENC1 B|24–26 AWG BLUE"/>
+
+    <!-- ===== Channel 3 — PLAY / GPIO9 (wdata3) ===== -->
+    <line x1="1020" y1="500" x2="1020" y2="280" class="w3v3"   data-info="BUS_3V3|bus → R3 pull-up|24 AWG RED"/>
+    <line x1="1020" y1="540" x2="1020" y2="550" class="wdata3" data-info="PLAY|R3 → GPIO9 node|24–26 AWG WHITE"/>
+    <line x1="720"  y1="550" x2="1020" y2="550" class="wdata3" data-info="PLAY|U1 GPIO9 → node|24–26 AWG WHITE"/>
+    <line x1="1020" y1="550" x2="1020" y2="566" class="wdata3" data-info="PLAY|node → C3 debounce|24–26 AWG WHITE"/>
+    <line x1="1020" y1="596" x2="1020" y2="606" class="wgnd"   data-info="GND|C3 → ground|24 AWG BLACK"/>
+    <path d="M 1020,606 L 1020,610 M 1011,610 L 1029,610 M 1014,614 L 1026,614 M 1017,618 L 1023,618" class="deco" stroke="var(--wire-gnd)" stroke-width="1.5" fill="none"/>
+    <circle cx="1020" cy="550" r="3" class="jdata3" data-info="PLAY|GPIO9 node|pull-up + cap + SW1"/>
+    <path d="M 1020,550 L 1115,550 a 5,5 0 0,0 10,0 L 1215,550 a 5,5 0 0,0 10,0 L 1264,550"
+          class="wdata3 arc" fill="none" data-info="PLAY|GPIO9 node → R8|24–26 AWG WHITE"/>
+    <line x1="1304" y1="550" x2="1340" y2="550" class="wdata3" data-info="PLAY|R8 → SW1|24–26 AWG WHITE"/>
+
+    <!-- ===== Channel 4 — PAUSE / GPIO10 (wdata4) ===== -->
+    <line x1="1120" y1="590" x2="1120" y2="280" class="w3v3"   data-info="BUS_3V3|bus → R4 pull-up|24 AWG RED"/>
+    <line x1="1120" y1="630" x2="1120" y2="640" class="wdata4" data-info="PAUSE|R4 → GPIO10 node|24–26 AWG YELLOW"/>
+    <line x1="720"  y1="640" x2="1120" y2="640" class="wdata4" data-info="PAUSE|U1 GPIO10 → node|24–26 AWG YELLOW"/>
+    <line x1="1120" y1="640" x2="1120" y2="656" class="wdata4" data-info="PAUSE|node → C4 debounce|24–26 AWG YELLOW"/>
+    <line x1="1120" y1="686" x2="1120" y2="696" class="wgnd"   data-info="GND|C4 → ground|24 AWG BLACK"/>
+    <path d="M 1120,696 L 1120,700 M 1111,700 L 1129,700 M 1114,704 L 1126,704 M 1117,708 L 1123,708" class="deco" stroke="var(--wire-gnd)" stroke-width="1.5" fill="none"/>
+    <circle cx="1120" cy="640" r="3" class="jdata4" data-info="PAUSE|GPIO10 node|pull-up + cap + SW2"/>
+    <path d="M 1120,640 L 1215,640 a 5,5 0 0,0 10,0 L 1264,640"
+          class="wdata4 arc" fill="none" data-info="PAUSE|GPIO10 node → R9|24–26 AWG YELLOW"/>
+    <line x1="1304" y1="640" x2="1340" y2="640" class="wdata4" data-info="PAUSE|R9 → SW2|24–26 AWG YELLOW"/>
+
+    <!-- ===== Channel 5 — STOP / GPIO11 (wdata5) ===== -->
+    <line x1="1220" y1="680" x2="1220" y2="280" class="w3v3"   data-info="BUS_3V3|bus → R5 pull-up|24 AWG RED"/>
+    <line x1="1220" y1="720" x2="1220" y2="730" class="wdata5" data-info="STOP|R5 → GPIO11 node|24–26 AWG ORANGE"/>
+    <line x1="720"  y1="730" x2="1220" y2="730" class="wdata5" data-info="STOP|U1 GPIO11 → node|24–26 AWG ORANGE"/>
+    <line x1="1220" y1="730" x2="1220" y2="746" class="wdata5" data-info="STOP|node → C5 debounce|24–26 AWG ORANGE"/>
+    <line x1="1220" y1="776" x2="1220" y2="786" class="wgnd"   data-info="GND|C5 → ground|24 AWG BLACK"/>
+    <path d="M 1220,786 L 1220,790 M 1211,790 L 1229,790 M 1214,794 L 1226,794 M 1217,798 L 1223,798" class="deco" stroke="var(--wire-gnd)" stroke-width="1.5" fill="none"/>
+    <circle cx="1220" cy="730" r="3" class="jdata5" data-info="STOP|GPIO11 node|pull-up + cap + SW3"/>
+    <line x1="1220" y1="730" x2="1264" y2="730" class="wdata5" data-info="STOP|GPIO11 node → R10|24–26 AWG ORANGE"/>
+    <line x1="1304" y1="730" x2="1340" y2="730" class="wdata5" data-info="STOP|R10 → SW3|24–26 AWG ORANGE"/>
+
+    <!-- ===== Channel 6 — STATUS LED / GPIO12 (wdata6, Rev 2.0) ===== -->
+    <line x1="720"  y1="820" x2="1240" y2="820" class="wdata6" data-info="STATUS|U1 GPIO12 → R11|24–26 AWG GREY"/>
+    <line x1="1280" y1="820" x2="1340" y2="820" class="wdata6" data-info="STATUS|R11 → LED1 anode|24–26 AWG GREY"/>
+
+    <!-- ===== Ground returns ===== -->
+    <!-- PSU1 GND -->
+    <line x1="260" y1="510" x2="280" y2="510" class="wgnd" data-info="GND|PSU1 pin → return line|24 AWG BLACK"/>
+    <line x1="280" y1="510" x2="280" y2="1020" class="wgnd" data-info="GND|PSU1 return → common bus|24 AWG BLACK"/>
+    <circle cx="280" cy="1020" r="3.5" class="jgnd" data-info="GND|PSU1 return"/>
+    <!-- U1 GND -->
+    <line x1="720" y1="880" x2="740" y2="880" class="wgnd" data-info="GND|ESP32 pin → return line|24 AWG BLACK"/>
+    <line x1="740" y1="880" x2="740" y2="1020" class="wgnd" data-info="GND|ESP32 return → common bus|24 AWG BLACK"/>
+    <circle cx="740" cy="1020" r="3.5" class="jgnd" data-info="GND|ESP32 return"/>
+    <!-- Operator-panel GND collector -->
+    <line x1="1530" y1="415" x2="1550" y2="415" class="wgnd" data-info="GND|ENC1 common → collector|24 AWG BLACK"/>
+    <line x1="1530" y1="550" x2="1550" y2="550" class="wgnd" data-info="GND|SW1 return → collector|24 AWG BLACK"/>
+    <line x1="1530" y1="640" x2="1550" y2="640" class="wgnd" data-info="GND|SW2 return → collector|24 AWG BLACK"/>
+    <line x1="1530" y1="730" x2="1550" y2="730" class="wgnd" data-info="GND|SW3 return → collector|24 AWG BLACK"/>
+    <line x1="1530" y1="820" x2="1550" y2="820" class="wgnd" data-info="GND|LED1 cathode → collector|24 AWG BLACK"/>
+    <line x1="1550" y1="415" x2="1550" y2="1020" class="wgnd" data-info="GND|operator-panel return → common bus|24 AWG BLACK"/>
+    <circle cx="1550" cy="415" r="3" class="jgnd" data-info="GND|ENC1 common tap"/>
+    <circle cx="1550" cy="550" r="3" class="jgnd" data-info="GND|SW1 tap"/>
+    <circle cx="1550" cy="640" r="3" class="jgnd" data-info="GND|SW2 tap"/>
+    <circle cx="1550" cy="730" r="3" class="jgnd" data-info="GND|SW3 tap"/>
+    <circle cx="1550" cy="820" r="3" class="jgnd" data-info="GND|LED1 tap"/>
+    <circle cx="1550" cy="1020" r="3.5" class="jgnd" data-info="GND|operator-panel return"/>
+
+    <!-- ===========================
+         COMMON GROUND BUS
+         =========================== -->
+    <line x1="-170" y1="1020" x2="2040" y2="1020" class="wgnd-bus" data-info="GND|common ground rail (full canvas)|24 AWG BLACK"/>
+    <text x="935" y="1014" font-size="18" class="channel-label" text-anchor="middle">GND</text>
+    <text x="2030" y="1010" font-size="15" fill="var(--wire-gnd)" text-anchor="end" class="black-text" letter-spacing="3">── COMMON GROUND BUS ──</text>
+
+    <!-- ===========================
+         BOTTOM PANELS (4 zones, y 1080…)
+         BOM          : x   40… 660
+         Wire-gauge   : x  690… 990
+         Harness col  : x 1010…1330
+         Notes + Rev  : x 1350…2000
+         =========================== -->
+
+    <!-- BOM panel (VR6) -->
+    <g id="bom-panel" class="bom-panel" data-info="Bill of Materials|Component list">
+      <rect x="40" y="1080" width="620" height="310" rx="4" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="350" y="1100" font-size="14" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="2">BILL OF MATERIALS</text>
+      <line x1="40" y1="1108" x2="660" y2="1108" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <!-- column header band -->
+      <rect x="40" y="1108" width="620" height="20" fill="var(--bg-panel)" stroke="none"/>
+      <text x="60"  y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">#</text>
+      <text x="105" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">QTY</text>
+      <text x="195" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">REF</text>
+      <text x="455" y="1122" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">DESCRIPTION</text>
+      <line x1="40"  y1="1128" x2="660" y2="1128" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+      <!-- vertical column dividers -->
+      <line x1="80"  y1="1108" x2="80"  y2="1380" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+      <line x1="130" y1="1108" x2="130" y2="1380" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+      <line x1="260" y1="1108" x2="260" y2="1380" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.4"/>
+      <!-- rows -->
+      <text x="60"  y="1143" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="105" y="1143" font-size="10" fill="var(--text-primary)" text-anchor="middle">3</text>
+      <text x="195" y="1143" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">C3–C5</text>
+      <text x="268" y="1143" font-size="10" fill="var(--text-primary)">100 nF X7R ceramic, ≥25 V, buttons only</text>
+      <line x1="80" y1="1148" x2="655" y2="1148" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1159" font-size="10" fill="var(--text-primary)" text-anchor="middle">2</text>
+      <text x="105" y="1159" font-size="10" fill="var(--text-primary)" text-anchor="middle">3</text>
+      <text x="195" y="1159" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">R3–R5</text>
+      <text x="268" y="1159" font-size="10" fill="var(--text-primary)">10 kΩ, 1%, 0.25 W, buttons only</text>
+      <line x1="80" y1="1164" x2="655" y2="1164" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1175" font-size="10" fill="var(--text-primary)" text-anchor="middle">3</text>
+      <text x="105" y="1175" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1175" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">J1</text>
+      <text x="268" y="1175" font-size="10" fill="var(--text-primary)">USB-C cable, quality, ≤1 m, 5 V power rated</text>
+      <line x1="80" y1="1180" x2="655" y2="1180" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1191" font-size="10" fill="var(--text-primary)" text-anchor="middle">4</text>
+      <text x="105" y="1191" font-size="10" fill="var(--text-primary)" text-anchor="middle">3</text>
+      <text x="195" y="1191" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">SW1–SW3</text>
+      <text x="268" y="1191" font-size="10" fill="var(--text-primary)">NO momentary pushbutton, panel mount</text>
+      <line x1="80" y1="1196" x2="655" y2="1196" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1207" font-size="10" fill="var(--text-primary)" text-anchor="middle">5</text>
+      <text x="105" y="1207" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1207" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">ENC1</text>
+      <text x="268" y="1207" font-size="10" fill="var(--text-primary)">NEBDS-01 / EC11 Schmitt encoder module</text>
+      <line x1="80" y1="1212" x2="655" y2="1212" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1223" font-size="10" fill="var(--text-primary)" text-anchor="middle">6</text>
+      <text x="105" y="1223" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1223" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">U1</text>
+      <text x="268" y="1223" font-size="10" fill="var(--text-primary)">ESP32-S3-DevKitC-1, USB-C, N8R8 / N16R8</text>
+      <line x1="80" y1="1228" x2="655" y2="1228" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1239" font-size="10" fill="var(--text-primary)" text-anchor="middle">7</text>
+      <text x="105" y="1239" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1239" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">PSU1</text>
+      <text x="268" y="1239" font-size="10" fill="var(--text-primary)">Regulated USB 5 V, 2 A wall adapter</text>
+      <line x1="80" y1="1244" x2="655" y2="1244" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1255" font-size="10" fill="var(--text-primary)" text-anchor="middle">8</text>
+      <text x="105" y="1255" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1255" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">PCB1</text>
+      <text x="268" y="1255" font-size="10" fill="var(--text-primary)">2.54 mm prototype PCB, ~70 × 50 mm</text>
+      <line x1="80" y1="1260" x2="655" y2="1260" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1271" font-size="10" fill="var(--text-primary)" text-anchor="middle">9</text>
+      <text x="105" y="1271" font-size="10" fill="var(--text-primary)" text-anchor="middle">5</text>
+      <text x="195" y="1271" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">H1–H5</text>
+      <text x="268" y="1271" font-size="10" fill="var(--text-primary)">H1 JST-XH 5-pin (ENC1, keyed); H2–H5 2-pin locking</text>
+      <line x1="80" y1="1276" x2="655" y2="1276" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1287" font-size="10" fill="var(--text-primary)" text-anchor="middle">10</text>
+      <text x="105" y="1287" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1287" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">ENCLOSURE</text>
+      <text x="268" y="1287" font-size="10" fill="var(--text-primary)">Nonconductive enclosure, strain relief + vents</text>
+      <line x1="80" y1="1292" x2="655" y2="1292" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1303" font-size="10" fill="var(--text-primary)" text-anchor="middle">11</text>
+      <text x="105" y="1303" font-size="10" fill="var(--text-primary)" text-anchor="middle">lot</text>
+      <text x="195" y="1303" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">W1</text>
+      <text x="268" y="1303" font-size="10" fill="var(--text-primary)">24 AWG stranded hookup wire, 7 colors, ≥300 V</text>
+      <line x1="80" y1="1308" x2="655" y2="1308" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1319" font-size="10" fill="var(--text-primary)" text-anchor="middle">12</text>
+      <text x="105" y="1319" font-size="10" fill="var(--text-primary)" text-anchor="middle">lot</text>
+      <text x="195" y="1319" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">HW1</text>
+      <text x="268" y="1319" font-size="10" fill="var(--text-primary)">Standoffs, M3 screws, knob, labels, heat-shrink</text>
+      <line x1="80" y1="1324" x2="655" y2="1324" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1335" font-size="10" fill="var(--text-primary)" text-anchor="middle">13</text>
+      <text x="105" y="1335" font-size="10" fill="var(--text-primary)" text-anchor="middle">5</text>
+      <text x="195" y="1335" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">R6–R10</text>
+      <text x="268" y="1335" font-size="10" fill="var(--text-primary)">100 Ω, 1%, 0.25 W, series GPIO protection</text>
+      <line x1="80" y1="1340" x2="655" y2="1340" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1351" font-size="10" fill="var(--text-primary)" text-anchor="middle">14</text>
+      <text x="105" y="1351" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1351" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">R11</text>
+      <text x="268" y="1351" font-size="10" fill="var(--text-primary)">330 Ω, 1%, 0.25 W, LED1 series resistor</text>
+      <line x1="80" y1="1356" x2="655" y2="1356" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <text x="60"  y="1367" font-size="10" fill="var(--text-primary)" text-anchor="middle">15</text>
+      <text x="105" y="1367" font-size="10" fill="var(--text-primary)" text-anchor="middle">1</text>
+      <text x="195" y="1367" font-size="10" fill="var(--accent)" text-anchor="middle" class="bold-text">LED1</text>
+      <text x="268" y="1367" font-size="10" fill="var(--text-primary)">Panel LED, 3–5 mm, Wi-Fi status indicator</text>
+      <line x1="80" y1="1372" x2="655" y2="1372" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+    </g>
+
+    <!-- Wire-gauge / schedule table -->
+    <g class="wire-gauge-table" transform="translate(690,1080)" data-info="Wire schedule|AWG and harness color per net">
+      <rect x="0" y="0" width="300" height="240" rx="2" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="150" y="19" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1.5">WIRE SCHEDULE</text>
+      <line x1="0" y1="28" x2="300" y2="28" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <!-- header -->
+      <text x="40"  y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">NET</text>
+      <text x="130" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">AWG</text>
+      <text x="205" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">COLOR</text>
+      <text x="268" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text">MAX RUN</text>
+      <line x1="0" y1="50" x2="300" y2="50" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+      <!-- rows -->
+      <rect x="20" y="60" width="20" height="4" rx="1" class="j3v3"/>
+      <text x="130" y="66" font-size="11" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">24</text>
+      <text x="205" y="66" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Red</text>
+      <text x="268" y="66" font-size="11" fill="var(--text-secondary)" text-anchor="middle">0.5 m</text>
+      <line x1="6" y1="73" x2="294" y2="73" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="82" width="20" height="4" rx="1" class="jgnd"/>
+      <text x="130" y="88" font-size="11" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">24</text>
+      <text x="205" y="88" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Black</text>
+      <text x="268" y="88" font-size="11" fill="var(--text-secondary)" text-anchor="middle">0.5 m</text>
+      <line x1="6" y1="95" x2="294" y2="95" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="104" width="20" height="4" rx="1" class="jdata"/>
+      <text x="130" y="110" font-size="11" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">24–26</text>
+      <text x="205" y="110" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Green</text>
+      <text x="268" y="110" font-size="11" fill="var(--text-secondary)" text-anchor="middle">0.5 m</text>
+      <line x1="6" y1="117" x2="294" y2="117" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="126" width="20" height="4" rx="1" class="jdata2"/>
+      <text x="130" y="132" font-size="11" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">24–26</text>
+      <text x="205" y="132" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Blue</text>
+      <text x="268" y="132" font-size="11" fill="var(--text-secondary)" text-anchor="middle">0.5 m</text>
+      <line x1="6" y1="139" x2="294" y2="139" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="148" width="20" height="4" rx="1" class="jdata3"/>
+      <text x="130" y="154" font-size="11" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">24–26</text>
+      <text x="205" y="154" font-size="11" fill="var(--text-secondary)" text-anchor="middle">White</text>
+      <text x="268" y="154" font-size="11" fill="var(--text-secondary)" text-anchor="middle">0.5 m</text>
+      <line x1="6" y1="161" x2="294" y2="161" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="170" width="20" height="4" rx="1" class="jdata4"/>
+      <text x="130" y="176" font-size="11" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">24–26</text>
+      <text x="205" y="176" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Yellow</text>
+      <text x="268" y="176" font-size="11" fill="var(--text-secondary)" text-anchor="middle">0.5 m</text>
+      <line x1="6" y1="183" x2="294" y2="183" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="192" width="20" height="4" rx="1" class="jdata5"/>
+      <text x="130" y="198" font-size="11" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">24–26</text>
+      <text x="205" y="198" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Orange</text>
+      <text x="268" y="198" font-size="11" fill="var(--text-secondary)" text-anchor="middle">0.5 m</text>
+      <line x1="6" y1="205" x2="294" y2="205" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+
+      <rect x="20" y="214" width="20" height="4" rx="1" class="jdata6"/>
+      <text x="130" y="220" font-size="11" fill="var(--text-primary)"   text-anchor="middle" class="bold-text">24–26</text>
+      <text x="205" y="220" font-size="11" fill="var(--text-secondary)" text-anchor="middle">Grey</text>
+      <text x="268" y="220" font-size="11" fill="var(--text-secondary)" text-anchor="middle">0.5 m</text>
+    </g>
+
+    <!-- U1 harness / GPIO map -->
+    <g class="harness-table" transform="translate(1010,1080)" data-info="U1 ESP32-S3 pinout|Wire-harness map">
+      <rect x="0" y="0" width="320" height="248" rx="2" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <line x1="0" y1="28" x2="320" y2="28" stroke="var(--comp-stroke)" stroke-width="1"/>
+      <text x="160" y="19" font-size="13" fill="var(--accent)" text-anchor="middle" class="black-text" letter-spacing="1.5">U1 ESP32-S3 · HARNESS</text>
+      <line x1="44.8"  y1="28" x2="44.8"  y2="248" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <line x1="160"   y1="28" x2="160"   y2="248" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <line x1="275.2" y1="28" x2="275.2" y2="248" stroke="var(--comp-stroke)" stroke-width="0.5" opacity="0.6"/>
+      <text x="22.4"  y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">PIN</text>
+      <text x="102.4" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">NAME</text>
+      <text x="217.6" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">NET</text>
+      <text x="297.6" y="44" font-size="10" fill="var(--text-secondary)" text-anchor="middle" class="bold-text" letter-spacing="1">CH</text>
+      <line x1="0" y1="50" x2="320" y2="50" stroke="var(--comp-stroke)" stroke-width="0.5"/>
+
+      <g class="hrow" transform="translate(0,50)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">USB-C</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">5V IN</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">USB_5V</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="j5v"/>
+        <line x1="6" y1="22" x2="314" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g class="hrow" transform="translate(0,72)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">3V3</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">3V3 OUT</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">BUS_3V3</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="j3v3"/>
+        <line x1="6" y1="22" x2="314" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g class="hrow" transform="translate(0,94)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">GPIO7</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">ENC A</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">ENC_A</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="jdata"/>
+        <line x1="6" y1="22" x2="314" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g class="hrow" transform="translate(0,116)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">GPIO8</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">ENC B</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">ENC_B</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="jdata2"/>
+        <line x1="6" y1="22" x2="314" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g class="hrow" transform="translate(0,138)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">GPIO9</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">PLAY</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">PLAY</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="jdata3"/>
+        <line x1="6" y1="22" x2="314" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g class="hrow" transform="translate(0,160)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">GPIO10</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">PAUSE</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">PAUSE</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="jdata4"/>
+        <line x1="6" y1="22" x2="314" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g class="hrow" transform="translate(0,182)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">GPIO11</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">STOP</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">STOP</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="jdata5"/>
+        <line x1="6" y1="22" x2="314" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g class="hrow" transform="translate(0,204)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">GPIO12</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">STATUS LED</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">STATUS</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="jdata6"/>
+        <line x1="6" y1="22" x2="314" y2="22" stroke="var(--comp-stroke)" stroke-width="0.3" opacity="0.4"/>
+      </g>
+      <g class="hrow" transform="translate(0,226)">
+        <text x="22.4"  y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle" class="bold-text">GND</text>
+        <text x="102.4" y="14" font-size="11" fill="var(--text-primary)" text-anchor="middle">GND</text>
+        <text x="217.6" y="14" font-size="11" fill="var(--text-secondary)" text-anchor="middle">GND</text>
+        <rect x="284.8" y="9" width="20" height="4" rx="1" class="jgnd"/>
+      </g>
+    </g>
+
+    <!-- Notes + revision history -->
+    <g id="notes-panel" data-info="Notes and revision history|Design notes for the controller">
+      <rect x="1350" y="1080" width="650" height="620" rx="4" fill="none" stroke="var(--comp-stroke)" stroke-width="1.5"/>
+      <text x="1365" y="1104" font-size="14" fill="var(--accent)" class="black-text" letter-spacing="1">NOTES</text>
+
+      <text x="1365" y="1135" font-size="12" fill="var(--warn)" class="bold-text">
+        <tspan fill="var(--text-primary)">1.</tspan> OSC address / port contract is PROPOSED (build doc §7) —
+        <tspan x="1380" dy="14">confirm against the actual Max patch before acceptance.</tspan>
+      </text>
+      <text x="1365" y="1185" font-size="12" fill="var(--warn)" class="bold-text">
+        <tspan fill="var(--text-primary)">2.</tspan> Do NOT apply 5 V to any GPIO; inputs are referenced
+        <tspan x="1380" dy="14">only to the board's 3.3 V and GND rails.</tspan>
+      </text>
+      <text x="1365" y="1235" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">3.</tspan> GPIO0 / 3 / 45 / 46 are avoided — ESP32-S3
+        <tspan x="1380" dy="14">boot-strapping pins.</tspan>
+      </text>
+      <text x="1365" y="1285" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">4.</tspan> ENC1 is powered from 3V3; A/B are Schmitt outputs.
+        <tspan x="1380" dy="14">SW is NC. R3–R5/C3–C5 debounce buttons only.</tspan>
+      </text>
+      <text x="1365" y="1335" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">5.</tspan> Command transmitter only — OSC / UDP over 2.4 GHz
+        <tspan x="1380" dy="14">Wi-Fi → ASUS router → wired Max / MSP. Carries no</tspan>
+        <tspan x="1380" dy="14">audio, video, DDP pixel data, or LED power.</tspan>
+      </text>
+      <text x="1365" y="1403" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">6.</tspan> Power: regulated USB 5 V / 2 A; keep independent
+        <tspan x="1380" dy="14">from 12 V LED supplies. Ground symbol = local return</tspan>
+        <tspan x="1380" dy="14">to the common GND bus.</tspan>
+      </text>
+      <text x="1365" y="1450" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">7.</tspan> R6–R10 (100 Ω) sit in-line between each GPIO node and
+        <tspan x="1380" dy="14">its panel run — ESD / short protection + edge damping.</tspan>
+      </text>
+      <text x="1365" y="1490" font-size="12" fill="var(--text-secondary)" class="bold-text">
+        <tspan fill="var(--text-primary)">8.</tspan> LED1 (GPIO12 → R11 330 Ω → LED1 → GND): solid =
+        <tspan x="1380" dy="14">Wi-Fi connected · blinking = reconnecting · off = no power.</tspan>
+      </text>
+      <text x="1365" y="1530" font-size="12" fill="var(--warn)" class="bold-text">
+        <tspan fill="var(--text-primary)">9.</tspan> Verify EC11 frame/shaft-to-GND continuity after mounting.
+        <tspan x="1380" dy="14">Use a quality USB-C cable ≤ 1 m (Wi-Fi TX brownout guard).</tspan>
+      </text>
+
+      <text x="1365" y="1568" font-size="14" fill="var(--accent)" class="black-text" letter-spacing="1">REVISION HISTORY</text>
+      <text x="1370" y="1596" font-size="13" fill="var(--accent)" class="bold-text">
+        <tspan fill="var(--text-primary)">Rev 2.0</tspan> — Added LED1 Wi-Fi status (GPIO12 + R11 330 Ω),
+        <tspan x="1430" dy="16">R6–R10 100 Ω series GPIO protection, H1 keyed JST-XH 5-pin</tspan>
+        <tspan x="1430" dy="16">encoder connector, shaft-ground check, USB-C ≤ 1 m (2026-07-02).</tspan>
+      </text>
+      <text x="1370" y="1650" font-size="13" fill="var(--accent)" class="bold-text">
+        <tspan fill="var(--text-primary)">Rev 1.0</tspan> — Initial design; reference-style rebuild of the
+        <tspan x="1430" dy="16">ESP32-S3 OSC controller: encoder + 3 buttons,</tspan>
+        <tspan x="1430" dy="16">Schmitt encoder module + button RC debounce (2026-06-19).</tspan>
+      </text>
+    </g>
+
+  </g>
+</svg>
+</div>
+</div>
+
+<!-- Zoom Controls -->
+<div id="zoom-controls">
+  <button class="zoom-btn" id="zoom-in" title="Zoom In (Ctrl+Shift++)">+</button>
+  <button class="zoom-btn" id="zoom-out" title="Zoom Out (Ctrl+Shift+−)">−</button>
+  <span id="zoom-level">100%</span>
+  <button class="zoom-btn fit-btn" id="zoom-fit" title="Fit to Screen (Ctrl+Shift+0)">FIT</button>
+  <button class="zoom-btn fit-btn" id="export-svg" title="Export as Standalone SVG" style="margin-left: 12px; color: var(--wire-data);">Export SVG</button>
+  <button class="zoom-btn fit-btn" id="export-png" title="Export as High-Res PNG" style="color: var(--wire-5v);">Export PNG</button>
+</div>
+<div class="zoom-shortcut-hint">Ctrl+Shift+ +/−/0 · Scroll to zoom · Drag to pan</div>
+
+<!-- Tooltip -->
+<div class="tip" id="tip">
+  <div class="ttl" id="tipTtl">Component Name</div>
+  <div class="desc" id="tipDesc">Description</div>
+</div>
+
+<script>
+  const tip = document.getElementById('tip');
+  const tipTtl = document.getElementById('tipTtl');
+  const tipDesc = document.getElementById('tipDesc');
+  document.querySelectorAll('[data-info]').forEach(el => {
+    el.addEventListener('mouseenter', (e) => {
+      const t = e.target.closest('[data-info]') || e.target;
+      const info = t.getAttribute('data-info');
+      if (info) {
+        const parts = info.split('|');
+        tipTtl.textContent = parts[0];
+        tipDesc.textContent = '';
+        parts.slice(1).forEach((seg, i) => {
+          if (i > 0) tipDesc.appendChild(document.createElement('br'));
+          tipDesc.appendChild(document.createTextNode(seg));
+        });
+        tip.classList.add('on');
+      }
+    });
+    el.addEventListener('mouseleave', () => tip.classList.remove('on'));
+  });
+  const container = document.getElementById('schematic-container');
+  const wrapper = document.getElementById('svg-wrapper');
+  const zoomLevelEl = document.getElementById('zoom-level');
+  let scale = 1, panX = 0, panY = 0, isPanning = false, startX, startY;
+  const MIN_SCALE = 0.1, MAX_SCALE = 4, ZOOM_STEP = 0.15;
+  const SVG_W = 2400, SVG_H = 1800;
+  function updateTransform() {
+    wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    zoomLevelEl.textContent = Math.round(scale * 100) + '%';
+  }
+  function zoomTo(ns, cx, cy) {
+    ns = Math.max(MIN_SCALE, Math.min(MAX_SCALE, ns));
+    if (cx !== undefined && cy !== undefined) {
+      const r = ns / scale;
+      panX = cx - (cx - panX) * r;
+      panY = cy - (cy - panY) * r;
+    }
+    scale = ns;
+    updateTransform();
+  }
+  function zoomIn()  { const r = container.getBoundingClientRect(); zoomTo(scale * (1 + ZOOM_STEP), r.width / 2, r.height / 2); }
+  function zoomOut() { const r = container.getBoundingClientRect(); zoomTo(scale * (1 - ZOOM_STEP), r.width / 2, r.height / 2); }
+  function fitToScreen() {
+    const r = container.getBoundingClientRect();
+    scale = Math.min(r.width / SVG_W, r.height / SVG_H) * 0.95;
+    panX = (r.width - SVG_W * scale) / 2;
+    panY = (r.height - SVG_H * scale) / 2;
+    updateTransform();
+  }
+  document.getElementById('zoom-in').addEventListener('click', zoomIn);
+  document.getElementById('zoom-out').addEventListener('click', zoomOut);
+  document.getElementById('zoom-fit').addEventListener('click', fitToScreen);
+  container.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const r = container.getBoundingClientRect();
+    zoomTo(scale * (e.deltaY > 0 ? (1 - ZOOM_STEP) : (1 + ZOOM_STEP)), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+  container.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.comp') || e.target.closest('#zoom-controls')) return;
+    isPanning = true; startX = e.clientX - panX; startY = e.clientY - panY;
+    container.classList.add('grabbing');
+  });
+  window.addEventListener('mousemove', (e) => { if (!isPanning) return; panX = e.clientX - startX; panY = e.clientY - startY; updateTransform(); });
+  window.addEventListener('mouseup', () => { isPanning = false; container.classList.remove('grabbing'); });
+  let lastTouchDist = 0;
+  container.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) { isPanning = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY; }
+    else if (e.touches.length === 2) { e.preventDefault(); isPanning = false; const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY; lastTouchDist = Math.sqrt(dx*dx+dy*dy); }
+  }, { passive: false });
+  container.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isPanning) { panX = e.touches[0].clientX - startX; panY = e.touches[0].clientY - startY; updateTransform(); }
+    else if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX, dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx+dy*dy), r = container.getBoundingClientRect();
+      const cx = (e.touches[0].clientX + e.touches[1].clientX)/2 - r.left, cy = (e.touches[0].clientY + e.touches[1].clientY)/2 - r.top;
+      zoomTo(scale * (dist / lastTouchDist), cx, cy); lastTouchDist = dist;
+    }
+  }, { passive: false });
+  container.addEventListener('touchend', () => { isPanning = false; });
+  window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey) {
+      if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomIn(); }
+      else if (e.key === '-' || e.key === '_') { e.preventDefault(); zoomOut(); }
+      else if (e.key === '0' || e.key === ')') { e.preventDefault(); fitToScreen(); }
+    }
+  });
+  window.addEventListener('load', () => { (document.fonts?.ready || Promise.resolve()).then(fitToScreen); });
+  function getSvgStringThemed() {
+    // Themed (matches on-screen) — used for PNG export.
+    const clone = document.getElementById('schematic-svg').cloneNode(true);
+    const styleTag = document.querySelector('style');
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = styleTag ? styleTag.innerHTML : '';
+    defs.appendChild(style);
+    const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim();
+    bgRect.setAttribute("width", "100%"); bgRect.setAttribute("height", "100%"); bgRect.setAttribute("fill", bgColor);
+    if (bgColor) clone.insertBefore(bgRect, clone.firstChild);
+    clone.insertBefore(defs, clone.firstChild);
+    if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    return new XMLSerializer().serializeToString(clone);
+  }
+  function getSvgStringPrint() {
+    // Print/embed export — black strokes & text on transparent background.
+    // No <rect> background. Overrides every themed color via injected !important style.
+    const clone = document.getElementById('schematic-svg').cloneNode(true);
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    // M6: use attribute-prefix selectors so adding --wire-data8 / .wdata8 (or
+    // any new wire class) is picked up automatically without editing print CSS.
+    style.textContent = `
+      svg { background: transparent !important; }
+      .comp, .sec-border-dash,
+      [class~="w12v"], [class~="w12v-bus"],
+      [class~="wgnd"], [class~="wgnd-bus"],
+      [class~="w5v"],  [class~="w5v-bus"],
+      [class~="w3v3"], [class~="w3v3-bus"],
+      [class*="wdata"] {
+        stroke: #000 !important;
+        fill: none !important;
+      }
+      [class^="j"], [class*=" j"], .pin {
+        fill: #000 !important;
+        stroke: none !important;
+      }
+      text { fill: #000 !important; }
+      line[stroke], path[stroke], polyline[stroke], rect[stroke], circle[stroke] {
+        stroke: #000 !important;
+      }
+      [fill]:not(text):not([class^="j"]):not([class*=" j"]):not(.pin) {
+        fill: none !important;
+      }
+    `;
+    defs.appendChild(style);
+    clone.insertBefore(defs, clone.firstChild);
+    if (!clone.getAttribute("xmlns")) clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    return new XMLSerializer().serializeToString(clone);
+  }
+  function exportFilename(ext) {
+    const title = document.title.replace(/[\\/:*?"<>|]/g, '_') || 'Schematic_Export';
+    return title + '.' + ext;
+  }
+  document.getElementById('export-svg').addEventListener('click', () => {
+    const blob = new Blob([getSvgStringPrint()], {type: "image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a"); link.href = url; link.download = exportFilename('svg');
+    document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+  });
+  document.getElementById('export-png').addEventListener('click', () => {
+    const btn = document.getElementById('export-png');
+    const origText = btn.textContent; btn.textContent = "WAIT..."; btn.style.opacity = "0.5";
+    const canvas = document.createElement("canvas"); canvas.width = SVG_W; canvas.height = SVG_H;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    const url = URL.createObjectURL(new Blob([getSvgStringThemed()], {type: "image/svg+xml;charset=utf-8"}));
+    img.onload = function() {
+      ctx.drawImage(img, 0, 0); URL.revokeObjectURL(url);
+      try {
+        const link = document.createElement("a"); link.href = canvas.toDataURL("image/png", 1.0);
+        link.download = exportFilename('png');
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      } catch (e) {
+        console.error("PNG export error:", e.message);
+      } finally { btn.textContent = origText; btn.style.opacity = "1"; }
+    };
+    img.onerror = function() {
+      btn.textContent = origText; btn.style.opacity = "1";
+      URL.revokeObjectURL(url);
+      console.error("PNG export: SVG image failed to load");
+    };
+    img.src = url;
+  });
+</script>
+</body>
+</html>
