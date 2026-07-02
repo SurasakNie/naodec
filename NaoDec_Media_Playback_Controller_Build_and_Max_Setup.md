@@ -1,9 +1,12 @@
 # NaoDec Media Playback Controller Build and Max Setup
 
-**Revision:** 1.0  
-**Date:** 2026-07-01  
+**Revision:** 1.1  
+**Date:** 2026-07-02  
 **Controller:** ESP32-S3 Wi-Fi OSC controller for Max/MSP media playback  
-**Schematic:** `Media_Playback_Controller_Schematic_Rev1.0.html`
+**Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev1.0.html`
+
+> Rev 1.1 — Sections 6 and 8 aligned with the real ASUS RT-AX1800HP LAN: Max host
+> `192.168.50.2`, controller reserved at `192.168.50.114` per the `.11x` convention.
 
 ## 1. Purpose
 
