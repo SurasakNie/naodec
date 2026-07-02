@@ -1,13 +1,13 @@
 # NaoDec — Power Requirements & Controller Box Report
 
 **Project:** NaoDec — 7-channel WS2815 LED installation + 4-channel scent controller
-**Document revision:** 1.1
+**Document revision:** 1.2
 **Date:** 2026-07-02
 **Scope:** Consolidated power budget, PSU selection, single-box mounting options
 (electrical enclosure vs. ATX PC case), cable/voltage-drop analysis, and the
 audit of all figures.
 
-> Companion interactive diagram: `NaoDec_Controller_Box_Configs_Rev1.2.html`
+> Companion interactive diagram: `NaoDec_Controller_Box_Configs_Rev1.3.html`
 > Source schematics: `NaoDec_WS2815_LED_Controller_Rev1.6.html`,
 > `NaoDec_Scent_Controller_Schematic_Rev2.0.html`
 
@@ -204,21 +204,37 @@ for ~24 total cable exits.
 Required: 12 V continuous ≥ ~27 A (full white) with margin; 5 V ≥ 1 A (trivial);
 **every 12 V rail actually used must individually clear ~27.1 A** (don't let
 the combined load span rails whose *individual* limits are below that);
-modular preferred. **850 W is sufficient** (~38 % load — the efficiency sweet
-spot); **1000 W** adds headroom and runs cooler/quieter.
+modular preferred. **850 W is sufficient** (~38.7 % load — the efficiency
+sweet spot); **1000 W** adds headroom and runs cooler/quieter. Load % is the
+full **329 W system total** (§3: 325.2 W @ 12 V + 4.1 W @ 5 V logic) over the
+PSU's rated wattage, since the ATX PSU supplies both rails.
 
-| # | Model | Watts | 12 V | 12 V rail config | Efficiency |
-|---|-------|-------|------|-------------------|-----------|
-| 1 | Seasonic Focus GX-850 | 850 W | 70.8 A | Single | Gold |
-| 2 | Corsair RM850e | 850 W | 70.8 A | Single | Gold |
-| 3 | be quiet! Pure Power 12 M 850W | 850 W | 70.8 A | Multi (12V1 40A / 12V2 36A) — each rail individually clears 27.1 A | Gold |
-| 4 | EVGA SuperNOVA 850 G6 | 850 W | 70.8 A | Single | Gold |
-| 5 | Corsair RM850x | 850 W | 70.8 A | Single | Gold |
-| 6 | be quiet! Straight Power 11 850W | 850 W | 70.8 A | ⚠ Multi (4×: 21/21/26/26 A, no single-rail mode) | Platinum |
-| 7 | Corsair HX850 | 850 W | 70.8 A | Switchable; default **multi**, 40 A/cable OCP — clears 27.1 A either way | Platinum |
-| 8 | Seasonic Prime GX-1000 | 1000 W | 83.3 A | Single | Gold |
-| 9 | Seasonic Prime TX-1000 | 1000 W | 83.3 A | Single | Titanium |
-| 10 | FSP Hydro G Pro 1000W | 1000 W | 83.3 A | Single | Gold |
+| # | Model | Watts | 12 V | 12 V rail config | Efficiency | Price (฿) | Load % |
+|---|-------|-------|------|-------------------|-----------|---:|---:|
+| 1 | Seasonic Focus GX-850 | 850 W | 70.8 A | Single | Gold | Verify live | 38.7% |
+| 2 | Corsair RM850e | 850 W | 70.8 A | Single | Gold | 3,690 (−14%) | 38.7% |
+| 3 | be quiet! Pure Power 12 M 850W | 850 W | 70.8 A | Multi (12V1 40A / 12V2 36A) — each rail individually clears 27.1 A | Gold | Verify live | 38.7% |
+| 4 | EVGA SuperNOVA 850 G6 | 850 W | 70.8 A | Single | Gold | Verify live | 38.7% |
+| 5 | Corsair RM850x | 850 W | 70.8 A | Single | Gold | Verify live | 38.7% |
+| 6 | be quiet! Straight Power 11 850W | 850 W | 70.8 A | ⚠ Multi (4×: 21/21/26/26 A, no single-rail mode) | Platinum | Verify live | 38.7% |
+| 7 | Corsair HX850 | 850 W | 70.8 A | Switchable; default **multi**, 40 A/cable OCP — clears 27.1 A either way | Platinum | Verify live | 38.7% |
+| 8 | Seasonic Prime GX-1000 | 1000 W | 83.3 A | Single | Gold | Verify live | 32.9% |
+| 9 | Seasonic Prime TX-1000 | 1000 W | 83.3 A | Single | Titanium | Verify live | 32.9% |
+| 10 | FSP Hydro G Pro 1000W | 1000 W | 83.3 A | Single | Gold | 5,990 | 32.9% |
+| 11 | MSI MAG A850GN PCIE5 850W | 850 W | 70.8 A | Single | Gold | 2,890 | 38.7% |
+| 12 | Thermaltake Toughpower GT 850W | 850 W | 70.8 A | Single | Gold | 3,290 (−8%) | 38.7% |
+| 13 | Gigabyte UD850GM PG5 V2 850W | 850 W | 70.8 A | Single | Gold | 3,590 (−18%) | 38.7% |
+| 14 | Gigabyte AORUS ELITE AE850PM PG5 | 850 W | 70.8 A | Single | Platinum | 4,790 | 38.7% |
+| 15 | Corsair RM1000E 1000W | 1000 W | 83.3 A | Single | Gold | 4,990 (−22%) | 32.9% |
+| 16 | Cooler Master ELITE 1000W | 1000 W | 83.3 A | Single | Gold | 4,990 | 32.9% |
+| 17 | Gigabyte UD1000GM PG5 1000W | 1000 W | 83.3 A | Single | Gold | 5,490 | 32.9% |
+| 18 | MSI MAG A1000GL PCIE5 1000W | 1000 W | 83.3 A | Single | Gold | 5,990 | 32.9% |
+
+Prices for #11–#18 are from a Thailand retail survey (ihavecpu.com,
+2026-06-25, reconfirmed 2026-07-01) — see `NaoDec_Config2_PSU_Survey_Sheet_20260625B.md`.
+Rail topology for #11–#18 has not been individually verified against
+manufacturer per-connector rail maps (unlike #1–#10 below); treat as
+"Single" pending confirmation.
 
 ⚠ **Rail-topology caveat (verified against current retail specs):** #3, #6,
 and #7 are multi-rail (not the single-rail units the original text implied),
@@ -233,8 +249,29 @@ their individual rails already clears the 27.1 A load on its own, with or
 without switching. Prefer #1, #2, #4, #5, #8, #9, #10 for the simplest,
 no-caveat wiring.
 
-Platinum/Titanium units (#7, #9) produce less waste heat — preferable inside
-an enclosed case.
+Platinum/Titanium units (#7, #9, #14) produce less waste heat — preferable
+inside an enclosed case.
+
+**Recommended picks (from the verified 2026-06-25 ihavecpu survey):**
+**Corsair RM1000E (#15)** — best headroom, fan reliably off at 32.9% load,
+4,990 ฿. **Corsair RM850e (#2)** — best value, 3,690 ฿, borderline-silent at
+38.7% load.
+
+### 500 W / 550 W cost-first fallback
+
+The 329 W system maximum would run a true 500 W PSU at **65.8% load** and a
+550 W PSU at **59.8% load** — electrically fine with a strong single 12 V
+rail, but outside the silent-operation target (fan will likely run
+continuously). Listed for completeness only; not recommended for this build.
+
+| # | Model | Watts | 12 V Rail | Efficiency | Load % | Price (฿) |
+|---|-------|------:|----------:|-----------|-------:|----------:|
+| 19 | Corsair CX550 | 550 W | ~45.8 A | Bronze | 59.8% | Verify live |
+| 20 | Cooler Master MWE 550 Bronze V2 | 550 W | ~45.8 A | Bronze | 59.8% | Verify live |
+| 21 | MSI MAG A550BN | 550 W | ~45.5 A | Bronze | 59.8% | Verify live |
+| 22 | SilverStone Essential ET550-B | 550 W | ~45 A | Bronze | 59.8% | Verify live |
+| 23 | FSP HV PRO 550W | 550 W | ~45 A | Bronze | 59.8% | Verify live |
+| 24 | Thermaltake Smart BX1 550W | 550 W | ~45 A | Bronze | 59.8% | Verify live |
 
 ---
 
@@ -275,6 +312,16 @@ following errors were found and fixed in
 
 ---
 
+## 9b. Audit Findings — Corrections Applied (Rev1.2 → Rev1.3)
+
+| # | Item | Was | Corrected | Cause |
+|---|------|-----|-----------|-------|
+| 17 | ATX load % basis | 38.3 % (850 W) / 32.5 % (1000 W) — computed from the **325.2 W 12 V-only** subtotal | **38.7 % (850 W) / 32.9 % (1000 W)** — computed from the **329 W full system total** (12 V + 5 V logic) | The ATX PSU supplies both rails, so its load % must use the full DC output, not just the 12 V branch. This also reverses a regression introduced in #12/#14: the original pre-audit figure of "32.9 % only" was actually correct for the 1000 W case by coincidence — both audit passes narrowed it to the wrong (12 V-only) subtotal. |
+| 18 | PSU shortlist pricing | No price column; all entries "Verify live" | **Added real THB prices for #2, #10–#18** from a Thailand retail survey (ihavecpu.com, 2026-06-25, reconfirmed 2026-07-01) | Shortlist had no cost data to support a purchase decision |
+| 19 | 500 W / 550 W fallback tier | Not documented | **Added as a rejected cost-first option** (59.8–65.8 % load, outside the silent-operation target) | Completeness — a common budget substitution should be documented and explicitly ruled out, not just omitted |
+
+---
+
 ## 10. Open Items (require user input / source data)
 
 1. **Strip #1 wire gauge conflict in source files** — README states 18 AWG; the LED
@@ -292,5 +339,5 @@ following errors were found and fixed in
 
 - `NaoDec_WS2815_LED_Controller_Rev1.6.html` — LED controller schematic (WS2815 = 10–15 mA/px; 4.2 A/strip; 25.2 A edges; 0.9 A vertex)
 - `NaoDec_Scent_Controller_Schematic_Rev2.0.html` — scent controller (ESP 0.40 A; 4 × 150 mA atomizers; F_MAIN T2A)
-- `NaoDec_Controller_Box_Configs_Rev1.2.html` — interactive box-configuration diagram (audited)
+- `NaoDec_Controller_Box_Configs_Rev1.3.html` — interactive box-configuration diagram (audited)
 - `README.md` — project overview & revisions table
