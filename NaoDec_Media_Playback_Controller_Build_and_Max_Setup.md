@@ -1,10 +1,14 @@
 # NaoDec Media Playback Controller Build and Max Setup
 
-**Revision:** 2.0  
+**Revision:** 2.1  
 **Date:** 2026-07-02  
 **Controller:** ESP32-S3 Wi-Fi OSC controller for Max/MSP media playback  
 **Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev2.0.html`
 
+> Rev 2.1 — Added an explicit placement requirement: U1 and its support PCB must be
+> mounted inside the operator panel enclosure, not staged near the router or any other
+> remote equipment. See Section 1.
+>
 > Rev 2.0 — Design hardening: LED1 Wi-Fi status indicator (GPIO12 via R11 330 Ω),
 > R6–R10 100 Ω series protection on every off-board GPIO line, H1 keyed JST-XH 5-pin
 > encoder connector, encoder shaft-to-GND continuity check, USB-C cable spec ≤ 1 m.
@@ -28,6 +32,16 @@ Functions:
 | Stop button | Sends `/transport/stop 1` |
 
 The Max computer should be connected to the ASUS router by wired Ethernet. The ESP32-S3 connects to the same LAN by 2.4 GHz Wi-Fi.
+
+### Placement Requirement
+
+**U1 (the ESP32-S3) and its support PCB must be mounted inside the operator panel enclosure**, next to the encoder and buttons it drives. Do not place U1 near the router, the Mac Mini, or any other equipment and run long wires out to a separate panel.
+
+The wire schedule in the schematic specifies a maximum run of about 0.5 m for every panel signal (encoder A/B, Play/Pause/Stop, status LED). These are unbuffered 3.3 V logic lines: a switch-to-GND button line or a quadrature encoder line stretched to several meters acts as a noise antenna, and R6-R10 (100 Ohm) only provide ESD/ringing protection for short runs, not EMI immunity over distance. Extending these runs to meters of cable, especially near a Wi-Fi router or switching power supplies, risks phantom button presses, missed presses, and misread encoder detents.
+
+There is no benefit to placing U1 near the router: the whole point of the Wi-Fi OSC design is that the *long* leg of the signal path (to the Max computer) does not need wires. 2.4 GHz Wi-Fi easily covers the distance between the operator panel and the router. Keep U1 at the panel and let Wi-Fi carry the distance; run only a USB-C power cable to the panel location.
+
+If a project constraint truly requires the microcontroller to sit apart from the panel by more than about 0.5 m, that is a different design (a remote I/O interconnect over UART/RS-485 or a buffered I2C expander) and is out of scope for this Rev 2.0 hardware.
 
 ## 2. Required Items
 
@@ -146,7 +160,7 @@ resistor sits between that node and the panel wire to the button.
 
 1. Drill the enclosure for the encoder, three buttons, the status LED, USB cable, and any service access.
 2. Arrange controls left to right as `VOLUME`, `PLAY`, `PAUSE`, `STOP`, with `LED1` visible from the operator position.
-3. Mount the ESP32-S3 board so the antenna end faces plastic, not metal.
+3. Mount the ESP32-S3 board inside this same enclosure so the antenna end faces plastic, not metal. Do not mount U1 in a separate location and run extension wires to the panel (see Section 1, Placement Requirement).
 4. Keep at least 10 mm clearance around the ESP32 antenna area.
 5. Mount the NEBDS-01 / EC11 encoder module and fit the knob. If using the optional KY-040 module, mount it in the same volume encoder position.
 6. Mount the three normally-open pushbuttons and LED1.
@@ -236,6 +250,8 @@ Default UDP destination port: `9000`.
 ## 8. ASUS Router Setup
 
 This project's ASUS RT-AX1800HP is already configured per the NaoDec network setup guide. Reuse that configuration rather than creating a new one.
+
+Router proximity is a network concern only. It has no bearing on where U1 is physically mounted — U1 belongs inside the operator panel enclosure regardless of how far that panel sits from the router (see Section 1, Placement Requirement). 2.4 GHz Wi-Fi range easily covers typical operator-panel-to-router distances.
 
 1. 2.4 GHz SSID `ASUS_NAODEC` is enabled (see the router credentials reference for the password; do not commit it to this repo).
 2. The Max computer (Mac Mini) connects to an ASUS LAN port by Ethernet, static IP `192.168.50.2`, with the Router field left blank so the Mac keeps using its Wi-Fi interface for internet (see the network setup guide, section 3).
