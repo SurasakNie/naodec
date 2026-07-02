@@ -1,6 +1,6 @@
 # NaoDec — Config 2 Component List (Bill of Materials)
 
-**Project:** NaoDec — WS2815 LED + scent controller, Config 2 (single Corsair HX850 ATX PSU)
+**Project:** NaoDec — WS2815 LED + scent controller, Config 2 (single ~650 W ATX PSU)
 **Date:** 2026-06-24
 **Scope:** All components in the combined Config 2 build (LED controller + scent controller
 on one ATX PSU). **Audio excluded** (GAB8 amp, Microlab speakers, Edifier T5 — separate 24 V subsystem).
@@ -14,7 +14,7 @@ on one ATX PSU). **Audio excluded** (GAB8 amp, Microlab speakers, Edifier T5 —
 |---|---|---|---|
 | IEC1 | 1 | IEC C14 mains inlet | 220 V AC · 10 A |
 | MCB1 | 1 | Miniature circuit breaker | 10 A · 2-pole · C-curve |
-| PSU1 | 1 | **Corsair HX850 ATX PSU** | 850 W · 80+ Platinum · fully modular · 12 V + 5 V rails |
+| PSU1 | 1 | **~650 W ATX PSU, single 12 V rail** (e.g. Thermaltake Smart BM3 650W or Corsair CV650) | 650 W · 80+ Bronze · single-rail · 12 V + 5 V rails · ~50.6 % loaded. See PSU report + `NaoDec_ATX_PSU_Wiring_and_Connectors.md` |
 | SW1 | 1 | Latching SPST switch | PS_ON# enable (pin 16 → GND) |
 | NTC1 | 1 | NTC inrush limiter | 10 Ω / 10 A · on 12 V → FB1 feed |
 
@@ -70,9 +70,10 @@ on one ATX PSU). **Audio excluded** (GAB8 amp, Microlab speakers, Edifier T5 —
 
 | Rail | Source | Worst-case load |
 |---|---|---|
-| 5 V (logic: U1, U2, U3) | HX850 5 V | ~0.82 A · ~4 W |
-| 12 V (LEDs + scent) | HX850 12 V | ~27.1 A · ~325 W |
+| 5 V (logic: U1, U2, U3) | ATX 5 V | ~0.82 A · ~4 W |
+| 12 V (LEDs + scent) | ATX 12 V | ~27.1 A · ~325 W |
 | **System total (DC)** | — | **~329 W** |
+| **PSU (650 W) load** | — | **~50.6 %** |
 | **AC mains** | 220 V | **~358 W → ~1.6 A** |
 
 ## Excluded — audio subsystem (separate 24 V build)
@@ -87,5 +88,6 @@ Not part of this BOM; documented in `NaoDec_Config2_Audio_Integration_20260622.m
 ## References
 - `NaoDec_Config2_Combined_Wiring_Rev1.0.html` — combined wiring schematic (source of this BOM)
 - `NaoDec_Power_Report_Complete_20260617.md` — power budget & PSU analysis
+- `NaoDec_ATX_PSU_Wiring_and_Connectors.md` — routing 12 V / 5 V / 3.3 V from the ATX PSU to each device
 - `NaoDec WS2815 LED Controller — 12VDC — Rev 1.6.html` — source LED controller schematic
 - `NaoDec_Config2_Audio_Integration_20260622.md` — deferred audio subsystem

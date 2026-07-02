@@ -135,3 +135,20 @@ Verified **0 text overlaps** via DOM geometry check after the changes.
 3. **Measure edge-strip +V trace resistance** to confirm one mid-strip injection point per strip suffices.
 4. **Audio (if/when pursued):** add a dedicated 24 V supply for the GAB8; keep the Edifier T5 on its own AC plug; consider Config 1 (DIN) or a partitioned audio box for clean power.
 5. Optionally bump the combined schematic to Rev 1.1 and log the clarity edits.
+
+---
+
+## 10. Follow-up (2026-07-02) — ATX right-sized to 650 W (supersedes §5 pick)
+
+The §5 "Pick: Corsair HX850" and the 850–1000 W framing above are **superseded**. That choice was
+about keeping a semi-fanless PSU silent *in the room*; since the controller box is **remote** (fan
+inaudible to the audience) and **sessions are short** (no continuous thermal soak), the build is
+**right-sized to a ~650 W 80+ Bronze single-rail PSU** (~50.6 % load at the 329 W worst case).
+
+- Recommended: **Thermaltake Smart BM3 Bronze 650W** (semi-modular) or **Corsair CV650**.
+- Confirm **single +12 V rail** at purchase; the 27.1 A load must sit on one rail.
+- New companion doc: **`NaoDec_ATX_PSU_Wiring_and_Connectors.md`** (how to route 12 V / 5 V / 3.3 V
+  from the ATX connectors to each device).
+- The 850/1000 W units remain valid only if the box ends up sharing the room or running continuously.
+
+See `NaoDec_Power_Report_Complete_20260617.md` (revised sizing section) for the full shortlist.

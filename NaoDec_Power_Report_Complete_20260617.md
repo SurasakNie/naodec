@@ -180,7 +180,21 @@ WARNING **Atomizer Moisture Isolation:** Mount the 4 atomizer drivers **outside 
 - Single 12 V rail
 - Modular preferred
 
-**Sizing:** 850 W is sufficient (~38.7 % load at full white - efficiency sweet spot). 1000 W adds headroom and runs cooler/quieter.
+**Sizing (revised 2026-07-02): right-sized to ~650 W.** The 329 W is a full-white worst case; realistic content averages ~110 W. Because the **controller box is remote** (PSU fan not audible in the room) and **sessions are short** (no continuous-duty thermal soak), the silent-zero-RPM headroom that drove the earlier 850/1000 W pick no longer applies. The only hard floor is **27.1 A on 12 V**, which a **650 W single-rail** unit clears at ~50.6 % load (329 W ÷ 650 W). The 850/1000 W tables below are retained as alternatives only if the box shares the room or runs continuously.
+
+### Recommended tier — 650 W 80+ Bronze, single 12 V rail (~50.6 % load)
+
+| # | Model | Watts | 12V Rail | Modular | Warranty | Efficiency | Availability |
+|---|-------|-------|----------|---------|----------|-----------|--------------|
+| B1 | **Thermaltake Smart BM3 Bronze 650W** | 650 W | Single ~54 A | Semi-modular | — | Bronze (ATX 3.0) | Global; check TH stock |
+| B2 | **Corsair CV650** | 650 W | Single ~54 A | Non-modular | 3 yr | Bronze | Advice.co.th |
+| B3 | **SilverStone VIVA650** | 650 W | Single ~54 A | Non-modular | 3 yr | Bronze | ihavecpu.com |
+| B4 | MSI MAG A650BN | 650 W | Single 54 A | Non-modular | 5 yr | Bronze | Global; check TH stock |
+| B5 | Enermax MarbleBron 650 | 650 W | Single 54 A | Semi-modular | — | Bronze | Global; check TH stock |
+
+**Pick:** B1 Thermaltake Smart BM3 650W if locally stocked (semi-modular helps a ~24-cable box); else B2 Corsair CV650. Confirm **single +12 V rail** on the box. Wiring to the 12 V/5 V loads: see `NaoDec_ATX_PSU_Wiring_and_Connectors.md`.
+
+### Higher-wattage alternatives (850 / 1000 W) — only if the box shares the room or runs continuous
 
 | # | Model | Watts | 12V Rail | Efficiency | Est. Load @ 329 W | Price (THB) | Notes |
 |---|-------|-------|----------|-----------|---:|---:|-------|
@@ -194,7 +208,7 @@ WARNING **Atomizer Moisture Isolation:** Mount the 4 atomizer drivers **outside 
 | 8 | Seasonic Prime GX-1000 | 1000 W | 83.3 A | Gold | 32.9% | Verify live | More headroom; original shortlist |
 | 9 | Seasonic Prime TX-1000 | 1000 W | 83.3 A | Titanium | 32.9% | Verify live | Lowest heat; original shortlist |
 | 10 | FSP Hydro G Pro 1000W | 1000 W | 83.3 A | Gold | 32.9% | 5,990 | ihavecpu 2026-06-25 survey; more headroom |
-| 11 | Corsair RM1000E 1000W | 1000 W | 83.3 A | Gold | 32.9% | 4,990 | ihavecpu 2026-06-25 survey; recommended silent option |
+| 11 | Corsair RM1000E 1000W | 1000 W | 83.3 A | Gold | 32.9% | 4,990 | ihavecpu 2026-06-25 survey; best silent option *if* stepping up to this tier |
 | 12 | MSI MAG A850GN PCIE5 850W | 850 W | 70.8 A | Gold | 38.7% | 2,890 | ihavecpu 2026-06-25 survey |
 | 13 | Thermaltake Toughpower GT 850W | 850 W | 70.8 A | Gold | 38.7% | 3,290 | ihavecpu 2026-06-25 survey |
 | 14 | Gigabyte UD850GM PG5 V2 850W | 850 W | 70.8 A | Gold | 38.7% | 3,590 | ihavecpu 2026-06-25 survey |
@@ -216,9 +230,9 @@ WARNING **Atomizer Moisture Isolation:** Mount the 4 atomizer drivers **outside 
 
 **500 W / 550 W note:** The related power documents put the maximum system demand at **~329 W DC**. A true 500 W PSU would run at **65.8% load**; a 550 W PSU at **59.8% load**. That is acceptable only as a budget fallback with a strong single 12 V rail, not as the preferred quiet wellness-room choice.
 
-**Recommendation:** For quiet wellness-room operation, keep the 850-1000 W class as the preferred Config 2 choice. From the verified 2026-06-25 ihavecpu survey, **Corsair RM1000E** is the safest silent/headroom option; **Corsair RM850E** is the best value. Platinum/Titanium units remain thermally attractive if available at purchase time.
+**Recommendation (revised 2026-07-02):** For this build (remote box, short sessions) the right-sized choice is a **650 W 80+ Bronze single-rail PSU** — B1 Thermaltake Smart BM3 650W or B2 Corsair CV650 (~50.6 % load). Step up to the 850/1000 W class *only* if the box shares the room or runs continuously; there, **Corsair RM1000E** is the best-headroom silent option and **Corsair RM850E** the best value.
 
-**Current draw at full white:** 850 W PSU -> 329 W system = **38.7 % load** (optimum efficiency region for most units).
+**Current draw at full white:** 650 W PSU -> 329 W system = **50.6 % load**; realistic content ~110 W -> ~17 %. (850 W = 38.7 %, 1000 W = 32.9 % for the higher-wattage alternatives.)
 
 ---
 

@@ -4,13 +4,20 @@
 **Companion to:** *NaoDec Power Wiring Diagram — Rev 1.5*
 **Date:** 2026-07-02
 
+> ⚠ **Superseded figures — see `NaoDec PC Case — Power Usage Summary.md` for the corrected budget.**
+> This sheet's 12 V total (~33 A) overcounts CH1 and the slave-board logic; the corrected 12 V peak is
+> **~27–28 A / ~329–341 W**. **PSU sizing was also revised (2026-07-02): the ATX is right-sized to
+> **~650 W 80+ Bronze, single rail** (not the 750 W shown below) — the box is remote (fan noise
+> irrelevant) and sessions are short. See the PSU report for the shortlist and
+> `NaoDec_ATX_PSU_Wiring_and_Connectors.md` for wiring.
+
 ---
 
 ## 1. Power Sources
 
 | Source | Voltage | Rated Current | Rated Power | Feeds |
 |---|---|---|---|---|
-| **ATX PSU** (desktop, 750 W class) | 12 V | ~62 A (12 V rail) | 750 W | Scent, Vertex Coil, WS2815 logic, **all LED strips** |
+| **ATX PSU** (650 W, right-sized single-rail) | 12 V | ~54 A (12 V rail) | 650 W | Scent, Vertex Coil, WS2815 logic, **all LED strips** |
 | | 5 V | ~20 A | | WS2815 ESP32 logic |
 | **Mean Well LRS-600-24** | 24 V | 25 A | 600 W | GAB8 amplifier **only** |
 | **USB-C wall adapter** (isolated) | 5 V | 2 A | 10 W | Playback Controller **only** |

@@ -162,3 +162,35 @@ K Product Link
 
 **500 W / 550 W assessment:** acceptable only as a cost-first fallback. It gives enough 12 V current on paper, but it loses the main benefit of Config 2's 850-1000 W recommendation: low fan noise and thermal headroom. For the wellness-room use case, keep **Corsair RM1000E** as the preferred silent option and **Corsair RM850E** as the budget silent-enough option.
 
+
+---
+
+## 2026-07-02 Update — Decision: right-sized to 650 W 80+ Bronze
+
+The 850–1000 W preference above was driven by keeping a semi-fanless PSU **silent in the wellness
+room**. Two facts retire that driver:
+
+- **The controller box is remote** from the LEDs/audience → PSU fan noise is not heard in the room.
+- **Sessions are short** → no continuous-duty thermal soak to derate for.
+
+The only hard requirement is **27.1 A on the 12 V rail** (329 W full-white worst case; realistic
+content ~110 W). A **650 W single-rail** PSU delivers ~54 A on 12 V → **~50.6 % load** — the
+efficiency sweet spot, healthier 12 V margin than a 550 W (~60 %), and cheaper than the 850 W tier.
+
+### 650 W 80+ Bronze shortlist (single 12 V rail)
+
+| # | Model | Watts | 12 V | Modular | Warranty | Efficiency | Load % | Availability |
+|---|-------|------:|-----:|---------|----------|-----------|-------:|--------------|
+| B1 | Thermaltake Smart BM3 Bronze 650W | 650 W | ~54 A | Semi-modular | — | Bronze (ATX 3.0) | 50.6% | Global; check TH |
+| B2 | Corsair CV650 | 650 W | ~54 A | Non-modular | 3Y | Bronze | 50.6% | Advice.co.th |
+| B3 | SilverStone VIVA650 | 650 W | ~54 A | Non-modular | 3Y | Bronze | 50.6% | ihavecpu.com |
+| B4 | MSI MAG A650BN | 650 W | 54 A | Non-modular | 5Y | Bronze | 50.6% | Global; check TH |
+| B5 | Enermax MarbleBron 650 | 650 W | 54 A | Semi-modular | — | Bronze | 50.6% | Global; check TH |
+
+**Pick:** **B1 Thermaltake Smart BM3 650W** (semi-modular helps the ~24-cable box) if locally
+stocked; else **B2 Corsair CV650** (confirmed Thai stock). Confirm **single +12 V rail** at purchase.
+Prices weren't text-extractable from the retailer pages (both 403 to automated fetch) — verify at
+checkout; all are budget-tier, well under the 850 W units.
+
+The 850/1000 W table above is retained only as an alternative if the box ends up sharing the room or
+running continuously. Wiring guidance: `NaoDec_ATX_PSU_Wiring_and_Connectors.md`.

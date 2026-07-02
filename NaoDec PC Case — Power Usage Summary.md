@@ -29,7 +29,7 @@ Current is per-rail (amps at different voltages don't add meaningfully) — tota
 
 | Supply | Voltage | Rated | Powers |
 |---|---|---|---|
-| **ATX PSU** (≈1000 W class) | 12 V / 5 V / 3.3 V | ~83 A on 12 V | LED strips, Scent, Vertex coil, all logic |
+| **ATX PSU** (650 W, right-sized) | 12 V / 5 V / 3.3 V | ~54 A on 12 V | LED strips, Scent, Vertex coil, all logic |
 | **Mean Well LRS-600-24** | 24 V | 25 A · 600 W | GAB8 amplifier only |
 | **USB-C wall adapter** (isolated) | 5 V | 2 A | Playback Controller only |
 
@@ -106,8 +106,8 @@ Current is per-rail (amps at different voltages don't add meaningfully) — tota
 | 12 V | ~28.1 A | ~337 W |
 | 5 V | ~0.82 A | ~4 W |
 | **ATX total (peak)** | | **~341 W** |
-| ATX capacity | | ~1000 W |
-| **Loaded** | | **~34 %** ✔ |
+| ATX capacity (650 W, right-sized) | | ~650 W |
+| **Loaded** | | **~52.5 %** ✔ |
 
 ---
 
@@ -115,7 +115,7 @@ Current is per-rail (amps at different voltages don't add meaningfully) — tota
 
 | Supply | Voltage | Peak Current | Peak Power | Loaded |
 |---|---|---|---|---|
-| ATX PSU | 12 V + 5 V | ~29 A | **~341 W** | 34 % of 1000 W |
+| ATX PSU | 12 V + 5 V | ~29 A | **~341 W** | 52.5 % of 650 W |
 | Mean Well 24 V | 24 V | ≤ 25 A | **≤ 600 W** | audio peaks only |
 | USB-C isolated | 5 V | ~0.4 A | **~2 W** | trickle |
 | **Case total (worst case)** | | | **≤ ~945 W** | |
@@ -136,12 +136,12 @@ Current is per-rail (amps at different voltages don't add meaningfully) — tota
 
 | Supply | Peak Load | Capacity | Status |
 |---|---|---|---|
-| ATX 12 V | ~28 A | ~83 A | ✔ 66 % headroom |
+| ATX 12 V | ~28 A | ~54 A (650 W) | ✔ ~48 % headroom |
 | ATX 5 V | ~0.82 A | ~20 A | ✔ ample |
 | Mean Well 24 V | ≤ 25 A | 25 A | ✔ sized to match |
 | USB-C isolated | ~0.4 A | 2 A | ✔ ample |
 
-**The ATX is comfortably oversized for the LED + logic + scent + coil load. The 24 V Mean Well is matched to the amplifier. No supply is stressed.**
+**The 650 W ATX is right-sized for the LED + logic + scent + coil load (~52 % loaded, ~48 % 12 V headroom). The 24 V Mean Well is matched to the amplifier. No supply is stressed.**
 
 ---
 

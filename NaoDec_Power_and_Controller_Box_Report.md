@@ -201,6 +201,14 @@ for ~24 total cable exits.
 
 ## 8. ATX PSU Shortlist (Config 2)
 
+> ⚠ **Sizing revised 2026-07-02 — right-sized to ~650 W.** The build now targets a **~650 W 80+
+> Bronze single-rail PSU** (~50.6 % load at the 329 W worst case): the controller box is remote (PSU
+> fan inaudible in the room) and sessions are short (no continuous thermal soak), so the 850/1000 W
+> "silent-headroom" rationale below no longer drives the choice. Recommended: **Thermaltake Smart BM3
+> Bronze 650W** or **Corsair CV650**. See `NaoDec_Power_Report_Complete_20260617.md` for the full 650 W
+> shortlist and `NaoDec_ATX_PSU_Wiring_and_Connectors.md` for wiring. The 850/1000 W table below is
+> retained only as an alternative if the box shares the room or runs continuously.
+
 Required: 12 V continuous ≥ ~27 A (full white) with margin; 5 V ≥ 1 A (trivial);
 single 12 V rail; modular preferred. **850 W is sufficient** (~38 % load — the
 efficiency sweet spot); **1000 W** adds headroom and runs cooler/quieter.

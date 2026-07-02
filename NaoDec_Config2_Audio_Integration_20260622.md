@@ -42,7 +42,7 @@ important integration fact.
 ## 3. Recommended Build (Config 2 + Audio)
 
 ```
-220 V AC ─► IEC inlet ─► 10 A MCB ─┬─► ATX PSU (850 W)  ──► 12 V LEDs+scent, 5 V logic
+220 V AC ─► IEC inlet ─► 10 A MCB ─┬─► ATX PSU (650 W)  ──► 12 V LEDs+scent, 5 V logic
                                    │
                                    ├─► 24 V PSU (240 W)  ──► GAB8 ──► 6× Microlab satellites
                                    │
@@ -63,19 +63,23 @@ important integration fact.
 
 ## 4. ATX PSU Selection (from report shortlist)
 
-Audio does **not** change the pick — the ATX still only carries LEDs + logic + scent
-(~345 W worst case ≈ 40 % load at 850 W). The tie-breaker is **heat/noise in the
-enclosed case**, which matters more now that audio gear shares the box.
+Audio does **not** change the ATX pick — the ATX still only carries LEDs + logic + scent
+(~329 W worst case ≈ **50.6 % load at 650 W**; the GAB8 is on its own 24 V supply). The build is
+**right-sized to a ~650 W 80+ Bronze single-rail PSU** (see the PSU report + `NaoDec_ATX_PSU_Wiring_and_Connectors.md`):
 
 | Rank | Model | Why |
 |------|-------|-----|
-| ✅ **Best** | **be quiet! Straight Power 11 850W** (#6) | Platinum (low heat), 850 W sweet-spot, quiet |
-| Runner-up | Corsair HX850 (#7) | Also Platinum 850 W |
-| Premium | Seasonic Prime TX-1000 (#9) | Titanium, lowest heat + headroom (only if budget allows) |
-| Avoid | Gold 850 W units (#1–#5) | Fine electrically, but run hotter in a packed case |
+| ✅ **Best** | **Thermaltake Smart BM3 Bronze 650W** (B1) | Semi-modular (tidy cabling), ATX 3.0, single 12 V rail |
+| Runner-up | **Corsair CV650** (B2) | Confirmed Thai stock, single rail, budget |
+| Alt | SilverStone VIVA650 (B3) / MSI A650BN (B4) | Single-rail Bronze equivalents |
+| Avoid | be quiet! Straight Power 11 850W (#6) | Multi-rail (two 21 A rails < 27.1 A load, no single-rail mode) — plus 850 W is oversized here |
 
-> Note: the shortlist's "70.8 A / 83.3 A" 12 V figures are just watts ÷ 12 —
-> the true single-rail ceiling is lower. Irrelevant at ~29 A draw.
+> **If the audio gear shares one cramped case**, that's an **airflow** matter, not a reason to oversize:
+> keep a case intake/exhaust fan across the PSU and GAB8. A 650 W Bronze at ~50 % load runs only
+> mildly warm. Fan *noise* is a non-issue because the box is remote from the room.
+>
+> Note: the shortlist's "70.8 A / 83.3 A" 12 V figures are just watts ÷ 12; a 650 W single rail is
+> ~54 A. Irrelevant at ~29 A draw either way.
 
 ---
 
