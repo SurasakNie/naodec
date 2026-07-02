@@ -1,10 +1,15 @@
 # NaoDec Media Playback Controller Build and Max Setup
 
-**Revision:** 2.1  
+**Revision:** 2.2  
 **Date:** 2026-07-02  
 **Controller:** ESP32-S3 Wi-Fi OSC controller for Max/MSP media playback  
 **Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev2.0.html`
 
+> Rev 2.2 — Added an "R1/R2/C1/C2 Fallback (Troubleshooting Reference)" note under the
+> encoder section: build with those four parts unpopulated, and only fit them
+> (10 kOhm / 100 nF, matching the button RC values) if the KY-040 shows encoder misreads
+> that firmware filtering alone doesn't resolve.
+>
 > Rev 2.1 — Added an explicit placement requirement: U1 and its support PCB must be
 > mounted inside the operator panel enclosure, not staged near the router or any other
 > remote equipment. See Section 1.
@@ -128,6 +133,22 @@ pins. After mounting, verify continuity from the encoder shaft to GND — the kn
 most-touched, most ESD-exposed part of a plastic enclosure. Most KY-040 breakout boards use
 a plastic shaft with no frame ground path; this check applies only if the fitted module has
 a metal shaft or frame.
+
+### R1 / R2 / C1 / C2 Fallback (Troubleshooting Reference)
+
+Build the controller with `R1`, `R2`, `C1`, and `C2` unpopulated. Do not fit them by default,
+with either encoder module.
+
+Only revisit this if you observe encoder misreads in testing: the volume jumps by more than
+one step per detent, skips steps, or reads the wrong direction intermittently. This is a
+symptom of unfiltered mechanical contact bounce that firmware filtering alone did not fully
+clean up, and it is only expected with the KY-040 (bare mechanical contacts). It should not
+happen with the NEBDS-01 (Schmitt trigger conditioning is already onboard).
+
+| Module | Default | If encoder misreads occur |
+|---|---|---|
+| NEBDS-01 / EC11 | `R1`/`R2`/`C1`/`C2` unpopulated | Do not populate — the module's onboard Schmitt trigger already conditions the signal. Look for a wiring or grounding fault instead. |
+| KY-040 | `R1`/`R2`/`C1`/`C2` unpopulated; rely on firmware filtering first | Populate `R1` = `R2` = 10 kOhm (to 3V3) and `C1` = `C2` = 100 nF (to GND) — the same values as `R3`-`R5`/`C3`-`C5` on the buttons, giving the same ~1 ms RC debounce constant |
 
 ### Play / Pause / Stop Buttons
 
