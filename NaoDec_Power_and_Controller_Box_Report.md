@@ -1,13 +1,13 @@
 # NaoDec — Power Requirements & Controller Box Report
 
 **Project:** NaoDec — 7-channel WS2815 LED installation + 4-channel scent controller
-**Document revision:** 1.0
-**Date:** 2026-06-14
+**Document revision:** 1.1
+**Date:** 2026-07-02
 **Scope:** Consolidated power budget, PSU selection, single-box mounting options
 (electrical enclosure vs. ATX PC case), cable/voltage-drop analysis, and the
 audit of all figures.
 
-> Companion interactive diagram: `NaoDec_Controller_Box_Configs_Rev1.1.html`
+> Companion interactive diagram: `NaoDec_Controller_Box_Configs_Rev1.2.html`
 > Source schematics: `NaoDec_WS2815_LED_Controller_Rev1.6.html`,
 > `NaoDec_Scent_Controller_Schematic_Rev2.0.html`
 
@@ -202,23 +202,38 @@ for ~24 total cable exits.
 ## 8. ATX PSU Shortlist (Config 2)
 
 Required: 12 V continuous ≥ ~27 A (full white) with margin; 5 V ≥ 1 A (trivial);
-single 12 V rail; modular preferred. **850 W is sufficient** (~38 % load — the
-efficiency sweet spot); **1000 W** adds headroom and runs cooler/quieter.
+**every 12 V rail actually used must individually clear ~27.1 A** (don't let
+the combined load span rails whose *individual* limits are below that);
+modular preferred. **850 W is sufficient** (~38 % load — the efficiency sweet
+spot); **1000 W** adds headroom and runs cooler/quieter.
 
-| # | Model | Watts | 12 V | Efficiency |
-|---|-------|-------|------|-----------|
-| 1 | Seasonic Focus GX-850 | 850 W | 70.8 A | Gold |
-| 2 | Corsair RM850e | 850 W | 70.8 A | Gold |
-| 3 | be quiet! Pure Power 12 M 850W | 850 W | 70.8 A | Gold |
-| 4 | EVGA SuperNOVA 850 G6 | 850 W | 70.8 A | Gold |
-| 5 | Corsair RM850x | 850 W | 70.8 A | Gold |
-| 6 | be quiet! Straight Power 11 850W | 850 W | 70.8 A | Platinum |
-| 7 | Corsair HX850 | 850 W | 70.8 A | Platinum |
-| 8 | Seasonic Prime GX-1000 | 1000 W | 83.3 A | Gold |
-| 9 | Seasonic Prime TX-1000 | 1000 W | 83.3 A | Titanium |
-| 10 | FSP Hydro G Pro 1000W | 1000 W | 83.3 A | Gold |
+| # | Model | Watts | 12 V | 12 V rail config | Efficiency |
+|---|-------|-------|------|-------------------|-----------|
+| 1 | Seasonic Focus GX-850 | 850 W | 70.8 A | Single | Gold |
+| 2 | Corsair RM850e | 850 W | 70.8 A | Single | Gold |
+| 3 | be quiet! Pure Power 12 M 850W | 850 W | 70.8 A | Multi (12V1 40A / 12V2 36A) — each rail individually clears 27.1 A | Gold |
+| 4 | EVGA SuperNOVA 850 G6 | 850 W | 70.8 A | Single | Gold |
+| 5 | Corsair RM850x | 850 W | 70.8 A | Single | Gold |
+| 6 | be quiet! Straight Power 11 850W | 850 W | 70.8 A | ⚠ Multi (4×: 21/21/26/26 A, no single-rail mode) | Platinum |
+| 7 | Corsair HX850 | 850 W | 70.8 A | Switchable; default **multi**, 40 A/cable OCP — clears 27.1 A either way | Platinum |
+| 8 | Seasonic Prime GX-1000 | 1000 W | 83.3 A | Single | Gold |
+| 9 | Seasonic Prime TX-1000 | 1000 W | 83.3 A | Single | Titanium |
+| 10 | FSP Hydro G Pro 1000W | 1000 W | 83.3 A | Single | Gold |
 
-Platinum/Titanium units (#6, #7, #9) produce less waste heat — preferable inside
+⚠ **Rail-topology caveat (verified against current retail specs):** #3, #6,
+and #7 are multi-rail (not the single-rail units the original text implied),
+but only **#6 is a real problem**: two of its four rails are fixed at **21 A**
+— below the ~27.1 A combined 12 V load — and there is no single-rail switch to
+merge them. If a high-current cable group lands on one of those 21 A rails,
+that rail's OCP can trip even though the PSU's total 12 V capacity is ample.
+**Drop #6, or only use it if the wiring is explicitly split so no single
+rail's connectors ever carry more than its rated amps** (verify against the
+manufacturer's per-connector rail map). #3 and #7 are fine as-is — each of
+their individual rails already clears the 27.1 A load on its own, with or
+without switching. Prefer #1, #2, #4, #5, #8, #9, #10 for the simplest,
+no-caveat wiring.
+
+Platinum/Titanium units (#7, #9) produce less waste heat — preferable inside
 an enclosed case.
 
 ---
@@ -246,6 +261,20 @@ The interactive diagram was audited; the following errors were found and fixed i
 
 ---
 
+## 9a. Audit Findings — Corrections Applied (Rev1.1 → Rev1.2)
+
+The ATX PSU shortlist (§8) was checked against current retail specs; the
+following errors were found and fixed in
+`NaoDec_Controller_Box_Configs_Rev1.2.html` (Rev1.1 archived to `Archived/`):
+
+| # | Item | Was | Corrected | Cause |
+|---|------|-----|-----------|-------|
+| 14 | ATX load % (1000 W) | 32.7 % | **32.5 %** (325.2 W ÷ 1000 W) | Arithmetic slip — didn't match the 325 W total from §3 |
+| 15 | PSU shortlist rail topology | All 10 models listed as generically "single 12 V rail"-compatible with no caveats | **#3, #6, #7 flagged as multi-rail; #6 (be quiet! Straight Power 11 850W) has two 21 A rails below the 27.1 A load and no single-rail mode — dropped from the no-caveat recommendation** | §8's stated "single 12 V rail" requirement was never checked against real per-model rail specs |
+| 16 | Recommended ATX PSU efficiency (diagram) | "80+ Platinum" for Seasonic Prime TX-1000 / be quiet! Dark Power Pro 13 | **80+ Titanium** (both units) | Wrong tier listed in diagram tooltip |
+
+---
+
 ## 10. Open Items (require user input / source data)
 
 1. **Strip #1 wire gauge conflict in source files** — README states 18 AWG; the LED
@@ -263,5 +292,5 @@ The interactive diagram was audited; the following errors were found and fixed i
 
 - `NaoDec_WS2815_LED_Controller_Rev1.6.html` — LED controller schematic (WS2815 = 10–15 mA/px; 4.2 A/strip; 25.2 A edges; 0.9 A vertex)
 - `NaoDec_Scent_Controller_Schematic_Rev2.0.html` — scent controller (ESP 0.40 A; 4 × 150 mA atomizers; F_MAIN T2A)
-- `NaoDec_Controller_Box_Configs_Rev1.1.html` — interactive box-configuration diagram (audited)
+- `NaoDec_Controller_Box_Configs_Rev1.2.html` — interactive box-configuration diagram (audited)
 - `README.md` — project overview & revisions table

@@ -210,8 +210,8 @@ Each schematic supports:
 | NaoDec_3D_Vertex_and_Edges_LED_Mapping | 1.2 | Current · 3D position map |
 | NaoDec_Series_Coil_Build | 0 (pre-release) | Pre-release · 60-coil series electromagnet subsystem |
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
-| NaoDec_Controller_Box_Configs | 1.1 | Current · electrical enclosure vs PC case · audited power calculations |
-| NaoDec_Power_and_Controller_Box_Report | 1.0 | Full power budget, PSU specs, voltage-drop analysis, audit findings |
+| NaoDec_Controller_Box_Configs | 1.2 | Current · electrical enclosure vs PC case · audited power calculations · ATX PSU rail-topology fix |
+| NaoDec_Power_and_Controller_Box_Report | 1.1 | Full power budget, PSU specs, voltage-drop analysis, audit findings |
 
 ---
 
