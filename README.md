@@ -26,7 +26,8 @@ naodec/
 ├── XL4015_CC_CV_Mockup_Test_Procedure.md          # Pre-coil converter qualification procedure
 ├── NaoDec_Media_Playback_Controller_Schematic_Rev2.0.html  # ESP32-S3 Wi-Fi OSC operator panel (interactive, current)
 ├── NaoDec_Media_Playback_Controller_Schematic_Rev1.0.html  # Previous revision (kept for reference)
-├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md # Playback controller build, network & Max/MSP setup (Rev 2.0)
+├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md # Playback controller build, network & Max/MSP setup (Rev 2.2)
+├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.docx # Word copy of the build/setup doc, for non-Markdown readers
 ├── Simple_WS2815_Controller_Rev_1.0.html          # Simplified single-controller reference
 └── Archived/                                      # Previous revisions
 ```
