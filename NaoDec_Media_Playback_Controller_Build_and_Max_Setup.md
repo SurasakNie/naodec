@@ -3,7 +3,7 @@
 **Revision:** 2.2  
 **Date:** 2026-07-02  
 **Controller:** ESP32-S3 Wi-Fi OSC controller for Max/MSP media playback  
-**Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev2.0.html`
+**Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev2.2.html`
 
 > Rev 2.2 — Added an "R1/R2/C1/C2 Fallback (Troubleshooting Reference)" note under the
 > encoder section: build with those four parts unpopulated, and only fit them

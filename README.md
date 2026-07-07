@@ -24,7 +24,7 @@ naodec/
 ├── NaoDec_Series_Coil_Build_Rev0_Pre-Release.html # Series coil / electromagnet subsystem (pre-release)
 ├── NaoDec_Vertex_Series_Coil_Rev1.0.html          # Interactive series-coil schematic (current in-file Rev 1.0a)
 ├── XL4015_CC_CV_Mockup_Test_Procedure.md          # Pre-coil converter qualification procedure
-├── NaoDec_Media_Playback_Controller_Schematic_Rev2.0.html  # ESP32-S3 Wi-Fi OSC operator panel (interactive, current)
+├── NaoDec_Media_Playback_Controller_Schematic_Rev2.2.html  # ESP32-S3 Wi-Fi OSC operator panel (interactive, current)
 ├── NaoDec_Media_Playback_Controller_Schematic_Rev1.0.html  # Previous revision (kept for reference)
 ├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md # Playback controller build, network & Max/MSP setup (Rev 2.2)
 ├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.docx # Word copy of the build/setup doc, for non-Markdown readers
