@@ -49,6 +49,10 @@ via WiFiManager.
 If the encoder direction comes out backwards on the bench (Build doc Section 9
 troubleshooting table), flip `ENCODER_REVERSED` to `1` instead of re-wiring A/B.
 
+If FUNC-05/06 show about half the expected step (ten detents move volume ~10
+points instead of ~20), the fitted encoder emits two quadrature transitions per
+detent rather than four — set `ENCODER_STEPS_PER_DETENT` to `2`.
+
 ## Validating before installation
 
 This firmware implements the behavior table in Build doc Section 6 and the OSC

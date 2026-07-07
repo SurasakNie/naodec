@@ -20,9 +20,10 @@
 #include <ESPmDNS.h>
 #include <WiFiManager.h>
 #include <Preferences.h>
+#include <Ticker.h>
 
 // ── Firmware ──────────────────────────────────────────────────────────────────
-#define FW_VERSION "1.0.0"
+#define FW_VERSION "1.1.0"
 
 // ── Hardware (see Build doc Section 3 — Pin Connections) ────────────────────
 #define PIN_ENC_A       7
@@ -42,12 +43,15 @@
 #define VOLUME_STEP             2   // percentage points per detent
 #define VOLUME_SAVE_IDLE_MS  2000
 #define LED_BLINK_MS          250   // ~2 Hz
-#define RECONNECT_INTERVAL_MS 5000
+#define RECONNECT_INTERVAL_MS 15000 // > one full associate+DHCP cycle, so a retry can't abort an attempt in progress
 #define ENCODER_REVERSED        0   // 1 if clockwise decreases volume (Build doc Section 9 troubleshooting: swap A/B wiring, or flip this instead)
+#define ENCODER_STEPS_PER_DETENT 4  // quarter-steps per physical click; standard EC11/KY-040 = 4, some variants = 2 (set here if FUNC-05 shows half the expected step)
+#define PORTAL_TIMEOUT_S      180   // captive portal stays open this long, then autoConnect() returns false -> restart -> retry saved network
 
 // ── Globals ───────────────────────────────────────────────────────────────────
 WiFiUDP     udp;
 Preferences prefs;
+Ticker      ledTicker;   // blinks the status LED while setup() blocks in autoConnect()
 
 int           volume            = 50;   // 0..100, persisted in NVS
 bool          volumeDirty        = false;
@@ -72,8 +76,8 @@ static const int8_t QUAD_TABLE[16] = {
    0,  1, -1,  0
 };
 
-volatile int8_t encoderAccum   = 0;
-volatile int8_t encoderDetents = 0;
+volatile int8_t  encoderAccum   = 0;
+volatile int16_t encoderDetents = 0;  // int16 so a spin while loop() is blocked (e.g. captive portal) can't wrap
 volatile uint8_t encoderPrevState = 0;
 
 void IRAM_ATTR onEncoderChange() {
@@ -84,10 +88,10 @@ void IRAM_ATTR onEncoderChange() {
   encoderPrevState = state;
   if (delta == 0) return;
   encoderAccum += delta;
-  if (encoderAccum >= 4) {
+  if (encoderAccum >= ENCODER_STEPS_PER_DETENT) {
     encoderDetents++;
     encoderAccum = 0;
-  } else if (encoderAccum <= -4) {
+  } else if (encoderAccum <= -ENCODER_STEPS_PER_DETENT) {
     encoderDetents--;
     encoderAccum = 0;
   }
@@ -102,8 +106,11 @@ struct DebouncedButton {
 
   void begin(uint8_t p) {
     pin          = p;
-    stableState  = HIGH;  // idle = released (active-low, pulled high)
-    lastRawState = HIGH;
+    // Sample the actual pin so a button held (or a harness shorted) at boot is
+    // treated as the resting state — no phantom press edge on power-up (FUNC-08).
+    // Call after pinMode(p, INPUT_PULLUP).
+    stableState  = digitalRead(p);
+    lastRawState = stableState;
     lastChangeMs = 0;
   }
 
@@ -193,6 +200,14 @@ void saveVolumeIfIdle() {
 }
 
 // ── Status LED ────────────────────────────────────────────────────────────────
+// Ticker callback: runs in the esp_timer task context (not an ISR), so
+// digitalWrite is safe. Used only while setup() is blocked inside autoConnect();
+// updateStatusLed() takes over once the Ticker is detached and loop() runs.
+void blinkLedTick() {
+  ledState = !ledState;
+  digitalWrite(PIN_STATUS_LED, ledState ? HIGH : LOW);
+}
+
 void updateStatusLed() {
   if (WiFi.status() == WL_CONNECTED) {
     digitalWrite(PIN_STATUS_LED, HIGH);
@@ -234,7 +249,7 @@ void updateButtons() {
 // ── Encoder ───────────────────────────────────────────────────────────────────
 void updateEncoder() {
   noInterrupts();
-  int8_t detents = encoderDetents;
+  int16_t detents = encoderDetents;
   encoderDetents = 0;
   interrupts();
   if (ENCODER_REVERSED) detents = -detents;
@@ -254,10 +269,11 @@ void printStatus() {
 void handleSerialCommand(const char* cmd) {
   while (*cmd == ' ') cmd++;  // ltrim
 
-  if (strncmp(cmd, "RESETWIFI", 9) == 0) {
+  // Exact match: RESETWIFI is destructive, so a stray suffix must not trigger it.
+  if (strcmp(cmd, "RESETWIFI") == 0) {
     Serial.println("[WIFI] Reset requested — clearing credentials, restarting...");
     resetWifiRequested = true;  // handled safely in loop(), not inside a callback
-  } else if (strncmp(cmd, "STATUS", 6) == 0) {
+  } else if (strcmp(cmd, "STATUS") == 0) {
     printStatus();
   } else if (strlen(cmd) > 0) {
     Serial.printf("[WARN] Unknown command: %s\n", cmd);
@@ -315,7 +331,17 @@ void setup() {
 
   WiFiManager wm;
   wm.setHostname(HOSTNAME);
-  if (!wm.autoConnect("NaoDecPlayback-Setup")) {
+  wm.setDebugOutput(false);          // don't print scan/portal traffic over serial
+  wm.setConfigPortalTimeout(PORTAL_TIMEOUT_S);  // portal is not infinite — time out and retry the saved network
+
+  // Blink the status LED while autoConnect() blocks (initial connect or open
+  // portal), so a dark LED still means "no power / fault" and not "busy".
+  ledTicker.attach_ms(LED_BLINK_MS, blinkLedTick);
+  bool connected = wm.autoConnect("NaoDecPlayback-Setup");
+  ledTicker.detach();
+  if (!connected) {
+    // Portal timed out without credentials, or the saved network is still
+    // unreachable — restart and try again rather than sitting idle forever.
     Serial.println("[ERROR] WiFiManager failed to connect, restarting...");
     ESP.restart();
   }
