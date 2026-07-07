@@ -29,6 +29,8 @@ naodec/
 ├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md # Playback controller build, network & Max/MSP setup (Rev 2.2)
 ├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.docx # Word copy of the build/setup doc, for non-Markdown readers
 ├── Simple_WS2815_Controller_Rev_1.0.html          # Simplified single-controller reference
+├── firmware/
+│   └── media_playback_controller/                 # ESP32-S3 Arduino sketch — OSC operator panel
 └── Archived/                                      # Previous revisions
 ```
 
@@ -184,6 +186,16 @@ Both controllers run **WLED** .
 - Host: Mac mini sends WLED / Art-Net data via USB-C to UART
 
 > Avoid strapping pins **GPIO 0, 3, 45, 46** on the ESP32-S3 — these conflict with boot mode.
+
+### Media Playback Controller
+
+Custom Arduino firmware: [`firmware/media_playback_controller/`](firmware/media_playback_controller/).
+An ESP32-S3-DevKitC-1 operator panel that reads a rotary volume encoder and
+Play/Pause/Stop buttons and sends OSC-over-UDP commands to a Max/MSP patch —
+no audio/video/LED data passes through this board. Wi-Fi is provisioned via a
+WiFiManager captive portal (no hardcoded credentials). See
+[`NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md`](NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md)
+for the full hardware build, network setup, OSC contract, and acceptance tests.
 
 ---
 
