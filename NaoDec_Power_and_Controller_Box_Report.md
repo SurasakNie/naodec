@@ -1,13 +1,13 @@
 # NaoDec — Power Requirements & Controller Box Report
 
 **Project:** NaoDec — 7-channel WS2815 LED installation + 4-channel scent controller
-**Document revision:** 1.0
-**Date:** 2026-06-14
+**Document revision:** 1.3
+**Date:** 2026-07-02
 **Scope:** Consolidated power budget, PSU selection, single-box mounting options
 (electrical enclosure vs. ATX PC case), cable/voltage-drop analysis, and the
 audit of all figures.
 
-> Companion interactive diagram: `NaoDec_Controller_Box_Configs_Rev1.1.html`
+> Companion interactive diagram: `NaoDec_Controller_Box_Configs_Rev1.3.html`
 > Source schematics: `NaoDec_WS2815_LED_Controller_Rev1.6.html`,
 > `NaoDec_Scent_Controller_Schematic_Rev2.0.html`
 
@@ -202,24 +202,114 @@ for ~24 total cable exits.
 ## 8. ATX PSU Shortlist (Config 2)
 
 Required: 12 V continuous ≥ ~27 A (full white) with margin; 5 V ≥ 1 A (trivial);
-single 12 V rail; modular preferred. **850 W is sufficient** (~38 % load — the
-efficiency sweet spot); **1000 W** adds headroom and runs cooler/quieter.
+**every 12 V rail actually used must individually clear ~27.1 A** (don't let
+the combined load span rails whose *individual* limits are below that); single
+12 V rail strongly preferred. Load % is the full **329 W system total** (§3:
+325.2 W @ 12 V + 4.1 W @ 5 V logic) over the PSU's rated wattage, since the ATX
+PSU supplies both rails.
 
-| # | Model | Watts | 12 V | Efficiency |
-|---|-------|-------|------|-----------|
-| 1 | Seasonic Focus GX-850 | 850 W | 70.8 A | Gold |
-| 2 | Corsair RM850e | 850 W | 70.8 A | Gold |
-| 3 | be quiet! Pure Power 12 M 850W | 850 W | 70.8 A | Gold |
-| 4 | EVGA SuperNOVA 850 G6 | 850 W | 70.8 A | Gold |
-| 5 | Corsair RM850x | 850 W | 70.8 A | Gold |
-| 6 | be quiet! Straight Power 11 850W | 850 W | 70.8 A | Platinum |
-| 7 | Corsair HX850 | 850 W | 70.8 A | Platinum |
-| 8 | Seasonic Prime GX-1000 | 1000 W | 83.3 A | Gold |
-| 9 | Seasonic Prime TX-1000 | 1000 W | 83.3 A | Titanium |
-| 10 | FSP Hydro G Pro 1000W | 1000 W | 83.3 A | Gold |
+> **Sizing decision (2026-07-02): right-sized to ~650 W.** The 329 W figure is a
+> *full-white worst case* — every LED at 15 mA/px at once. Real content averages
+> ~25–40 % of that (**realistic sustained draw ≈ 110 W**). Two facts remove the
+> reason the earlier drafts reached for 850–1000 W:
+> - **The controller box is remote** (away from the LEDs/audience), so PSU **fan
+>   noise is not in the room** — the "silent zero-RPM headroom" that drove the
+>   850/1000 W pick no longer applies.
+> - **Sessions are short**, so there is no continuous-duty thermal soak to derate
+>   for. Running ~50 % loaded for a short show is the efficiency sweet spot, not a
+>   strain.
+>
+> The only hard floor is **27.1 A on the 12 V rail**. A **650 W single-rail** unit
+> gives ~54 A on 12 V → the build sits at **~50.6 % load** (329 W ÷ 650 W), ~17 %
+> at realistic content. **Recommended: a quality 650 W 80+ Bronze single-rail PSU
+> (see below).** The 850/1000 W tables are retained as alternatives *only if the
+> box ends up sharing the room, or the duty cycle becomes continuous.*
 
-Platinum/Titanium units (#6, #7, #9) produce less waste heat — preferable inside
-an enclosed case.
+### Recommended tier — 650 W 80+ Bronze, single 12 V rail (~50.6 % load)
+
+| # | Model | Watts | 12 V rail | Modular | Warranty | Efficiency | Availability |
+|---|-------|-------|-----------|---------|----------|-----------|--------------|
+| B1 | **Thermaltake Smart BM3 Bronze 650W** | 650 W | Single ~54 A | **Semi-modular** | — | Bronze (ATX 3.0) | Global · check TH stock |
+| B2 | **Corsair CV650** | 650 W | Single ~54 A | Non-modular | 3 yr | Bronze | ✅ Advice.co.th |
+| B3 | **SilverStone VIVA650** | 650 W | Single ~54 A | Non-modular | 3 yr | Bronze | ✅ ihavecpu.com |
+| B4 | MSI MAG A650BN | 650 W | Single 54 A | Non-modular | 5 yr | Bronze | Global · check TH stock |
+| B5 | Enermax MarbleBron 650 | 650 W | Single 54 A | Semi-modular | — | Bronze | Global · check TH stock |
+
+**Pick:** **B1 Thermaltake Smart BM3 650W** if locally stocked — semi-modular cabling is the one
+convenience that genuinely helps a ~24-cable box, and ATX 3.0 is current. Otherwise **B2 Corsair
+CV650** as the confirmed-in-Thailand fallback. Prices weren't text-extractable from the retailer
+pages (verify at checkout); all are budget-tier (well under the 850 W units). ⚠ Confirm **single
++12 V rail** on the box — a few budget Bronze lines ship multi-rail revisions, and 27.1 A must sit on
+one rail. Wiring these to the 12 V/5 V loads is covered in
+`NaoDec_ATX_PSU_Wiring_and_Connectors.md`.
+
+### Higher-wattage alternatives (850 / 1000 W) — only if the box shares the room or runs continuous
+
+At 850 W the load is ~38.7 %, at 1000 W ~32.9 % — both keep a semi-fanless PSU in its zero-RPM zone,
+which matters *only* if the PSU's fan is audible in the space. Retained from the prior survey:
+
+| # | Model | Watts | 12 V | 12 V rail config | Efficiency | Price (฿) | Load % |
+|---|-------|-------|------|-------------------|-----------|---:|---:|
+| 1 | Seasonic Focus GX-850 | 850 W | 70.8 A | Single | Gold | Verify live | 38.7% |
+| 2 | Corsair RM850e | 850 W | 70.8 A | Single | Gold | 3,690 (−14%) | 38.7% |
+| 3 | be quiet! Pure Power 12 M 850W | 850 W | 70.8 A | Multi (12V1 40A / 12V2 36A) — each rail individually clears 27.1 A | Gold | Verify live | 38.7% |
+| 4 | EVGA SuperNOVA 850 G6 | 850 W | 70.8 A | Single | Gold | Verify live | 38.7% |
+| 5 | Corsair RM850x | 850 W | 70.8 A | Single | Gold | Verify live | 38.7% |
+| 6 | be quiet! Straight Power 11 850W | 850 W | 70.8 A | ⚠ Multi (4×: 21/21/26/26 A, no single-rail mode) | Platinum | Verify live | 38.7% |
+| 7 | Corsair HX850 | 850 W | 70.8 A | Switchable; default **multi**, 40 A/cable OCP — clears 27.1 A either way | Platinum | Verify live | 38.7% |
+| 8 | Seasonic Prime GX-1000 | 1000 W | 83.3 A | Single | Gold | Verify live | 32.9% |
+| 9 | Seasonic Prime TX-1000 | 1000 W | 83.3 A | Single | Titanium | Verify live | 32.9% |
+| 10 | FSP Hydro G Pro 1000W | 1000 W | 83.3 A | Single | Gold | 5,990 | 32.9% |
+| 11 | MSI MAG A850GN PCIE5 850W | 850 W | 70.8 A | Single | Gold | 2,890 | 38.7% |
+| 12 | Thermaltake Toughpower GT 850W | 850 W | 70.8 A | Single | Gold | 3,290 (−8%) | 38.7% |
+| 13 | Gigabyte UD850GM PG5 V2 850W | 850 W | 70.8 A | Single | Gold | 3,590 (−18%) | 38.7% |
+| 14 | Gigabyte AORUS ELITE AE850PM PG5 | 850 W | 70.8 A | Single | Platinum | 4,790 | 38.7% |
+| 15 | Corsair RM1000E 1000W | 1000 W | 83.3 A | Single | Gold | 4,990 (−22%) | 32.9% |
+| 16 | Cooler Master ELITE 1000W | 1000 W | 83.3 A | Single | Gold | 4,990 | 32.9% |
+| 17 | Gigabyte UD1000GM PG5 1000W | 1000 W | 83.3 A | Single | Gold | 5,490 | 32.9% |
+| 18 | MSI MAG A1000GL PCIE5 1000W | 1000 W | 83.3 A | Single | Gold | 5,990 | 32.9% |
+
+Prices for #11–#18 are from a Thailand retail survey (ihavecpu.com,
+2026-06-25, reconfirmed 2026-07-01) — see `NaoDec_Config2_PSU_Survey_Sheet_20260625B.md`.
+Rail topology for #11–#18 has not been individually verified against
+manufacturer per-connector rail maps (unlike #1–#10 below); treat as
+"Single" pending confirmation.
+
+⚠ **Rail-topology caveat (verified against current retail specs):** #3, #6,
+and #7 are multi-rail (not the single-rail units the original text implied),
+but only **#6 is a real problem**: two of its four rails are fixed at **21 A**
+— below the ~27.1 A combined 12 V load — and there is no single-rail switch to
+merge them. If a high-current cable group lands on one of those 21 A rails,
+that rail's OCP can trip even though the PSU's total 12 V capacity is ample.
+**Drop #6, or only use it if the wiring is explicitly split so no single
+rail's connectors ever carry more than its rated amps** (verify against the
+manufacturer's per-connector rail map). #3 and #7 are fine as-is — each of
+their individual rails already clears the 27.1 A load on its own, with or
+without switching. Prefer #1, #2, #4, #5, #8, #9, #10 for the simplest,
+no-caveat wiring.
+
+Platinum/Titanium units (#7, #9, #14) produce less waste heat — preferable
+inside an enclosed case. If you do go this tier (shared-room / continuous
+duty), **Corsair RM1000E (#15)** is the best-headroom silent pick (4,990 ฿) and
+**Corsair RM850e (#2)** the best value (3,690 ฿). Otherwise the 650 W Bronze
+tier above is the right size.
+
+### 500 W / 550 W — smaller-still fallback
+
+The 329 W maximum would run a true 500 W PSU at **65.8 % load** and a 550 W PSU
+at **59.8 % load** — electrically fine on a strong single 12 V rail. Since the
+box is remote and fan noise is a non-issue, these are *viable*, but the 650 W
+Bronze tier costs little more and leaves healthier 12 V margin (~50 % vs ~60 %
+of rail), so prefer 650 W. Listed for completeness:
+
+| # | Model | Watts | 12 V Rail | Efficiency | Load % | Price (฿) |
+|---|-------|------:|----------:|-----------|-------:|----------:|
+| 19 | Corsair CX550 | 550 W | ~45.8 A | Bronze | 59.8% | Verify live |
+| 20 | Cooler Master MWE 550 Bronze V2 | 550 W | ~45.8 A | Bronze | 59.8% | Verify live |
+| 21 | MSI MAG A550BN | 550 W | ~45.5 A | Bronze | 59.8% | Verify live |
+| 22 | SilverStone Essential ET550-B | 550 W | ~45 A | Bronze | 59.8% | Verify live |
+| 23 | FSP HV PRO 550W | 550 W | ~45 A | Bronze | 59.8% | Verify live |
+| 24 | Thermaltake Smart BX1 550W | 550 W | ~45 A | Bronze | 59.8% | Verify live |
 
 ---
 
@@ -246,6 +336,40 @@ The interactive diagram was audited; the following errors were found and fixed i
 
 ---
 
+## 9a. Audit Findings — Corrections Applied (Rev1.1 → Rev1.2)
+
+The ATX PSU shortlist (§8) was checked against current retail specs; the
+following errors were found and fixed in
+`NaoDec_Controller_Box_Configs_Rev1.2.html` (Rev1.1 archived to `Archived/`):
+
+| # | Item | Was | Corrected | Cause |
+|---|------|-----|-----------|-------|
+| 14 | ATX load % (1000 W) | 32.7 % | **32.5 %** (325.2 W ÷ 1000 W) | Arithmetic slip — didn't match the 325 W total from §3 |
+| 15 | PSU shortlist rail topology | All 10 models listed as generically "single 12 V rail"-compatible with no caveats | **#3, #6, #7 flagged as multi-rail; #6 (be quiet! Straight Power 11 850W) has two 21 A rails below the 27.1 A load and no single-rail mode — dropped from the no-caveat recommendation** | §8's stated "single 12 V rail" requirement was never checked against real per-model rail specs |
+| 16 | Recommended ATX PSU efficiency (diagram) | "80+ Platinum" for Seasonic Prime TX-1000 / be quiet! Dark Power Pro 13 | **80+ Titanium** (both units) | Wrong tier listed in diagram tooltip |
+
+---
+
+## 9b. Audit Findings — Corrections Applied (Rev1.2 → Rev1.3)
+
+| # | Item | Was | Corrected | Cause |
+|---|------|-----|-----------|-------|
+| 17 | ATX load % basis | 38.3 % (850 W) / 32.5 % (1000 W) — computed from the **325.2 W 12 V-only** subtotal | **38.7 % (850 W) / 32.9 % (1000 W)** — computed from the **329 W full system total** (12 V + 5 V logic) | The ATX PSU supplies both rails, so its load % must use the full DC output, not just the 12 V branch. This also reverses a regression introduced in #12/#14: the original pre-audit figure of "32.9 % only" was actually correct for the 1000 W case by coincidence — both audit passes narrowed it to the wrong (12 V-only) subtotal. |
+| 18 | PSU shortlist pricing | No price column; all entries "Verify live" | **Added real THB prices for #2, #10–#18** from a Thailand retail survey (ihavecpu.com, 2026-06-25, reconfirmed 2026-07-01) | Shortlist had no cost data to support a purchase decision |
+| 19 | 500 W / 550 W fallback tier | Not documented | **Added as a rejected cost-first option** (59.8–65.8 % load, outside the silent-operation target) | Completeness — a common budget substitution should be documented and explicitly ruled out, not just omitted |
+
+---
+
+## 9c. Sizing Revision (Doc Rev 1.3, 2026-07-02) — right-sized to 650 W
+
+| # | Item | Was | Now | Reason |
+|---|------|-----|-----|--------|
+| 20 | Recommended PSU wattage | 850 W (value) / 1000 W (headroom) | **~650 W 80+ Bronze, single 12 V rail** (~50.6 % load) | The 850/1000 W pick was driven by keeping a semi-fanless PSU silent in the room. The **controller box is remote** (fan not audible) and **sessions are short** (no continuous-duty thermal soak) — both premises removed. Only the 27.1 A / 12 V floor remains, which 650 W clears at ~50 % of rail. |
+| 21 | 850/1000 W tables | The recommendation | **Demoted to "alternatives — only if the box shares the room or runs continuous"** | Analysis retained, ranking corrected to match the actual install. |
+| 22 | Connector/wiring guidance | Not documented | **New companion `NaoDec_ATX_PSU_Wiring_and_Connectors.md`** | How to route 12 V / 5 V / 3.3 V from ATX connectors to each device was undocumented. |
+
+---
+
 ## 10. Open Items (require user input / source data)
 
 1. **Strip #1 wire gauge conflict in source files** — README states 18 AWG; the LED
@@ -263,5 +387,6 @@ The interactive diagram was audited; the following errors were found and fixed i
 
 - `NaoDec_WS2815_LED_Controller_Rev1.6.html` — LED controller schematic (WS2815 = 10–15 mA/px; 4.2 A/strip; 25.2 A edges; 0.9 A vertex)
 - `NaoDec_Scent_Controller_Schematic_Rev2.0.html` — scent controller (ESP 0.40 A; 4 × 150 mA atomizers; F_MAIN T2A)
-- `NaoDec_Controller_Box_Configs_Rev1.1.html` — interactive box-configuration diagram (audited)
+- `NaoDec_Controller_Box_Configs_Rev1.3.html` — interactive box-configuration diagram (audited)
+- `NaoDec_ATX_PSU_Wiring_and_Connectors.md` — how to route 12 V / 5 V / 3.3 V from the ATX PSU to each device
 - `README.md` — project overview & revisions table
