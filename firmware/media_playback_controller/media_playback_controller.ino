@@ -7,23 +7,26 @@
  *          passes through this board — see NaoDec_Media_Playback_Controller_
  *          Build_and_Max_Setup.md for the full hardware and network spec.
  *
- * Wi-Fi provisioning: WiFiManager captive portal ("NaoDecPlayback-Setup"), so
- * no SSID/password is ever hardcoded in this file. Type RESETWIFI in the
- * Serial Monitor to clear saved credentials and re-open the portal, or STATUS
- * to print current Wi-Fi/volume/uptime state.
+ * Network: wired Ethernet via U2, a WIZnet W5500 Lite SPI module (hardware
+ * Rev 3.0, SPI on GPIO13-18). DHCP only — the router reserves 192.168.50.114
+ * keyed to the Ethernet MAC; type STATUS in the Serial Monitor to read that
+ * MAC plus link/IP/volume/uptime state. Nothing to provision, and the board
+ * is safe to boot with the cable unplugged (LED blinks until link + lease).
  *
- * New library required: "WiFiManager" by tzapu (Arduino Library Manager)
+ * Requires the esp32 Arduino core >= 3.0.0 (W5500 support lives in the
+ * core's ETH.h). No third-party libraries.
  */
 
-#include <WiFi.h>
-#include <WiFiUdp.h>
+#include <ETH.h>
+#include <Network.h>
+#include <NetworkUdp.h>
 #include <ESPmDNS.h>
-#include <WiFiManager.h>
 #include <Preferences.h>
-#include <Ticker.h>
 
 // ── Firmware ──────────────────────────────────────────────────────────────────
-#define FW_VERSION "1.1.0"
+// major.minor tracks the schematic revision this firmware targets (Rev 3.0);
+// the patch digit is for firmware-only fixes on that hardware.
+#define FW_VERSION "3.0.0"
 
 // ── Hardware (see Build doc Section 3 — Pin Connections) ────────────────────
 #define PIN_ENC_A       7
@@ -32,6 +35,17 @@
 #define PIN_BTN_PAUSE  10
 #define PIN_BTN_STOP   11
 #define PIN_STATUS_LED 12
+
+// ── Ethernet (Rev 3.0 — U2 W5500 Lite on SPI, see schematic wire schedule) ──
+#define PIN_ETH_SCLK   13
+#define PIN_ETH_MOSI   14
+#define PIN_ETH_MISO   15
+#define PIN_ETH_CS     16
+#define PIN_ETH_INT    17   // W5500 INTn. If a bench build leaves INT unwired, irq=-1 (polled) needs core >= 3.1.
+#define PIN_ETH_RST    18   // the esp_eth driver pulses this itself (phy reset_gpio_num) — no manual reset code
+#define ETH_PHY_ADDR_W5500  1
+#define ETH_SPI_HOST_W5500  SPI2_HOST
+#define ETH_SPI_MHZ_W5500   20  // GPIO-matrix SPI is good to ~26 MHz; drop to 10-16 if a jumper-wired module misbehaves
 
 // ── Network (see Build doc Section 6/8 — not secrets, already public there) ─
 #define MAX_HOST   "192.168.50.2"
@@ -43,22 +57,16 @@
 #define VOLUME_STEP             2   // percentage points per detent
 #define VOLUME_SAVE_IDLE_MS  2000
 #define LED_BLINK_MS          250   // ~2 Hz
-#define RECONNECT_INTERVAL_MS 15000 // > one full associate+DHCP cycle, so a retry can't abort an attempt in progress
 #define ENCODER_REVERSED        0   // 1 if clockwise decreases volume (Build doc Section 9 troubleshooting: swap A/B wiring, or flip this instead)
 #define ENCODER_STEPS_PER_DETENT 4  // quarter-steps per physical click; standard EC11/KY-040 = 4, some variants = 2 (set here if FUNC-05 shows half the expected step)
-#define PORTAL_TIMEOUT_S      180   // captive portal stays open this long, then autoConnect() returns false -> restart -> retry saved network
 
 // ── Globals ───────────────────────────────────────────────────────────────────
-WiFiUDP     udp;
+NetworkUDP  udp;
 Preferences prefs;
-Ticker      ledTicker;   // blinks the status LED while setup() blocks in autoConnect()
 
 int           volume            = 50;   // 0..100, persisted in NVS
 bool          volumeDirty        = false;
 unsigned long lastVolumeChangeMs = 0;
-
-bool          resetWifiRequested   = false;  // set by RESETWIFI, handled in loop()
-unsigned long lastReconnectAttempt = 0;
 
 bool          ledState        = false;
 unsigned long lastLedToggleMs = 0;
@@ -77,7 +85,7 @@ static const int8_t QUAD_TABLE[16] = {
 };
 
 volatile int8_t  encoderAccum   = 0;
-volatile int16_t encoderDetents = 0;  // int16 so a spin while loop() is blocked (e.g. captive portal) can't wrap
+volatile int16_t encoderDetents = 0;  // int16 headroom so a fast spin between loop() passes can't wrap
 volatile uint8_t encoderPrevState = 0;
 
 void IRAM_ATTR onEncoderChange() {
@@ -131,6 +139,39 @@ struct DebouncedButton {
 
 DebouncedButton btnPlay, btnPause, btnStop;
 
+// ── Ethernet (W5500) ──────────────────────────────────────────────────────────
+// esp_netif owns DHCP, including re-acquiring the lease when the link comes
+// back — there is no reconnect logic to run in loop(). The events below are
+// for serial logging (and hostname latching) only; the status LED and the
+// OSC guards poll networkReady() instead of tracking event state.
+bool networkReady() {
+  return ETH.hasIP();  // link up AND a DHCP lease in hand
+}
+
+void onNetworkEvent(arduino_event_id_t event) {
+  switch (event) {
+    case ARDUINO_EVENT_ETH_START:
+      ETH.setHostname(HOSTNAME);  // some core versions only latch the hostname here
+      Serial.println("[ETH]  Started");
+      break;
+    case ARDUINO_EVENT_ETH_CONNECTED:
+      Serial.println("[ETH]  Link up");
+      break;
+    case ARDUINO_EVENT_ETH_GOT_IP:
+      Serial.printf("[ETH]  DHCP lease: %s (expect 192.168.50.114 if the router reservation is set)\n",
+                    ETH.localIP().toString().c_str());
+      break;
+    case ARDUINO_EVENT_ETH_LOST_IP:
+      Serial.println("[ETH]  Lost IP");
+      break;
+    case ARDUINO_EVENT_ETH_DISCONNECTED:
+      Serial.println("[ETH]  Link down");
+      break;
+    default:
+      break;
+  }
+}
+
 // ── OSC sender ────────────────────────────────────────────────────────────────
 // Minimal hand-rolled OSC-over-UDP packet builder — only two message shapes
 // are ever needed (int argument, float argument), so no OSC library dependency.
@@ -152,6 +193,7 @@ void appendBigEndianU32(uint8_t* buf, size_t offset, uint32_t v) {
 }
 
 void sendOscInt(const char* address, int32_t value) {
+  if (!networkReady()) return;  // offline: drop the send instead of spamming lwIP route errors
   uint8_t buf[64];
   size_t offset = appendOscString(buf, 0, address);
   offset = appendOscString(buf, offset, ",i");
@@ -163,6 +205,7 @@ void sendOscInt(const char* address, int32_t value) {
 }
 
 void sendOscFloat(const char* address, float value) {
+  if (!networkReady()) return;  // offline: drop the send instead of spamming lwIP route errors
   uint8_t buf[64];
   size_t offset = appendOscString(buf, 0, address);
   offset = appendOscString(buf, offset, ",f");
@@ -200,16 +243,10 @@ void saveVolumeIfIdle() {
 }
 
 // ── Status LED ────────────────────────────────────────────────────────────────
-// Ticker callback: runs in the esp_timer task context (not an ISR), so
-// digitalWrite is safe. Used only while setup() is blocked inside autoConnect();
-// updateStatusLed() takes over once the Ticker is detached and loop() runs.
-void blinkLedTick() {
-  ledState = !ledState;
-  digitalWrite(PIN_STATUS_LED, ledState ? HIGH : LOW);
-}
-
+// Solid = Ethernet link up with a DHCP lease; ~2 Hz blink = no link / no
+// lease; off = no power (or firmware fault). Matches Build doc Section 3.
 void updateStatusLed() {
-  if (WiFi.status() == WL_CONNECTED) {
+  if (networkReady()) {
     digitalWrite(PIN_STATUS_LED, HIGH);
     ledState = true;
     return;
@@ -219,15 +256,6 @@ void updateStatusLed() {
     digitalWrite(PIN_STATUS_LED, ledState ? HIGH : LOW);
     lastLedToggleMs = millis();
   }
-}
-
-// ── Wi-Fi ─────────────────────────────────────────────────────────────────────
-void maintainWifi() {
-  if (WiFi.status() == WL_CONNECTED) return;
-  if (millis() - lastReconnectAttempt < RECONNECT_INTERVAL_MS) return;
-  lastReconnectAttempt = millis();
-  Serial.println("[WIFI] Disconnected, attempting reconnect...");
-  WiFi.reconnect();
 }
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
@@ -259,8 +287,18 @@ void updateEncoder() {
 // ── Serial input (USB) ────────────────────────────────────────────────────────
 void printStatus() {
   Serial.println("[STATUS] ----------------------------");
-  Serial.printf("[STATUS] Wi-Fi:      %s\n", WiFi.status() == WL_CONNECTED ? "connected" : "disconnected");
-  Serial.printf("[STATUS] IP address: %s\n", WiFi.localIP().toString().c_str());
+  Serial.printf("[STATUS] Firmware:   %s\n", FW_VERSION);
+  if (ETH.linkUp()) {
+    Serial.printf("[STATUS] Link:       up, %d Mbps %s-duplex\n",
+                  (int)ETH.linkSpeed(), ETH.fullDuplex() ? "full" : "half");
+  } else {
+    Serial.println("[STATUS] Link:       down (check the Cat6 cable and router LAN port)");
+  }
+  Serial.printf("[STATUS] IP address: %s\n", ETH.localIP().toString().c_str());
+  Serial.printf("[STATUS] MAC (ETH):  %s  <- key the router DHCP reservation to this\n",
+                ETH.macAddress().c_str());
+  Serial.printf("[STATUS] Hostname:   %s (.local)\n", HOSTNAME);
+  Serial.printf("[STATUS] OSC target: %s:%d\n", MAX_HOST, OSC_PORT);
   Serial.printf("[STATUS] Volume:     %d\n", volume);
   Serial.printf("[STATUS] Uptime:     %lu s\n", millis() / 1000);
   Serial.println("[STATUS] ----------------------------");
@@ -269,10 +307,9 @@ void printStatus() {
 void handleSerialCommand(const char* cmd) {
   while (*cmd == ' ') cmd++;  // ltrim
 
-  // Exact match: RESETWIFI is destructive, so a stray suffix must not trigger it.
   if (strcmp(cmd, "RESETWIFI") == 0) {
-    Serial.println("[WIFI] Reset requested — clearing credentials, restarting...");
-    resetWifiRequested = true;  // handled safely in loop(), not inside a callback
+    // Courtesy stub for FW 1.x muscle memory.
+    Serial.println("[INFO] RESETWIFI was removed in FW 3.x — Rev 3.0 is wired Ethernet; nothing to provision.");
   } else if (strcmp(cmd, "STATUS") == 0) {
     printStatus();
   } else if (strlen(cmd) > 0) {
@@ -303,8 +340,8 @@ void setup() {
   delay(100);  // let USB CDC enumerate before the first log line
   Serial.println();
   Serial.println("[BOOT] NaoDec Media Playback Controller starting...");
-  Serial.printf("[BOOT] Firmware version %s\n", FW_VERSION);
-  Serial.println("[BOOT] Serial commands: RESETWIFI  |  STATUS");
+  Serial.printf("[BOOT] Firmware version %s (hardware Rev 3.0, W5500 Ethernet)\n", FW_VERSION);
+  Serial.println("[BOOT] Serial commands: STATUS");
 
   // Safe boot state first: LED off, no OSC sent, before any control logic runs.
   pinMode(PIN_STATUS_LED, OUTPUT);
@@ -329,23 +366,27 @@ void setup() {
   // Not sent on boot: Max keeps its own gain until the operator turns the
   // knob, matching the "no commands sent on boot" rule for Play/Pause/Stop.
 
-  WiFiManager wm;
-  wm.setHostname(HOSTNAME);
-  wm.setDebugOutput(false);          // don't print scan/portal traffic over serial
-  wm.setConfigPortalTimeout(PORTAL_TIMEOUT_S);  // portal is not infinite — time out and retry the saved network
+  Network.onEvent(onNetworkEvent);
+  ETH.setHostname(HOSTNAME);  // belt; ETH_START latches it again (suspenders)
 
-  // Blink the status LED while autoConnect() blocks (initial connect or open
-  // portal), so a dark LED still means "no power / fault" and not "busy".
-  ledTicker.attach_ms(LED_BLINK_MS, blinkLedTick);
-  bool connected = wm.autoConnect("NaoDecPlayback-Setup");
-  ledTicker.detach();
-  if (!connected) {
-    // Portal timed out without credentials, or the saved network is still
-    // unreachable — restart and try again rather than sitting idle forever.
-    Serial.println("[ERROR] WiFiManager failed to connect, restarting...");
+  bool ethOk = ETH.begin(ETH_PHY_W5500, ETH_PHY_ADDR_W5500, PIN_ETH_CS, PIN_ETH_INT,
+                         PIN_ETH_RST, ETH_SPI_HOST_W5500, PIN_ETH_SCLK, PIN_ETH_MISO,
+                         PIN_ETH_MOSI, ETH_SPI_MHZ_W5500);
+  if (!ethOk) {
+    // Driver/SPI fault (wiring, W5500 3.3 V power) — unlike a missing cable,
+    // this can't self-heal from loop(), so blink visibly and retry from a
+    // clean boot. A genuine fault shows up as a loggable ~10 s boot loop.
+    Serial.println("[ERROR] W5500 init failed — check SPI wiring and 3.3 V power. Restarting in 10 s...");
+    for (int i = 0; i < 10000 / LED_BLINK_MS; i++) {
+      digitalWrite(PIN_STATUS_LED, (i & 1) ? HIGH : LOW);
+      delay(LED_BLINK_MS);
+    }
     ESP.restart();
   }
-  Serial.printf("[WIFI] Connected. IP: %s\n", WiFi.localIP().toString().c_str());
+  // begin() does not wait for a cable: fall through to loop(), where the LED
+  // blinks until link + DHCP lease arrive (safe to boot unplugged).
+  Serial.printf("[ETH]  MAC %s — waiting for link/DHCP (LED blinks until ready)\n",
+                ETH.macAddress().c_str());
 
   if (MDNS.begin(HOSTNAME)) {
     Serial.printf("[mDNS] %s.local ready\n", HOSTNAME);
@@ -360,19 +401,6 @@ void setup() {
 // ── loop ──────────────────────────────────────────────────────────────────────
 void loop() {
   checkSerial();
-
-  // Deferred Wi-Fi reset — executed here rather than inside the serial
-  // callback to avoid restarting while the network stack is mid-operation.
-  if (resetWifiRequested) {
-    Serial.println("[WIFI] Clearing saved credentials...");
-    digitalWrite(PIN_STATUS_LED, LOW);
-    WiFiManager wm;
-    wm.resetSettings();
-    delay(200);
-    ESP.restart();
-  }
-
-  maintainWifi();
   updateStatusLed();
   updateButtons();
   updateEncoder();
