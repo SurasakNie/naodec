@@ -119,9 +119,13 @@ chair.
 
 ---
 
-## 6. Firmware follow-up (not yet done)
+## 6. Firmware follow-up (done — firmware 3.0.0)
 
-The schematic change is hardware-only. The `.ino` still needs the network layer
-swapped from **Wi-Fi** to the **W5500 Ethernet** library (SPI on GPIO13–18),
-keeping the same OSC/UDP contract and IP scheme. The encoder/button/LED logic
-and the Max patch are unaffected.
+Completed in firmware **3.0.0** (the firmware version now tracks the schematic
+revision it targets): the `.ino` network layer was swapped from **Wi-Fi** to
+the esp32 core's **W5500 Ethernet** driver (`ETH.h`, SPI on GPIO13–18), keeping
+the same OSC/UDP contract and IP scheme. Wi-Fi provisioning (WiFiManager
+captive portal) was removed entirely — the wired build has nothing to
+provision, and the DHCP reservation is re-keyed to the Ethernet MAC printed by
+the `STATUS` serial command. The encoder/button/LED logic and the Max patch
+are unaffected.

@@ -193,8 +193,10 @@ Both controllers run **WLED** .
 Custom Arduino firmware: [`firmware/media_playback_controller/`](firmware/media_playback_controller/).
 An ESP32-S3-DevKitC-1 operator panel that reads a rotary volume encoder and
 Play/Pause/Stop buttons and sends OSC-over-UDP commands to a Max/MSP patch —
-no audio/video/LED data passes through this board. Wi-Fi is provisioned via a
-WiFiManager captive portal (no hardcoded credentials). See
+no audio/video/LED data passes through this board. Firmware 3.x matches
+hardware Rev 3.0: the panel joins the LAN over wired Ethernet (WIZnet W5500
+SPI module), DHCP-reserved at `192.168.50.114` — nothing to provision, no
+credentials in the sketch. See
 [`NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md`](NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md)
 for the full hardware build, network setup, OSC contract, and acceptance tests.
 

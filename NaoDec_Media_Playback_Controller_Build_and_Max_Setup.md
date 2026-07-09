@@ -1,10 +1,18 @@
 # NaoDec Media Playback Controller Build and Max Setup
 
-**Revision:** 2.2  
-**Date:** 2026-07-02  
-**Controller:** ESP32-S3 Wi-Fi OSC controller for Max/MSP media playback  
+**Revision:** 3.0  
+**Date:** 2026-07-09  
+**Controller:** ESP32-S3 wired-Ethernet (W5500) OSC controller for Max/MSP media playback  
 **Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev3.0.html`
 
+> Rev 3.0 — Wired-Ethernet migration, matching Schematic Rev 3.0: added U2 (WIZnet
+> W5500 Lite Ethernet module, SPI on GPIO13–18), C6 (100 nF decoupling at U2), and
+> W2 (~6 m Cat6 to the ASUS LAN port). Firmware 3.0.0 swaps the network layer from
+> Wi-Fi to the W5500 — same OSC/UDP contract and IP scheme — and drops Wi-Fi
+> provisioning entirely (no credentials anywhere; DHCP reservation is keyed to the
+> Ethernet MAC printed by the `STATUS` serial command). See
+> `NaoDec_Media_Playback_Controller_Rev3_Ethernet_Rationale.md` for why.
+>
 > Rev 2.2 — Added an "R1/R2/C1/C2 Fallback (Troubleshooting Reference)" note under the
 > encoder section: build with those four parts unpopulated, and only fit them
 > (10 kOhm / 100 nF, matching the button RC values) if the KY-040 shows encoder misreads
@@ -25,7 +33,7 @@
 
 ## 1. Purpose
 
-This controller is a small operator panel for a Max/MSP media player. It does not carry audio, video, LED data, or LED power. It only sends control messages over Wi-Fi using OSC over UDP.
+This controller is a small operator panel for a Max/MSP media player. It does not carry audio, video, LED data, or LED power. It only sends control messages over wired Ethernet using OSC over UDP.
 
 Functions:
 
@@ -36,7 +44,7 @@ Functions:
 | Pause button | Sends `/transport/pause 1` |
 | Stop button | Sends `/transport/stop 1` |
 
-The Max computer should be connected to the ASUS router by wired Ethernet. The ESP32-S3 connects to the same LAN by 2.4 GHz Wi-Fi.
+The Max computer should be connected to the ASUS router by wired Ethernet. The ESP32-S3 joins the same LAN by wired Ethernet too, through U2 — a WIZnet W5500 Lite SPI module — and the ~6 m Cat6 run (W2). Rev 3.0 replaced the original 2.4 GHz Wi-Fi link because the router sits inside a metal ATX case that attenuates its radio; see `NaoDec_Media_Playback_Controller_Rev3_Ethernet_Rationale.md`.
 
 ### Placement Requirement
 
@@ -44,23 +52,26 @@ The Max computer should be connected to the ASUS router by wired Ethernet. The E
 
 The wire schedule in the schematic specifies a maximum run of about 0.5 m for every panel signal (encoder A/B, Play/Pause/Stop, status LED). These are unbuffered 3.3 V logic lines: a switch-to-GND button line or a quadrature encoder line stretched to several meters acts as a noise antenna, and R6-R10 (100 Ohm) only provide ESD/ringing protection for short runs, not EMI immunity over distance. Extending these runs to meters of cable, especially near a Wi-Fi router or switching power supplies, risks phantom button presses, missed presses, and misread encoder detents.
 
-There is no benefit to placing U1 near the router: the whole point of the Wi-Fi OSC design is that the *long* leg of the signal path (to the Max computer) does not need wires. 2.4 GHz Wi-Fi easily covers the distance between the operator panel and the router. Keep U1 at the panel and let Wi-Fi carry the distance; run only a USB-C power cable to the panel location.
+There is no benefit to placing U1 near the router: the *long* leg of the signal path (to the router and on to the Max computer) is exactly what the W2 Cat6 run is for. Ethernet is engineered for 100 m, so ~6 m is trivial, while the unbuffered panel signals are rated for ~0.5 m. Keep U1 (and U2) at the panel, keep the encoder/button/LED runs short, and let the Cat6 carry the distance; only the USB-C power cable and the Ethernet cable arrive at the panel location.
 
-If a project constraint truly requires the microcontroller to sit apart from the panel by more than about 0.5 m, that is a different design (a remote I/O interconnect over UART/RS-485 or a buffered I2C expander) and is out of scope for this Rev 2.0 hardware.
+If a project constraint truly requires the microcontroller to sit apart from the panel by more than about 0.5 m, that is a different design (a remote I/O interconnect over UART/RS-485 or a buffered I2C expander) and is out of scope for this hardware.
 
 ## 2. Required Items
 
 | Ref | Qty | Item | Description |
 |---|---:|---|---|
 | U1 | 1 | ESP32-S3-DevKitC-1 | Main controller board, USB-C, N8R8 or N16R8 preferred |
+| U2 | 1 | WIZnet W5500 Lite Ethernet module | SPI Ethernet (10/100) with RJ45 magnetics. **3.3 V only — never 5 V**; ~150 mA from the ESP32 3V3 rail |
 | ENC1 | 1 | NEBDS-01 / EC11 encoder module | Preferred rotary encoder module with Schmitt trigger / anti-bounce, pins `A`, `B`, `SW`, `VCC`, `GND`; KY-040 may be used as an optional replacement |
 | SW1-SW3 | 3 | Normally-open momentary pushbutton | Play, Pause, Stop panel buttons |
 | R3-R5 | 3 | 10 kOhm resistor | Pull-ups for Play/Pause/Stop buttons |
 | R6-R10 | 5 | 100 Ohm resistor | Series protection between each GPIO and its panel wire (ESD / short protection, edge damping) |
 | R11 | 1 | 330 Ohm resistor | Series resistor for LED1 status LED |
-| LED1 | 1 | Panel-mount LED, 3-5 mm | Wi-Fi status indicator on the operator panel |
+| LED1 | 1 | Panel-mount LED, 3-5 mm | Network status indicator on the operator panel |
 | C3-C5 | 3 | 100 nF capacitor | Button debounce capacitors, X7R ceramic, 25 V or higher |
+| C6 | 1 | 100 nF capacitor | Decoupling at U2's 3V3/GND pins, X7R ceramic, 25 V or higher, placed close to the module |
 | J1 | 1 | USB-C cable | Power cable for ESP32-S3 board, quality cable, 1 m or shorter |
+| W2 | 1 | Cat6 Ethernet cable, ~6 m | U2 RJ45 → ASUS RT-AX1800HP LAN port. Cat5e is sufficient; Cat8 is unnecessary (the W5500 is 10/100) |
 | PSU1 | 1 | USB power adapter | Regulated 5 V, 2 A wall adapter |
 | PCB1 | 1 | Prototype PCB | 2.54 mm prototype PCB or custom PCB, approx. 70 x 50 mm |
 | ENCLOSURE | 1 | Nonconductive enclosure | Plastic controller box with strain relief and ventilation |
@@ -92,13 +103,38 @@ Recommended spares:
 | Pause | GPIO10 | Yellow | Button input, active low, through R9 (100 Ohm) |
 | Stop | GPIO11 | Orange | Button input, active low, through R10 (100 Ohm) |
 | Status LED | GPIO12 | Grey | To LED1 anode through R11 (330 Ohm), active high |
-| Encoder/module power | 3V3 | Red | Connect to `ENC1 VCC` on NEBDS-01, or `+` on KY-040 |
-| Ground | GND | Black | Common ground for encoder, buttons, and LED1 |
+| W5500 SCLK | GPIO13 | — (SPI harness) | To `U2 SCLK` |
+| W5500 MOSI | GPIO14 | — (SPI harness) | To `U2 MOSI` |
+| W5500 MISO | GPIO15 | — (SPI harness) | To `U2 MISO` |
+| W5500 SCS | GPIO16 | — (SPI harness) | To `U2 SCS` (chip select) |
+| W5500 INT | GPIO17 | — (SPI harness) | To `U2 INT` |
+| W5500 RST | GPIO18 | — (SPI harness) | To `U2 RST` |
+| Encoder/module power | 3V3 | Red | Connect to `ENC1 VCC` on NEBDS-01, or `+` on KY-040; also feeds `U2 3V3` |
+| Ground | GND | Black | Common ground for encoder, buttons, LED1, and U2 |
 | Power input | USB-C | USB cable | Use USB-C input path, not GPIO or 3V3 pin |
 
 Every signal that leaves the PCB (GPIO7-GPIO11) passes through a 100 Ohm series resistor
 (R6-R10) mounted on the PCB, close to the ESP32. These protect the GPIOs against ESD and
 wiring shorts and damp reflections on the panel runs, regardless of which encoder module is fitted.
+The U2 SPI harness stays on the PCB (no panel run), so it has no series resistors — keep it
+short instead (under ~0.1 m).
+
+### W5500 Ethernet Module (U2)
+
+| U2 pin | ESP32-S3 connection | Note |
+|---|---|---|
+| SCLK | GPIO13 | SPI clock |
+| MOSI | GPIO14 | SPI data, ESP32 → W5500 |
+| MISO | GPIO15 | SPI data, W5500 → ESP32 |
+| SCS | GPIO16 | SPI chip select |
+| INT | GPIO17 | Interrupt (wired in this build; firmware also supports polling on esp32 core >= 3.1 if a bench module lacks it) |
+| RST | GPIO18 | Reset — pulsed by the firmware's Ethernet driver at boot |
+| 3V3 | 3V3 | **3.3 V only — never 5 V.** Decouple with C6 (100 nF) directly at these pins |
+| GND | GND | Common ground |
+| RJ45 | — | W2 Cat6 → ASUS RT-AX1800HP LAN port |
+
+The W5500 carries its own MAC/PHY and TCP/IP offload; the ESP32-S3 has no built-in
+Ethernet MAC, which is why this SPI module is required for a wired link.
 
 ### Encoder Module: NEBDS-01 Preferred, KY-040 Optional
 
@@ -173,30 +209,32 @@ resistor sits between that node and the panel wire to the button.
 
 | LED state | Meaning |
 |---|---|
-| Solid on | Wi-Fi connected, controller operational |
-| Blinking | Wi-Fi disconnected, reconnect in progress |
+| Solid on | Ethernet link up with a DHCP lease, controller operational |
+| Blinking | No link or no lease (cable unplugged, router port down, DHCP pending) |
 | Off | No power (or firmware fault) |
 
 ## 4. Build Steps
 
-1. Drill the enclosure for the encoder, three buttons, the status LED, USB cable, and any service access.
+1. Drill the enclosure for the encoder, three buttons, the status LED, the USB cable, the Cat6 cable (or a panel-mount RJ45 coupler), and any service access.
 2. Arrange controls left to right as `VOLUME`, `PLAY`, `PAUSE`, `STOP`, with `LED1` visible from the operator position.
-3. Mount the ESP32-S3 board inside this same enclosure so the antenna end faces plastic, not metal. Do not mount U1 in a separate location and run extension wires to the panel (see Section 1, Placement Requirement).
-4. Keep at least 10 mm clearance around the ESP32 antenna area.
+3. Mount the ESP32-S3 board inside this same enclosure. Do not mount U1 in a separate location and run extension wires to the panel (see Section 1, Placement Requirement).
+4. Mount U2 (W5500 Lite) beside U1 with its RJ45 facing the cable exit, and keep the planned SPI harness short (under ~0.1 m).
 5. Mount the NEBDS-01 / EC11 encoder module and fit the knob. If using the optional KY-040 module, mount it in the same volume encoder position.
 6. Mount the three normally-open pushbuttons and LED1.
 7. Build the 3.3 V and GND buses on the prototype PCB.
 8. Install R3-R5 from 3.3 V to GPIO9/GPIO10/GPIO11.
 9. Install C3-C5 from GPIO9/GPIO10/GPIO11 to GND.
 10. Install the series resistors on the PCB, close to the ESP32: R6-R10 (100 Ohm) in line with GPIO7-GPIO11, and R11 (330 Ohm) in line with GPIO12.
-11. Wire encoder `A`, `B`, `VCC`, and `GND` to the ESP32 through the keyed H1 JST-XH connector.
-12. Leave encoder `SW` unconnected and insulated (route it to the spare H1 position if you want it available later).
-13. Wire each pushbutton between its series resistor output and GND.
-14. Wire LED1 anode to the R11 output and LED1 cathode to GND.
-15. Verify continuity from the encoder shaft/frame to GND after mounting.
-16. Add strain relief for the USB-C cable. Use a quality cable no longer than 1 m.
-17. Label both ends of every wire.
-18. Inspect for solder bridges, loose strands, reversed connectors, and accidental contact near the antenna.
+11. Install C6 (100 nF) directly across U2's `3V3` and `GND` pins.
+12. Wire the U2 SPI harness: `SCLK`→GPIO13, `MOSI`→GPIO14, `MISO`→GPIO15, `SCS`→GPIO16, `INT`→GPIO17, `RST`→GPIO18, plus `3V3` and `GND` from the PCB buses. **3.3 V only — never wire U2 to 5 V.**
+13. Wire encoder `A`, `B`, `VCC`, and `GND` to the ESP32 through the keyed H1 JST-XH connector.
+14. Leave encoder `SW` unconnected and insulated (route it to the spare H1 position if you want it available later).
+15. Wire each pushbutton between its series resistor output and GND.
+16. Wire LED1 anode to the R11 output and LED1 cathode to GND.
+17. Verify continuity from the encoder shaft/frame to GND after mounting.
+18. Add strain relief for the USB-C cable (quality cable no longer than 1 m) and for the W2 Cat6 run at its exit.
+19. Label both ends of every wire.
+20. Inspect for solder bridges, loose strands, and reversed connectors.
 
 ## 5. Electrical Checks Before Firmware
 
@@ -210,16 +248,17 @@ Perform these checks before plugging the controller into a computer or router se
 | Encoder shaft ground | Measure encoder shaft/frame to GND | Continuity (near 0 Ohm) |
 | 3.3 V rail | Power by USB-C and measure 3V3 to GND | 3.20 V to 3.40 V |
 | Encoder module VCC | Measure `ENC1 VCC` or KY-040 `+` to GND | 3.20 V to 3.40 V |
+| W5500 supply | Measure `U2 3V3` to GND at the module pins | 3.20 V to 3.40 V — U2 must never see 5 V |
 | Button idle voltage | Release Play/Pause/Stop and measure GPIO9-11 | Above 3.0 V |
 | Button active voltage | Press each button and measure its GPIO | Below 0.3 V |
 | Encoder A/B level | Rotate encoder and measure A/B, or KY-040 CLK/DT | Logic should stay within 0 V to 3.3 V |
 | Status LED | Drive GPIO12 high (or run test firmware) | LED1 lights; current ~4 mA |
 
-Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, GPIO12, or the encoder module signal pins.
+Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, GPIO12, the encoder module signal pins, or any U2 pin (the W5500 Lite is a 3.3 V device).
 
 ## 6. Firmware Configuration
 
-Store Wi-Fi and Max destination settings in a local config file that is excluded from Git.
+There is nothing to provision on the board: no SSID, no password, no config file. The wired build stores no network secrets anywhere. `MAX_HOST` and `OSC_PORT` are plain `#define`s at the top of the sketch (they are public values, already published here), and the controller's own address comes from the router's DHCP reservation.
 
 Project network assignment:
 
@@ -229,22 +268,15 @@ Project network assignment:
 | Max player computer IP | Confirm from the ASUS router setup |
 | OSC UDP port | `9000` |
 
-The controller IP `192.168.50.114` should normally be assigned by ASUS DHCP reservation using the ESP32 MAC address. `MAX_HOST` is different: it must be the IP address of the Max player computer that receives OSC.
+The controller IP `192.168.50.114` should normally be assigned by ASUS DHCP reservation keyed to the controller's **Ethernet MAC** — the `STATUS` serial command prints it (it is not the same as the ESP32's Wi-Fi MAC, so a reservation made for firmware 1.x must be re-keyed). `MAX_HOST` is different: it must be the IP address of the Max player computer that receives OSC.
 
-```text
-WIFI_SSID=ASUS_NAODEC
-WIFI_PASSWORD=<see router credentials reference — not stored in this file>
-MAX_HOST=192.168.50.2
-MAX_OSC_PORT=9000
-```
-
-Firmware behavior required for Rev 2.0:
+Firmware behavior required for Rev 3.0 (firmware 3.0.0 — the firmware version tracks the schematic revision it targets):
 
 | Area | Requirement |
 |---|---|
-| Wi-Fi | Connect by DHCP and reconnect automatically after loss |
-| Logging | Report assigned IP, Max host, and events over USB serial |
-| Credentials | Never print the Wi-Fi password |
+| Network | Bring up the W5500 (SPI on GPIO13-18), lease by DHCP, and re-acquire automatically after link loss — no manual reconnect action |
+| Logging | Report the Ethernet MAC, link state, assigned IP, Max host, and events over USB serial (`STATUS` command) |
+| Credentials | None — the wired build has no network secrets to store or print |
 | Buttons | Send one OSC command on the debounced press edge only |
 | Encoder | Decode valid quadrature transitions from GPIO7/GPIO8; apply stronger filtering if KY-040 is used |
 | Volume | Maintain integer volume `0...100` |
@@ -252,12 +284,12 @@ Firmware behavior required for Rev 2.0:
 | OSC volume | Send normalized float `0.0...1.0` |
 | Limits | Clamp volume between `0.0` and `1.0` |
 | Memory | Save last volume after about 2 seconds of inactivity |
-| Boot | Do not send Play, Pause, or Stop on boot |
-| Status LED | GPIO12 solid high when Wi-Fi is connected; blink at ~2 Hz while disconnected or reconnecting |
+| Boot | Do not send Play, Pause, or Stop on boot; booting with the Ethernet cable unplugged must wait (LED blinking), not restart-loop |
+| Status LED | GPIO12 solid high when the Ethernet link is up with a DHCP lease; blink at ~2 Hz while there is no link or no lease |
 
 ## 7. OSC Message Contract
 
-These OSC messages are the Rev 2.0 proposed contract (unchanged from Rev 1.0). Confirm that the final Max patch uses the same addresses and UDP port before acceptance testing.
+This OSC contract is carried unchanged since Rev 1.0 — the Rev 3.0 Ethernet migration changed only the transport underneath it. Confirm that the final Max patch uses the same addresses and UDP port before acceptance testing.
 
 | Function | OSC Address | Argument | Example |
 |---|---|---:|---|
@@ -272,15 +304,16 @@ Default UDP destination port: `9000`.
 
 This project's ASUS RT-AX1800HP is already configured per the NaoDec network setup guide. Reuse that configuration rather than creating a new one.
 
-Router proximity is a network concern only. It has no bearing on where U1 is physically mounted — U1 belongs inside the operator panel enclosure regardless of how far that panel sits from the router (see Section 1, Placement Requirement). 2.4 GHz Wi-Fi range easily covers typical operator-panel-to-router distances.
+Router proximity is a network concern only. It has no bearing on where U1 is physically mounted — U1 belongs inside the operator panel enclosure regardless of how far that panel sits from the router (see Section 1, Placement Requirement). The W2 Cat6 run carries the panel-to-router distance; the controller no longer uses the router's 2.4 GHz radio at all.
 
-1. 2.4 GHz SSID `ASUS_NAODEC` is enabled (see the router credentials reference for the password; do not commit it to this repo).
+1. Connect W2 (the ~6 m Cat6) from U2's RJ45 to a free ASUS LAN port. The cable carries data only — this router has no PoE, so the panel is still powered locally by PSU1/J1.
 2. The Max computer (Mac Mini) connects to an ASUS LAN port by Ethernet, static IP `192.168.50.2`, with the Router field left blank so the Mac keeps using its Wi-Fi interface for internet (see the network setup guide, section 3).
-3. The ESP32 Wi-Fi network and the wired Max computer share the same LAN, gateway `192.168.50.1`.
-4. Wireless client isolation / AP isolation must remain disabled for this SSID.
-5. DHCP pool is `192.168.50.100`-`192.168.50.199`; the Max computer's `192.168.50.2` is a static address outside the pool, not a reservation.
-6. Reserve a DHCP address for the media playback controller by MAC address under LAN -> DHCP Server -> Manually Assigned IP, at `192.168.50.114`.
-7. Record the controller's MAC address and confirm the reservation with `ping 192.168.50.114`.
+3. The wired controller and the wired Max computer share the same LAN, gateway `192.168.50.1`.
+4. DHCP pool is `192.168.50.100`-`192.168.50.199`; the Max computer's `192.168.50.2` is a static address outside the pool, not a reservation.
+5. Reserve a DHCP address for the media playback controller under LAN -> DHCP Server -> Manually Assigned IP, at `192.168.50.114`, keyed to the **Ethernet MAC printed by the `STATUS` serial command**. If an entry from the Wi-Fi firmware (1.x) exists, replace it — the Ethernet MAC is a different address.
+6. Record the controller's Ethernet MAC and confirm the reservation with `ping 192.168.50.114`.
+
+(The 2.4 GHz SSID `ASUS_NAODEC` and its AP-isolation setting no longer matter to this controller; they remain relevant only to other NaoDec Wi-Fi devices.)
 
 Addressing for this LAN:
 
@@ -288,7 +321,7 @@ Addressing for this LAN:
 |---|---|
 | ASUS RT-AX1800HP (gateway) | `192.168.50.1` |
 | Max computer (Mac Mini, Ethernet, static) | `192.168.50.2` |
-| Media playback controller (this build, DHCP reservation) | `192.168.50.114` |
+| Media playback controller (this build, wired, DHCP reservation) | `192.168.50.114` |
 
 `192.168.50.114` follows the existing NaoDec convention of assigning each new ESP32 the next `.11x` address (`.111`, `.112`, `.113` are already in use by other NaoDec ESP32 modules).
 
@@ -352,7 +385,7 @@ If Max receives nothing:
 |---|---|
 | No UDP messages | Confirm ESP32 `MAX_HOST` is the Max computer IP, not `192.168.50.114` |
 | Wrong port | Confirm both firmware and Max use UDP `9000` |
-| ESP32 not reachable | Confirm same LAN/VLAN and AP isolation disabled |
+| ESP32 not reachable | LED1 blinking means no link/lease: check the Cat6 at both ends, the router LAN port, and the DHCP reservation (type `STATUS` for link/IP/MAC). Then confirm same LAN/VLAN |
 | Duplicate button messages | Increase firmware debounce or check switch wiring |
 | Encoder direction reversed | Swap A/B wiring or reverse direction in firmware |
 | Volume affects lights | The Max patch is mapped to NeoDDP brightness instead of media gain |
@@ -366,10 +399,11 @@ Run these before calling the controller ready.
 | ELEC-01 | Visual inspection | No shorts, loose wires, or exposed conductors |
 | ELEC-02 | 3.3 V rail | 3.20 V to 3.40 V |
 | ELEC-03 | Encoder shaft ground | Continuity from shaft/frame to GND |
-| NET-01 | Wi-Fi join | Controller gets DHCP address `192.168.50.114` within 15 seconds |
+| NET-01 | Ethernet DHCP | Controller gets DHCP address `192.168.50.114` within 15 seconds of link up |
 | NET-02 | Max reachability | Max computer and ESP32 are on same LAN/VLAN |
 | NET-03 | UDP receive | Max receives only on the configured IP and port |
-| NET-04 | Reconnect | Controller reconnects after Wi-Fi/router interruption |
+| NET-04 | Reconnect | Controller re-leases and OSC resumes after a cable unplug/replug and after a router reboot, with no manual action |
+| NET-05 | Cold boot unplugged | Booted with the Cat6 unplugged for 2 minutes: no restart loop, LED keeps blinking; after plug-in the LED goes solid and controls work |
 | FUNC-01 | Play | One press sends one play command |
 | FUNC-02 | Pause | One press sends one pause command |
 | FUNC-03 | Stop | One press sends one stop command |
@@ -378,8 +412,8 @@ Run these before calling the controller ready.
 | FUNC-06 | Volume counterclockwise | Ten detents decrease by about 20 percentage points |
 | FUNC-07 | Volume limits | Output remains clamped from `0.0` to `1.0` |
 | FUNC-08 | Boot behavior | No Play, Pause, or Stop command on power-up |
-| FUNC-09 | Status LED | LED1 solid within 15 s of power-up; blinks when the router 2.4 GHz radio is disabled; returns to solid after re-enable (ties into NET-04) |
-| SYS-01 | Site range | Reliable control at final operator location |
+| FUNC-09 | Status LED | LED1 solid within 15 s of power-up with the cable connected; blinks within a few seconds of unplugging the Cat6; returns to solid after replug (ties into NET-04) |
+| SYS-01 | Site link | Reliable control at the final operator location over the installed ~6 m Cat6 run |
 | SYS-02 | Soak | Stable operation for 8 hours with no unintended command |
 
 ## 12. Commissioning Record
@@ -391,8 +425,8 @@ Fill this out for each built controller.
 | Controller serial / asset ID | |
 | ESP32-S3 board variant | |
 | Firmware version / commit | |
-| ASUS SSID | |
-| Controller MAC address | |
+| Router / LAN port used | |
+| Controller Ethernet MAC (from `STATUS`) | |
 | Controller reserved IP | `192.168.50.114` |
 | Max computer IP | |
 | OSC UDP port | |
@@ -412,6 +446,6 @@ The controller is ready for installation only when:
 | Network tests | Pass |
 | Max OSC contract | Confirmed against the actual Max patch |
 | Functional tests | Pass |
-| Site range test | Pass |
+| Wired link test | Pass |
 | Enclosure | Closed, labeled, strain-relieved, and free of exposed conductors |
 | Documentation | Commissioning record complete |
