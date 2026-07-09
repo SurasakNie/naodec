@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NaoDec PC Case Layout — Rev 1.2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+  :root {
+    --bg-dark:        #060a0b;
+    --bg-panel:       rgba(10,18,20,0.95);
+    --wire-12v:       #eaddaa;
+    --wire-5v:        #c9a86a;
+    --wire-gnd:       #4a6b6d;
+    --wire-data:      #88e2d6;
+    --wire-ac:        #c084fc;
+    --text-primary:   #ffffff;
+    --text-secondary: #8eb5b8;
+    --accent:         #eaddaa;
+    --border:         rgba(74,107,109,0.6);
+    --comp-fill:      #0f1a1c;
+    --comp-stroke:    #4a6b6d;
+    --warn:           #ff5555;
+    --ok:             #66bb6a;
+    --blue:           #64b5f6;
+    --box1:           #0a181a;
+    --box2:           #0a180e;
+    --box3:           #161407;
+    --box4:           #170d0d;
+    --bb1:            rgba(88,160,170,0.6);
+    --bb2:            rgba(80,150,100,0.6);
+    --bb3:            rgba(180,160,90,0.5);
+    --bb4:            rgba(255,85,85,0.45);
+    --case:           rgba(140,180,185,0.85);
+    --muted:          #4a6b6d;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { height:100%; }
+  body { background:var(--bg-dark); color:var(--text-primary);
+         font-family:'Roboto',sans-serif; font-weight:500; overflow:hidden; }
+  #stage { width:100vw; height:100vh; cursor:grab; }
+  #stage.grabbing { cursor:grabbing; }
+  svg { width:100%; height:100%; display:block; }
+  text { font-family:'Roboto',sans-serif; fill:var(--text-primary); }
+
+  .case-shell  { fill:none; stroke:var(--case); stroke-width:3; }
+  .case-inner  { fill:none; stroke:var(--border); stroke-width:1.2; stroke-dasharray:6 5; }
+  .shroud-line { stroke:var(--border); stroke-width:1.4; stroke-dasharray:5 4; }
+
+  .mod         { stroke-width:2; }
+  .comp        { fill:var(--comp-fill); stroke:var(--comp-stroke); stroke-width:1.4; rx:4; }
+  .sub-passive { fill:#080e10; stroke:rgba(74,107,109,0.3); stroke-width:1; rx:4; }
+  .comp-group  { cursor:pointer; }
+  .comp-group:hover .comp { stroke:var(--accent); stroke-width:2.2; }
+
+  .title-main { font-weight:900; font-size:30px; letter-spacing:4; text-anchor:middle; }
+  .title-sub  { font-weight:500; font-size:13px; letter-spacing:2; text-anchor:middle; fill:var(--text-secondary); }
+  .zone-label { font-weight:700; font-size:12px; letter-spacing:2; fill:var(--muted); }
+  .mod-hdr    { font-weight:700; font-size:14px; letter-spacing:2; }
+
+  .p-name { font-weight:700; font-size:12px; text-anchor:middle; }
+  .p-val  { font-weight:700; font-size:12px; text-anchor:middle; fill:var(--accent); }
+  .p-spec { font-weight:500; font-size:9.5px; text-anchor:middle; fill:var(--text-secondary); }
+  .p-note { font-weight:500; font-size:8.5px; text-anchor:middle; fill:var(--muted); }
+  .p-pow  { font-weight:500; font-size:9px;  text-anchor:middle; fill:var(--wire-5v); }
+  .p-warn { font-weight:700; font-size:8.5px; text-anchor:middle; fill:var(--warn); }
+  .p-ok   { font-weight:500; font-size:8.5px; text-anchor:middle; fill:var(--ok); }
+
+  .panel { position:fixed; background:var(--bg-panel); border:1px solid var(--border);
+           border-radius:8px; padding:10px 14px; font-size:12px; color:var(--text-secondary); }
+  #legend { top:16px; right:16px; }
+  #legend .lt { color:var(--accent); font-weight:700; letter-spacing:2; margin-bottom:6px; font-size:11px; }
+  #legend .row { display:flex; align-items:center; gap:8px; margin:4px 0; }
+  #legend .sw { width:22px; height:0; border-top:3px solid; }
+  #hint { bottom:16px; left:16px; }
+  #controls { position:fixed; bottom:16px; right:16px; display:flex; gap:6px; }
+  #controls button { background:var(--bg-panel); border:1px solid var(--border); color:var(--text-primary);
+    font-family:'Roboto',sans-serif; font-weight:700; font-size:13px; border-radius:6px; padding:7px 12px; cursor:pointer; }
+  #controls button:hover { border-color:var(--accent); color:var(--accent); }
+  #tip { position:fixed; pointer-events:none; background:var(--bg-dark); border:1px solid var(--accent);
+         border-radius:6px; padding:8px 11px; font-size:12px; color:var(--text-primary);
+         max-width:320px; display:none; z-index:50; box-shadow:0 4px 18px rgba(0,0,0,.5); line-height:1.45; }
+  #tip b { color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <svg id="svg" viewBox="0 0 1600 1690" xmlns="http://www.w3.org/2000/svg">
+    <g id="world">
+
+      <!-- ===== Title ===== -->
+      <text class="title-main" x="800" y="52" fill="var(--accent)">NaoDec — PC CASE LAYOUT</text>
+      <text class="title-sub"  x="800" y="80">COMPONENT PLACEMENT · MODULE DETAIL · NO WIRING · REV 1.2</text>
+
+      <!-- ===== PC Case shell ===== -->
+      <rect class="case-shell" x="60" y="110" width="1480" height="1490" rx="16"/>
+      <line class="case-inner" x1="60" y1="152" x2="1540" y2="152"/>
+      <text class="zone-label" x="78" y="142">CHASSIS · ATX MID-TOWER  ·  FRONT I/O STRIP</text>
+      <circle cx="1490" cy="131" r="4" fill="var(--ok)"/>
+      <circle cx="1470" cy="131" r="4" fill="var(--wire-12v)"/>
+
+      <!-- =====================================================================
+           ROW 1 — WS2815 LED CONTROLLER
+           ===================================================================== -->
+      <rect class="mod" x="100" y="180" width="680" height="420" rx="6" fill="var(--box1)" stroke="var(--bb1)"/>
+      <text class="mod-hdr" x="118" y="206" fill="var(--blue)">WS2815 LED CONTROLLER  ·  Rev 1.6</text>
+
+      <!-- controllers row -->
+      <g class="comp-group" data-info="ESP32-S3-WROOM-1 N16R8 — MASTER|Runs WLED firmware · outputs CH1–CH4 (GPIO 1,4,5,6)|Calculates all FX, streams DDP to Slave over Wi-Fi|USB-C/UART → Mac mini for Art-Net|5 V Vin from ATX rail · ~0.40 A">
+        <rect class="comp" x="120" y="222" width="200" height="150"/>
+        <text class="p-name" x="220" y="248" fill="var(--blue)">ESP32-S3</text>
+        <text class="p-val"  x="220" y="268">MASTER</text>
+        <text class="p-spec" x="220" y="286">WLED · CH1–CH4</text>
+        <text class="p-note" x="220" y="303">GPIO 1, 4, 5, 6</text>
+        <text class="p-note" x="220" y="318">USB-C → Mac mini</text>
+        <text class="p-pow"  x="220" y="336">5 V Vin · ~0.40 A</text>
+        <text class="p-note" x="220" y="353">N16R8 · 16 MB flash</text>
+      </g>
+      <g class="comp-group" data-info="ESP32-S3-WROOM-1 N16R8 — SLAVE|Runs WLED firmware in DDP receiver mode|Outputs CH5–CH7 (GPIO 4,5,6) · no local FX|Receives pixel data from Master via Wi-Fi DDP|5 V Vin from ATX rail · ~0.40 A">
+        <rect class="comp" x="336" y="222" width="200" height="150"/>
+        <text class="p-name" x="436" y="248" fill="var(--blue)">ESP32-S3</text>
+        <text class="p-val"  x="436" y="268">SLAVE</text>
+        <text class="p-spec" x="436" y="286">DDP · CH5–CH7</text>
+        <text class="p-note" x="436" y="303">GPIO 4, 5, 6</text>
+        <text class="p-note" x="436" y="318">Wi-Fi from Master</text>
+        <text class="p-pow"  x="436" y="336">5 V Vin · ~0.40 A</text>
+        <text class="p-note" x="436" y="353">N16R8 · 16 MB flash</text>
+      </g>
+      <g class="comp-group" data-info="U2 — SN74AHCT245N|Octal bus transceiver · 3.3 V → 5 V level shift|7 channels used (CH1–CH7)|R1–R7: 47 Ω ¼ W source termination (≤20 mm)|C7: 100 nF VCC decoupling · 5 V Vcc">
+        <rect class="comp" x="552" y="222" width="208" height="150"/>
+        <text class="p-name" x="656" y="248" fill="var(--accent)">U2 · SN74AHCT245</text>
+        <text class="p-spec" x="656" y="268">3.3 V → 5 V · 7 ch</text>
+        <text class="p-note" x="656" y="286">R1–R7: 47 Ω ¼ W</text>
+        <text class="p-note" x="656" y="301">source termination</text>
+        <text class="p-note" x="656" y="316">C7: 100 nF decouple</text>
+        <text class="p-pow"  x="656" y="336">5 V Vcc · ~20 mA</text>
+      </g>
+
+      <!-- LED OUTPUTS row -->
+      <g class="comp-group" data-info="Vertex strip output — CH1|Strip #1: 60× WS2815 12 V (20 vertex nodes × 3 LEDs)|~0.9 A · single power feed is sufficient at this length|Cable: 18 AWG power · 22 AWG data · ~20 m run|V-drop OK (≈11.25 V at strip; WS2815 min 9 V) · fused F1 7.5 A">
+        <rect class="comp" x="120" y="392" width="310" height="150"/>
+        <text class="p-name" x="275" y="418" fill="var(--wire-data)">VERTEX OUTPUT · CH1</text>
+        <text class="p-val"  x="275" y="438">Strip #1 — 60× WS2815</text>
+        <text class="p-spec" x="275" y="456">20 vertex nodes × 3 LEDs</text>
+        <text class="p-note" x="275" y="473">~0.9 A · single power feed</text>
+        <text class="p-note" x="275" y="489">18 AWG power · 22 AWG data · ~20 m</text>
+        <text class="p-ok"   x="275" y="508">✓ single-end feed sufficient</text>
+        <text class="p-pow"  x="275" y="526">12 V · F1 7.5 A</text>
+      </g>
+      <g class="comp-group" data-info="Edge strip outputs — CH2–CH7|6× strips · 280 LEDs each (5 sections × 56 LEDs)|~4.2 A max per strip|Mid-strip power injection REQUIRED at the S2/S3 joint|Cable: 12 AWG feed · via FB1 fuse block (F2–F7, 7.5 A each)">
+        <rect class="comp" x="450" y="392" width="310" height="150"/>
+        <text class="p-name" x="605" y="418" fill="var(--wire-data)">EDGE OUTPUTS · CH2–CH7</text>
+        <text class="p-val"  x="605" y="438">6× strips — 280 LEDs ea.</text>
+        <text class="p-spec" x="605" y="456">5 sections × 56 LEDs</text>
+        <text class="p-warn" x="605" y="473">⚠ mid-strip injection required</text>
+        <text class="p-note" x="605" y="489">12 AWG feed · ~4.2 A each</text>
+        <text class="p-note" x="605" y="508">inject at S2/S3 joint</text>
+        <text class="p-pow"  x="605" y="526">12 V · FB1 (F2–F7)</text>
+      </g>
+
+      <line x1="120" y1="558" x2="760" y2="558" class="shroud-line"/>
+      <text class="p-spec" x="440" y="577">7 data channels · 47 Ω source-terminated · Master computes FX, Slave receives via Wi-Fi DDP</text>
+      <text class="p-ok"   x="440" y="594">✓ Vertex = single feed · Edge = mid-injected for even brightness across 280 LEDs</text>
+
+      <!-- =====================================================================
+           ROW 1 — SCENT CONTROLLER
+           ===================================================================== -->
+      <rect class="mod" x="820" y="180" width="680" height="420" rx="6" fill="var(--box2)" stroke="var(--bb2)"/>
+      <text class="mod-hdr" x="838" y="206" fill="var(--ok)">SCENT CONTROLLER  ·  Rev 2.0</text>
+
+      <g class="comp-group" data-info="Waveshare ESP32-S3-Relay-6CH|Input 7–36 V DC (fed 12 V from ATX) · 6× SPDT relays|4 channels used: GPIO1→CH1 · GPIO2→CH2 · GPIO41→CH3 · GPIO42→CH4|Runs WLED firmware · ~0.40 A @ 12 V|Rev 2.0: NO 5 V buck — 12 V direct to relay COM bus">
+        <rect class="comp" x="838" y="222" width="330" height="150"/>
+        <text class="p-name" x="1003" y="248" fill="var(--ok)">ESP32-S3-RELAY-6CH</text>
+        <text class="p-val"  x="1003" y="268">Waveshare</text>
+        <text class="p-spec" x="1003" y="286">7–36 V in · 6× SPDT relays</text>
+        <text class="p-note" x="1003" y="303">CH1–CH4 · GPIO 1, 2, 41, 42</text>
+        <text class="p-pow"  x="1003" y="321">12 V direct · ~0.40 A</text>
+        <text class="p-warn" x="1003" y="339">Rev 2.0 · no buck converter</text>
+        <text class="p-note" x="1003" y="356">WLED firmware · 2.4 GHz SMA</text>
+      </g>
+      <g class="comp-group" data-info="Scent relay outputs|4× SPDT dry contacts · COM bus = 12 V (Rev 2.0)|Channels CH1–CH4|Route to external scent station via terminal block|RC snubbers across inductive loads recommended">
+        <rect class="comp" x="1184" y="222" width="296" height="150"/>
+        <text class="p-name" x="1332" y="248" fill="var(--accent)">RELAY OUTPUTS</text>
+        <text class="p-spec" x="1332" y="268">4× SPDT dry contacts</text>
+        <text class="p-note" x="1332" y="286">CH1 · CH2 · CH3 · CH4</text>
+        <text class="p-note" x="1332" y="301">COM bus = 12 V (Rev 2.0)</text>
+        <text class="p-note" x="1332" y="316">→ external atomiser sub-box</text>
+        <text class="p-warn" x="1332" y="338">⚠ RC snubber on inductive loads</text>
+      </g>
+      <g class="comp-group" data-info="Scent station (external)|4× atomiser / pump heads driven by the relay channels|Mounted outside the PC case, fed via terminal block|Each inductive load gets an RC snubber|Keep scent tubing away from electronics">
+        <rect class="comp" x="838" y="392" width="330" height="150"/>
+        <text class="p-name" x="1003" y="418" fill="var(--accent)">SCENT STATION</text>
+        <text class="p-spec" x="1003" y="438">→ external atomisers / pumps</text>
+        <text class="p-note" x="1003" y="456">4× heads via terminal block</text>
+        <text class="p-note" x="1003" y="472">mounted outside case</text>
+        <text class="p-warn" x="1003" y="492">⚠ RC snubber per inductive load</text>
+        <text class="p-note" x="1003" y="510">keep tubing clear of PCBs</text>
+      </g>
+      <g class="comp-group" data-info="Power & RF|Single 12 V feed from ATX rail · ~0.40 A total|No on-board buck (Rev 2.0)|2.4 GHz Wi-Fi via external SMA antenna|Runs WLED firmware">
+        <rect class="comp" x="1184" y="392" width="296" height="150"/>
+        <text class="p-name" x="1332" y="418" fill="var(--accent)">POWER / RF</text>
+        <text class="p-spec" x="1332" y="438">12 V single feed</text>
+        <text class="p-pow"  x="1332" y="457">~0.40 A @ 12 V</text>
+        <text class="p-note" x="1332" y="474">2.4 GHz SMA antenna</text>
+        <text class="p-note" x="1332" y="490">WLED · GPIO 1/2/41/42</text>
+      </g>
+
+      <line x1="838" y1="558" x2="1480" y2="558" class="shroud-line"/>
+      <text class="p-spec" x="1159" y="577">Single 12 V branch from ATX · isolated relay outputs to the external scent station</text>
+      <text class="p-ok"   x="1159" y="594">✓ Simplified single-rail design (Rev 2.0) — fewer failure points than Rev 1.0</text>
+
+      <!-- =====================================================================
+           ROW 2 — MEDIA PLAYBACK CONTROLLER
+           ===================================================================== -->
+      <rect class="mod" x="100" y="630" width="680" height="300" rx="6" fill="var(--box1)" stroke="var(--bb1)"/>
+      <text class="mod-hdr" x="118" y="656" fill="var(--blue)">MEDIA PLAYBACK CONTROLLER  ·  Rev 1.0</text>
+
+      <g class="comp-group" data-info="U1 — ESP32-S3-DevKitC-1|USB-C dev board · 2.4 GHz Wi-Fi · N8R8 / N16R8|Wi-Fi OSC media/playback controller|Avoid GPIO 0/3/45/46 (boot-strapping pins)|Powered from dedicated USB 5 V / 2 A adapter">
+        <rect class="comp" x="120" y="672" width="240" height="150"/>
+        <text class="p-name" x="240" y="698" fill="var(--blue)">ESP32-S3</text>
+        <text class="p-val"  x="240" y="718">DevKitC-1</text>
+        <text class="p-spec" x="240" y="736">Wi-Fi OSC controller</text>
+        <text class="p-note" x="240" y="753">USB-C · N8R8 / N16R8</text>
+        <text class="p-note" x="240" y="768">avoid GPIO 0/3/45/46</text>
+        <text class="p-pow"  x="240" y="788">5 V / 2 A USB adapter</text>
+      </g>
+      <g class="comp-group" data-info="Front-panel controls|Rotary encoder: ENC-A GPIO7 · ENC-B GPIO8|Buttons: PLAY GPIO9 · PAUSE GPIO10 · STOP GPIO11|R1–R5: 10 kΩ 1% pull-ups to 3V3|C1–C5: 100 nF X7R debounce (~1 ms RC)">
+        <rect class="comp" x="376" y="672" width="190" height="150"/>
+        <text class="p-name" x="471" y="698" fill="var(--accent)">CONTROLS</text>
+        <text class="p-spec" x="471" y="718">encoder + 3 buttons</text>
+        <text class="p-note" x="471" y="735">ENC GPIO7/8</text>
+        <text class="p-note" x="471" y="750">PLAY/PAUSE/STOP 9/10/11</text>
+        <text class="p-note" x="471" y="768">R: 10 kΩ pull-ups</text>
+        <text class="p-note" x="471" y="786">C: 100 nF debounce</text>
+      </g>
+      <g class="comp-group" data-info="Power & audio I/O|PSU1: regulated USB 5 V / 2 A wall adapter (country-certified)|Keep independent from 12 V LED rails|Audio out → media/playback path (to GAB8 amplifier)|USB-C output">
+        <rect class="comp" x="582" y="672" width="178" height="150"/>
+        <text class="p-name" x="671" y="698" fill="var(--accent)">POWER / I/O</text>
+        <text class="p-spec" x="671" y="718">USB 5 V / 2 A</text>
+        <text class="p-note" x="671" y="735">independent adapter</text>
+        <text class="p-note" x="671" y="750">country-certified</text>
+        <text class="p-note" x="671" y="768">audio → GAB8 amp</text>
+        <text class="p-pow"  x="671" y="788">5 V · isolated</text>
+      </g>
+      <line x1="120" y1="842" x2="760" y2="842" class="shroud-line"/>
+      <text class="p-spec" x="440" y="862">Wi-Fi OSC playback engine · triggers synchronized media cues across the installation</text>
+      <text class="p-note" x="440" y="880">Dedicated 5 V adapter keeps audio logic isolated from the LED / scent 12 V branches</text>
+      <text class="p-ok"   x="440" y="900">✓ Independent supply avoids ground-loop noise into the amplifier</text>
+
+      <!-- =====================================================================
+           ROW 2 — GAB8 AUDIO AMPLIFIER
+           ===================================================================== -->
+      <rect class="mod" x="820" y="630" width="680" height="300" rx="6" fill="var(--box3)" stroke="var(--bb3)"/>
+      <text class="mod-hdr" x="838" y="656" fill="var(--wire-12v)">GAB8 AUDIO AMPLIFIER</text>
+
+      <g class="comp-group" data-info="GAB8 amplifier board|Class-D audio power amplifier|Supply: 24 VDC from PSU 24 V (Mean Well LRS-600-24)|Line input from Media Playback Controller|Drives 6× Microlab X3 speakers + 4× Dayton TT25-16-4 transducers">
+        <rect class="comp" x="838" y="672" width="330" height="150"/>
+        <text class="p-name" x="1003" y="698" fill="var(--wire-12v)">GAB8 AMP BOARD</text>
+        <text class="p-val"  x="1003" y="718">Class-D power amp</text>
+        <text class="p-spec" x="1003" y="736">supply: 24 VDC</text>
+        <text class="p-note" x="1003" y="753">line in ← Playback ctrl</text>
+        <text class="p-pow"  x="1003" y="772">24 V ← LRS-600-24</text>
+        <text class="p-note" x="1003" y="789">drives 6 spk + 4 transducers</text>
+      </g>
+      <g class="comp-group" data-info="Speaker / transducer outputs|6× Microlab Satellite X3 speakers|4× Dayton Audio TT25-16-4 puck transducers|Match impedance &amp; power to GAB8 channels|Twisted output pairs · route away from data lines">
+        <rect class="comp" x="1184" y="672" width="296" height="150"/>
+        <text class="p-name" x="1332" y="698" fill="var(--accent)">SPEAKER OUT</text>
+        <text class="p-spec" x="1332" y="718">6× Microlab Satellite X3</text>
+        <text class="p-spec" x="1332" y="736">4× Dayton TT25-16-4</text>
+        <text class="p-note" x="1332" y="753">puck transducers</text>
+        <text class="p-note" x="1332" y="769">twisted pairs · away from data</text>
+        <text class="p-warn" x="1332" y="789">⚠ match impedance / power</text>
+      </g>
+      <line x1="838" y1="842" x2="1480" y2="842" class="shroud-line"/>
+      <text class="p-spec" x="1159" y="862">Audio power stage · fed by dedicated 24 V supply, signal from Playback controller</text>
+      <text class="p-note" x="1159" y="880">Loads: 6× Microlab Satellite X3 + 4× Dayton TT25-16-4 transducers</text>
+      <text class="p-warn" x="1159" y="900">⚠ Verify GAB8 channel count + per-channel power/impedance vs datasheet</text>
+
+      <!-- =====================================================================
+           ROW 3 — VERTEX SERIES COIL (full width, essentials only)
+           ===================================================================== -->
+      <rect class="mod" x="100" y="960" width="1400" height="250" rx="6" fill="var(--box4)" stroke="var(--bb4)"/>
+      <text class="mod-hdr" x="118" y="986" fill="var(--warn)">VERTEX SERIES COIL  ·  Rev 1.0a  ·  HIGH-CURRENT BRANCH</text>
+
+      <g class="comp-group" data-info="Protection — F1 + TCO1|F1: 3 A slow-blow T-type, inline before XL4015 IN+|Buck can fail shorted — fault protection required|TCO1: series thermal cutoff 70–80 °C, rated ≥5 A|TCO bonded to hottest cable/connector (manned install)">
+        <rect class="comp" x="140" y="1002" width="400" height="160"/>
+        <text class="p-name" x="340" y="1030" fill="var(--accent)">PROTECTION</text>
+        <text class="p-spec" x="340" y="1052">F1: 3 A slow-blow T-type</text>
+        <text class="p-note" x="340" y="1070">inline before buck input</text>
+        <text class="p-spec" x="340" y="1092">TCO1: 70–80 °C · ≥5 A</text>
+        <text class="p-warn" x="340" y="1112">⚠ required for manned install</text>
+        <text class="p-note" x="340" y="1130">bond TCO to hottest point</text>
+      </g>
+      <g class="comp-group" data-info="U1 — XL4015 HW-083-B|Dual-pot CC/CV buck converter|CV 11.0 V open-load ceiling · CC 3.0 A limit|Loaded output ≈ 5.55 V in CC mode|Input 12 V from ATX → current-limited coil drive">
+        <rect class="comp" x="580" y="1002" width="420" height="160"/>
+        <text class="p-name" x="790" y="1030" fill="var(--accent)">U1 · XL4015 BUCK</text>
+        <text class="p-val"  x="790" y="1052">HW-083-B · CC/CV dual-pot</text>
+        <text class="p-spec" x="790" y="1072">CV 11.0 V · CC 3.0 A limit</text>
+        <text class="p-note" x="790" y="1090">loaded output ≈ 5.55 V (CC mode)</text>
+        <text class="p-pow"  x="790" y="1110">in 12 V → out ≈ 5.55 V</text>
+        <text class="p-ok"   x="790" y="1130">✓ current-limited by design</text>
+      </g>
+      <g class="comp-group" data-info="Coil array — L1–L6|Two groups of three coils in series|7 turns each · 12.5 mm ID crystal core|Groups linked by the installed 20 AWG run|Current-limited series loop ≈ 3.0 A (set by XL4015 CC)">
+        <rect class="comp" x="1040" y="1002" width="420" height="160"/>
+        <text class="p-name" x="1250" y="1030" fill="var(--warn)">COIL ARRAY · L1–L6</text>
+        <text class="p-val"  x="1250" y="1052">2 groups × 3 coils, series</text>
+        <text class="p-spec" x="1250" y="1072">7 turns · 12.5 mm ID core</text>
+        <text class="p-note" x="1250" y="1090">crystal core · 20 AWG link run</text>
+        <text class="p-pow"  x="1250" y="1110">series loop ≈ 3.0 A</text>
+        <text class="p-note" x="1250" y="1130">verify thermal rise on commission</text>
+      </g>
+      <text class="p-spec" x="800" y="1192">High-current branch · XL4015 CC mode holds coil current near 3.0 A · keep this 12 V branch isolated from LED positive rails</text>
+
+      <!-- ===== PSU shroud divider ===== -->
+      <line class="shroud-line" x1="84" y1="1240" x2="1516" y2="1240"/>
+      <text class="zone-label" x="92" y="1264">POWER SHROUD  ·  SUPPLIES</text>
+
+      <!-- =====================================================================
+           ROW 4 — ATX PSU
+           ===================================================================== -->
+      <rect class="mod" x="100" y="1280" width="680" height="270" rx="6" fill="var(--box3)" stroke="var(--bb3)"/>
+      <text class="mod-hdr" x="118" y="1306" fill="var(--wire-12v)">ATX PSU  ·  PRIMARY POWER</text>
+
+      <g class="comp-group" data-info="ATX PSU — rails|Single ATX supply (≈1000 W)|Rails: 12 V (LED + scent + coil branch), 5 V (logic), 3.3 V|Use 24-pin ATX breakout or PSU jumper to enable|Inline fuses retained per Config 2">
+        <rect class="comp" x="120" y="1322" width="300" height="170"/>
+        <text class="p-name" x="270" y="1348" fill="var(--wire-12v)">RAILS</text>
+        <text class="p-val"  x="270" y="1370">≈1000 W ATX</text>
+        <text class="p-spec" x="270" y="1390">12 V · 5 V · 3.3 V</text>
+        <text class="p-note" x="270" y="1408">24-pin breakout / jumper ON</text>
+        <text class="p-note" x="270" y="1424">inline fuses retained</text>
+        <text class="p-pow"  x="270" y="1444">shared 12 V rail</text>
+      </g>
+      <g class="comp-group" data-info="ATX loads|12 V → WS2815 LED strips + Scent relay branch + Vertex coil branch|5 V → ESP32-S3 logic (LED master/slave + level shifter)|Size headroom for peak LED current|Star-point grounds at PSU">
+        <rect class="comp" x="436" y="1322" width="324" height="170"/>
+        <text class="p-name" x="598" y="1348" fill="var(--accent)">LOADS</text>
+        <text class="p-spec" x="598" y="1370">12 V → LEDs · scent · coil</text>
+        <text class="p-note" x="598" y="1388">5 V → ESP32 logic + U2</text>
+        <text class="p-note" x="598" y="1404">size for peak LED current</text>
+        <text class="p-note" x="598" y="1420">star-point grounds at PSU</text>
+        <text class="p-ok"   x="598" y="1442">✓ single primary supply</text>
+      </g>
+
+      <!-- =====================================================================
+           ROW 4 — PSU 24 V
+           ===================================================================== -->
+      <rect class="mod" x="820" y="1280" width="680" height="270" rx="6" fill="var(--box3)" stroke="var(--bb3)"/>
+      <text class="mod-hdr" x="838" y="1306" fill="var(--wire-12v)">PSU 24 V  ·  AMPLIFIER POWER</text>
+
+      <g class="comp-group" data-info="PSU 24 V — Mean Well LRS-600-24|24 V · 25 A · 600 W enclosed switching supply|Dedicated rail for the GAB8 audio amplifier|Keep separate from the ATX 12 V / 5 V rails">
+        <rect class="comp" x="838" y="1322" width="300" height="170"/>
+        <text class="p-name" x="988" y="1348" fill="var(--wire-12v)">24 V SUPPLY</text>
+        <text class="p-val"  x="988" y="1370">Mean Well LRS-600-24</text>
+        <text class="p-spec" x="988" y="1390">24 V · 25 A · 600 W</text>
+        <text class="p-note" x="988" y="1408">enclosed switching</text>
+        <text class="p-note" x="988" y="1424">dedicated amplifier rail</text>
+        <text class="p-pow"  x="988" y="1444">separate from ATX rails</text>
+      </g>
+      <g class="comp-group" data-info="24 V loads|Feeds the GAB8 amplifier (6 speakers + 4 transducers)|Single-point ground tie to audio source|600 W headroom for amplifier peaks">
+        <rect class="comp" x="1156" y="1322" width="324" height="170"/>
+        <text class="p-name" x="1318" y="1348" fill="var(--accent)">LOADS</text>
+        <text class="p-spec" x="1318" y="1370">→ GAB8 amplifier 24 V in</text>
+        <text class="p-note" x="1318" y="1388">6 spk + 4 transducers</text>
+        <text class="p-note" x="1318" y="1404">single-point ground tie</text>
+        <text class="p-ok"   x="1318" y="1426">✓ 600 W headroom</text>
+      </g>
+
+      <!-- ===== Footer ===== -->
+      <text class="title-sub" x="800" y="1640">Click / hover any sub-block for details · 7 modules · logic on ATX 5 V · loads on 12 V · amplifier on 24 V (LRS-600-24)</text>
+
+    </g>
+  </svg>
+</div>
+
+<div class="panel" id="legend">
+  <div class="lt">CONTENTS</div>
+  <div class="row"><span class="sw" style="border-color:var(--blue)"></span>Logic controllers</div>
+  <div class="row"><span class="sw" style="border-color:var(--ok)"></span>Scent (relay)</div>
+  <div class="row"><span class="sw" style="border-color:var(--warn)"></span>High-current coil</div>
+  <div class="row"><span class="sw" style="border-color:var(--wire-12v)"></span>Power / amplifier</div>
+</div>
+
+<div class="panel" id="hint">Scroll = zoom · Drag = pan · Hover sub-block = info</div>
+
+<div id="controls">
+  <button id="zin">+</button>
+  <button id="zout">−</button>
+  <button id="fit">⊞ FIT</button>
+  <button id="esvg">Export SVG</button>
+  <button id="epng">Export PNG</button>
+</div>
+
+<div id="tip"></div>
+
+<script>
+(function(){
+  const stage=document.getElementById('stage'), svg=document.getElementById('svg'),
+        world=document.getElementById('world'), tip=document.getElementById('tip');
+  let scale=1,tx=0,ty=0;
+  function apply(){ world.setAttribute('transform',`translate(${tx},${ty}) scale(${scale})`); }
+  function fit(){ scale=1;tx=0;ty=0;apply(); } fit();
+
+  stage.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const r=svg.getBoundingClientRect(), vb=svg.viewBox.baseVal;
+    const sx=(e.clientX-r.left)/r.width*vb.width, sy=(e.clientY-r.top)/r.height*vb.height;
+    const f=e.deltaY<0?1.12:1/1.12, ns=Math.min(8,Math.max(0.3,scale*f));
+    tx=sx-(sx-tx)*(ns/scale); ty=sy-(sy-ty)*(ns/scale); scale=ns; apply();
+  },{passive:false});
+
+  let drag=false,px=0,py=0;
+  stage.addEventListener('mousedown',e=>{drag=true;px=e.clientX;py=e.clientY;stage.classList.add('grabbing');});
+  window.addEventListener('mousemove',e=>{
+    if(!drag)return;
+    const r=svg.getBoundingClientRect(), vb=svg.viewBox.baseVal;
+    tx+=(e.clientX-px)/r.width*vb.width; ty+=(e.clientY-py)/r.height*vb.height;
+    px=e.clientX; py=e.clientY; apply();
+  });
+  window.addEventListener('mouseup',()=>{drag=false;stage.classList.remove('grabbing');});
+
+  document.getElementById('zin').onclick=()=>{scale=Math.min(8,scale*1.2);apply();};
+  document.getElementById('zout').onclick=()=>{scale=Math.max(0.3,scale/1.2);apply();};
+  document.getElementById('fit').onclick=fit;
+
+  document.querySelectorAll('.comp-group').forEach(g=>{
+    g.addEventListener('mousemove',e=>{
+      const d=(g.getAttribute('data-info')||'').split('|');
+      let h=`<b>${d[0]||''}</b>`;
+      for(let i=1;i<d.length;i++) h+=`<br>${d[i]}`;
+      tip.innerHTML=h; tip.style.display='block';
+      tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY+14)+'px';
+    });
+    g.addEventListener('mouseleave',()=>{tip.style.display='none';});
+  });
+
+  function download(name,data,type){
+    const b=new Blob([data],{type}),u=URL.createObjectURL(b),a=document.createElement('a');
+    a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
+  }
+  function svgString(themed){
+    const clone=svg.cloneNode(true);
+    clone.querySelector('#world').removeAttribute('transform');
+    const cs=getComputedStyle(document.documentElement);
+    clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    let s=new XMLSerializer().serializeToString(clone);
+    s=s.replace(/var\((--[a-z0-9-]+)\)/g,(m,v)=>cs.getPropertyValue(v).trim()||m);
+    if(!themed){ s=s.replace(/fill:[^;"']*/g,'fill:#000').replace(/stroke:[^;"']*(?=[;"'])/g,'stroke:#000'); }
+    return '<?xml version="1.0" encoding="UTF-8"?>\n'+s;
+  }
+  document.getElementById('esvg').onclick=()=>download('NaoDec_PC_Case_Layout_print.svg',svgString(false),'image/svg+xml');
+  document.getElementById('epng').onclick=()=>{
+    const s=svgString(true), img=new Image();
+    img.onload=()=>{
+      const vb=svg.viewBox.baseVal, sc=2, c=document.createElement('canvas');
+      c.width=vb.width*sc; c.height=vb.height*sc;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--bg-dark').trim();
+      ctx.fillRect(0,0,c.width,c.height); ctx.scale(sc,sc); ctx.drawImage(img,0,0);
+      c.toBlob(b=>{const u=URL.createObjectURL(b),a=document.createElement('a');
+        a.href=u;a.download='NaoDec_PC_Case_Layout.png';a.click();URL.revokeObjectURL(u);});
+    };
+    img.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(s)));
+  };
+})();
+</script>
+</body>
+</html>

@@ -229,6 +229,8 @@ Each schematic supports:
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
 | NaoDec_Controller_Box_Configs | 1.1 | Current · electrical enclosure vs PC case · audited power calculations |
 | NaoDec_Power_and_Controller_Box_Report | 1.0 | Full power budget, PSU specs, voltage-drop analysis, audit findings |
+| NaoDec_Power_Report_Complete | 1.1 | Complete power export · ATX PSU shortlist · right-sized to 650 W |
+| NaoDec_ATX_PSU_Wiring_and_Connectors | — | Routing 12 V / 5 V / 3.3 V from the ATX PSU to each device |
 
 ---
 
