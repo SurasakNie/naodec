@@ -1,10 +1,17 @@
 # NaoDec Media Playback Controller Build and Max Setup
 
-**Revision:** 3.0  
-**Date:** 2026-07-09  
+**Revision:** 3.1  
+**Date:** 2026-07-10  
 **Controller:** ESP32-S3 wired-Ethernet (W5500) OSC controller for Max/MSP media playback  
 **Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev3.0.html`
 
+> Rev 3.1 — Added a Quick Reference table ahead of Section 1: all four OSC addresses
+> (including `/volume` for the encoder — not just the transport switches), mDNS
+> hostname, UDP port, Max host IP, and the controller's reserved IP. Also aligned
+> Section 6 with firmware 3.1.0 (optional Wi-Fi fallback provisioned over USB serial
+> with `SETWIFI`; Ethernet remains primary and wins whenever its link returns).
+> Documentation only — hardware is unchanged at Rev 3.0.
+>
 > Rev 3.0 — Wired-Ethernet migration, matching Schematic Rev 3.0: added U2 (WIZnet
 > W5500 Lite Ethernet module, SPI on GPIO13–18), C6 (100 nF decoupling at U2), and
 > W2 (~6 m Cat6 to the ASUS LAN port). Firmware 3.0.0 swaps the network layer from
@@ -30,6 +37,19 @@
 >
 > Rev 1.1 — Sections 6 and 8 aligned with the real ASUS RT-AX1800HP LAN: Max host
 > `192.168.50.2`, controller reserved at `192.168.50.114` per the `.11x` convention.
+
+## Quick Reference
+
+| Item | Value |
+|---|---|
+| Play button OSC | `/transport/play 1` (integer) |
+| Pause button OSC | `/transport/pause 1` (integer) |
+| Stop button OSC | `/transport/stop 1` (integer) |
+| Volume encoder OSC | `/volume <float 0.0–1.0>` — e.g. `/volume 0.65` |
+| mDNS hostname | `naodec-playback.local` |
+| OSC UDP port | `9000` |
+| OSC destination (Max computer) | `192.168.50.2` |
+| Controller reserved IP (DHCP) | `192.168.50.114` |
 
 ## 1. Purpose
 
@@ -258,7 +278,7 @@ Do not apply 5 V to GPIO7, GPIO8, GPIO9, GPIO10, GPIO11, GPIO12, the encoder mod
 
 ## 6. Firmware Configuration
 
-There is nothing to provision on the board: no SSID, no password, no config file. The wired build stores no network secrets anywhere. `MAX_HOST` and `OSC_PORT` are plain `#define`s at the top of the sketch (they are public values, already published here), and the controller's own address comes from the router's DHCP reservation.
+Out of the box there is nothing to provision: no SSID, no password, no config file — the controller is wired-only and its address comes from the router's DHCP reservation. `MAX_HOST` and `OSC_PORT` are plain `#define`s at the top of the sketch (they are public values, already published here). Optionally, firmware 3.1.0 accepts Wi-Fi fallback credentials over USB serial (`SETWIFI`, stored in NVS — never in the source, never printed); with none stored the board behaves exactly like Rev 3.0 wired-only.
 
 Project network assignment:
 
@@ -270,13 +290,13 @@ Project network assignment:
 
 The controller IP `192.168.50.114` should normally be assigned by ASUS DHCP reservation keyed to the controller's **Ethernet MAC** — the `STATUS` serial command prints it (it is not the same as the ESP32's Wi-Fi MAC, so a reservation made for firmware 1.x must be re-keyed). `MAX_HOST` is different: it must be the IP address of the Max player computer that receives OSC.
 
-Firmware behavior required for Rev 3.0 (firmware 3.0.0 — the firmware version tracks the schematic revision it targets):
+Firmware behavior required (firmware 3.1.0 on hardware Rev 3.0):
 
 | Area | Requirement |
 |---|---|
-| Network | Bring up the W5500 (SPI on GPIO13-18), lease by DHCP, and re-acquire automatically after link loss — no manual reconnect action |
+| Network | Bring up the W5500 (SPI on GPIO13-18), lease by DHCP, and re-acquire automatically after link loss — no manual reconnect action. If the Ethernet link stays down and `SETWIFI` credentials are stored, fall back to Wi-Fi; switch back to Ethernet the moment its link + lease return |
 | Logging | Report the Ethernet MAC, link state, assigned IP, Max host, and events over USB serial (`STATUS` command) |
-| Credentials | None — the wired build has no network secrets to store or print |
+| Credentials | None required. Optional Wi-Fi fallback credentials are provisioned over USB serial (`SETWIFI`) into NVS — never compiled into the sketch, never printed |
 | Buttons | Send one OSC command on the debounced press edge only |
 | Encoder | Decode valid quadrature transitions from GPIO7/GPIO8; apply stronger filtering if KY-040 is used |
 | Volume | Maintain integer volume `0...100` |
@@ -285,7 +305,7 @@ Firmware behavior required for Rev 3.0 (firmware 3.0.0 — the firmware version 
 | Limits | Clamp volume between `0.0` and `1.0` |
 | Memory | Save last volume after about 2 seconds of inactivity |
 | Boot | Do not send Play, Pause, or Stop on boot; booting with the Ethernet cable unplugged must wait (LED blinking), not restart-loop |
-| Status LED | GPIO12 solid high when the Ethernet link is up with a DHCP lease; blink at ~2 Hz while there is no link or no lease |
+| Status LED | GPIO12 solid high when the Ethernet link is up with a DHCP lease; mostly-on with a short off-blip while running on the Wi-Fi fallback; blink at ~2 Hz while there is no network at all |
 
 ## 7. OSC Message Contract
 
