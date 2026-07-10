@@ -7,26 +7,38 @@
  *          passes through this board — see NaoDec_Media_Playback_Controller_
  *          Build_and_Max_Setup.md for the full hardware and network spec.
  *
- * Network: wired Ethernet via U2, a WIZnet W5500 Lite SPI module (hardware
- * Rev 3.0, SPI on GPIO13-18). DHCP only — the router reserves 192.168.50.114
- * keyed to the Ethernet MAC; type STATUS in the Serial Monitor to read that
- * MAC plus link/IP/volume/uptime state. Nothing to provision, and the board
- * is safe to boot with the cable unplugged (LED blinks until link + lease).
+ * Network: wired Ethernet is primary — U2, a WIZnet W5500 Lite SPI module
+ * (hardware Rev 3.0, SPI on GPIO13-18), DHCP only. The router reserves
+ * 192.168.50.114 keyed to the Ethernet MAC.
  *
- * Requires the esp32 Arduino core >= 3.0.0 (W5500 support lives in the
- * core's ETH.h). No third-party libraries.
+ * Wi-Fi fallback (Rev 3.1): if the Ethernet link drops and stays down, and
+ * Wi-Fi credentials have been stored, the controller brings up a Wi-Fi station
+ * and keeps sending OSC over it. Ethernet always wins — the moment the cable
+ * link + DHCP lease return, Wi-Fi is shut back off. Provision credentials over
+ * USB serial with SETWIFI (they live in NVS, never in this file); RESETWIFI
+ * clears them; STATUS prints the active interface plus link/IP/MAC/volume/
+ * uptime state. With no credentials stored the board behaves exactly like
+ * Rev 3.0 — wired only, nothing to provision.
+ *
+ * The board is safe to boot with the cable unplugged (LED blinks until a link
+ * comes up on either interface).
+ *
+ * Requires the esp32 Arduino core >= 3.0.0 (W5500 support lives in the core's
+ * ETH.h; WiFi.h is also part of the core). No third-party libraries.
  */
 
 #include <ETH.h>
+#include <WiFi.h>
 #include <Network.h>
 #include <NetworkUdp.h>
 #include <ESPmDNS.h>
 #include <Preferences.h>
 
 // ── Firmware ──────────────────────────────────────────────────────────────────
-// major.minor tracks the schematic revision this firmware targets (Rev 3.0);
-// the patch digit is for firmware-only fixes on that hardware.
-#define FW_VERSION "3.0.0"
+// major tracks the schematic revision this firmware targets (Rev 3.x hardware);
+// minor bumps for firmware feature releases on that hardware (3.1 = Wi-Fi
+// fallback); the patch digit is for firmware-only fixes.
+#define FW_VERSION "3.1.0"
 
 // ── Hardware (see Build doc Section 3 — Pin Connections) ────────────────────
 #define PIN_ENC_A       7
@@ -56,9 +68,19 @@
 #define DEBOUNCE_MS            30
 #define VOLUME_STEP             2   // percentage points per detent
 #define VOLUME_SAVE_IDLE_MS  2000
-#define LED_BLINK_MS          250   // ~2 Hz
+#define LED_BLINK_MS          250   // ~2 Hz (no-network blink)
+#define LED_WIFI_PERIOD_MS   2000   // Wi-Fi fallback: one off-blip per this period
+#define LED_WIFI_BLIP_MS      150   // ...off for this long within the period (mostly-on)
 #define ENCODER_REVERSED        0   // 1 if clockwise decreases volume (Build doc Section 9 troubleshooting: swap A/B wiring, or flip this instead)
 #define ENCODER_STEPS_PER_DETENT 4  // quarter-steps per physical click; standard EC11/KY-040 = 4, some variants = 2 (set here if FUNC-05 shows half the expected step)
+
+// Wi-Fi fallback timing. Only arm the fallback after Ethernet has been down
+// this long, so a brief cable/link glitch or a normal boot-time DHCP wait does
+// not thrash the radio. WIFI_RETRY_MS mirrors the FW 1.x reconnect cadence:
+// longer than one associate+DHCP cycle, so a retry can't abort an attempt in
+// progress.
+#define ETH_FALLBACK_MS     15000
+#define WIFI_RETRY_MS       15000
 
 // ── Globals ───────────────────────────────────────────────────────────────────
 NetworkUDP  udp;
@@ -70,6 +92,20 @@ unsigned long lastVolumeChangeMs = 0;
 
 bool          ledState        = false;
 unsigned long lastLedToggleMs = 0;
+
+// ── Wi-Fi fallback state ────────────────────────────────────────────────────
+// Credentials live in NVS (SETWIFI), never in this file. hasWifiCreds gates the
+// whole fallback path — with no credentials the controller is wired-only, i.e.
+// identical to Rev 3.0. wifiActive means the radio is currently switched on as
+// the fallback; ethGotIpMs stamps the last time Ethernet lost its lease so the
+// fallback only arms after ETH has been down for ETH_FALLBACK_MS.
+String        wifiSsid;
+String        wifiPass;
+bool          hasWifiCreds     = false;
+bool          wifiActive       = false;   // radio on as fallback
+volatile bool wifiHasIp        = false;   // set/cleared from network events
+unsigned long ethDownSinceMs   = 0;       // millis() when ETH last went link-down / lost IP (0 = ETH is up)
+unsigned long lastWifiTryMs    = 0;
 
 // ── Quadrature encoder (quarter-step Gray-code table, ISR-driven) ───────────
 // Indexed by (prevState<<2 | currState), state = (A<<1)|B. 0 = invalid/bounce
@@ -139,13 +175,24 @@ struct DebouncedButton {
 
 DebouncedButton btnPlay, btnPause, btnStop;
 
-// ── Ethernet (W5500) ──────────────────────────────────────────────────────────
-// esp_netif owns DHCP, including re-acquiring the lease when the link comes
-// back — there is no reconnect logic to run in loop(). The events below are
-// for serial logging (and hostname latching) only; the status LED and the
-// OSC guards poll networkReady() instead of tracking event state.
+// ── Network (Ethernet primary, Wi-Fi fallback) ─────────────────────────────────
+// esp_netif owns DHCP on both interfaces, including re-acquiring a lease when a
+// link comes back. The events below are for serial logging and for tracking the
+// Wi-Fi lease flag; the status LED and the OSC guards poll networkReady(), and
+// all radio on/off switching happens in manageWifiFallback() (loop context) so
+// no mode changes run inside an event callback.
+//
+// Only one interface ever carries traffic at a time: Ethernet is primary, and
+// manageWifiFallback() shuts the Wi-Fi radio off the moment ETH has a lease, so
+// the OSC senders never face an ambiguous default route.
 bool networkReady() {
-  return ETH.hasIP();  // link up AND a DHCP lease in hand
+  return ETH.hasIP() || wifiHasIp;  // a usable link + lease on either interface
+}
+
+const char* activeInterface() {
+  if (ETH.hasIP()) return "Ethernet";
+  if (wifiHasIp)   return "Wi-Fi fallback";
+  return "none";
 }
 
 void onNetworkEvent(arduino_event_id_t event) {
@@ -167,8 +214,79 @@ void onNetworkEvent(arduino_event_id_t event) {
     case ARDUINO_EVENT_ETH_DISCONNECTED:
       Serial.println("[ETH]  Link down");
       break;
+    case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+      wifiHasIp = true;
+      Serial.printf("[WIFI] DHCP lease: %s (RSSI %d dBm)\n",
+                    WiFi.localIP().toString().c_str(), (int)WiFi.RSSI());
+      break;
+    case ARDUINO_EVENT_WIFI_STA_LOST_IP:
+      wifiHasIp = false;
+      Serial.println("[WIFI] Lost IP");
+      break;
+    case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+      wifiHasIp = false;
+      Serial.println("[WIFI] Disconnected");
+      break;
     default:
       break;
+  }
+}
+
+// Load stored credentials (if any) from the shared "playback" NVS namespace.
+// Called at boot and after SETWIFI/RESETWIFI so hasWifiCreds stays current.
+void loadWifiCreds() {
+  wifiSsid = prefs.getString("wifi_ssid", "");
+  wifiPass = prefs.getString("wifi_pass", "");
+  hasWifiCreds = wifiSsid.length() > 0;
+}
+
+void stopWifiFallback(const char* reason) {
+  if (!wifiActive) return;
+  Serial.printf("[WIFI] %s — disabling Wi-Fi fallback\n", reason);
+  WiFi.disconnect(true /*wifioff*/, false /*eraseap*/);
+  WiFi.mode(WIFI_OFF);
+  wifiActive = false;
+  wifiHasIp  = false;
+}
+
+void startWifiFallback() {
+  Serial.printf("[WIFI] Ethernet down > %lus — starting Wi-Fi fallback to SSID \"%s\"\n",
+                (unsigned long)(ETH_FALLBACK_MS / 1000), wifiSsid.c_str());
+  WiFi.persistent(false);        // we own the credentials in our own NVS keys
+  WiFi.mode(WIFI_STA);
+  WiFi.setHostname(HOSTNAME);    // keep naodec-playback(.local) on the radio too
+  WiFi.begin(wifiSsid.c_str(), wifiPass.c_str());
+  wifiActive    = true;
+  lastWifiTryMs = millis();
+}
+
+// Ethernet-primary failover. Ethernet always wins: whenever it holds a lease the
+// radio is forced off. Only once Ethernet has been down continuously for
+// ETH_FALLBACK_MS (and credentials exist) does the radio come up; while it is up
+// but not yet associated, re-begin() every WIFI_RETRY_MS. Non-blocking — buttons
+// and the encoder keep running throughout.
+void manageWifiFallback() {
+  unsigned long now = millis();
+
+  if (ETH.hasIP()) {                 // Ethernet primary and healthy
+    ethDownSinceMs = 0;
+    stopWifiFallback("Ethernet restored");
+    return;
+  }
+
+  // Ethernet is down. Track how long, whether or not credentials exist yet, so
+  // that provisioning with SETWIFI after the cable has already been out engages
+  // the fallback right away instead of restarting the grace window.
+  if (ethDownSinceMs == 0) ethDownSinceMs = now;
+  if (!hasWifiCreds) return;         // wired-only build — identical to Rev 3.0
+  if (now - ethDownSinceMs < ETH_FALLBACK_MS) return;        // still in grace window
+
+  if (!wifiActive) {
+    startWifiFallback();
+  } else if (!wifiHasIp && (now - lastWifiTryMs >= WIFI_RETRY_MS)) {
+    Serial.println("[WIFI] Still not associated — retrying");
+    WiFi.begin(wifiSsid.c_str(), wifiPass.c_str());
+    lastWifiTryMs = now;
   }
 }
 
@@ -243,15 +361,26 @@ void saveVolumeIfIdle() {
 }
 
 // ── Status LED ────────────────────────────────────────────────────────────────
-// Solid = Ethernet link up with a DHCP lease; ~2 Hz blink = no link / no
-// lease; off = no power (or firmware fault). Matches Build doc Section 3.
+// Solid            = Ethernet link up with a DHCP lease (normal operation).
+// Mostly-on, brief
+//   off-blip / 2 s = running on Wi-Fi fallback (panel works, wired link needs
+//                    attention).
+// ~2 Hz blink      = no network on either interface.
+// Off              = no power (or firmware fault).
 void updateStatusLed() {
-  if (networkReady()) {
+  if (ETH.hasIP()) {                        // Ethernet primary: solid on
     digitalWrite(PIN_STATUS_LED, HIGH);
     ledState = true;
     return;
   }
-  if (millis() - lastLedToggleMs >= LED_BLINK_MS) {
+  if (wifiHasIp) {                          // Wi-Fi fallback: mostly-on, short off-blip
+    unsigned long phase = millis() % LED_WIFI_PERIOD_MS;
+    bool on = phase >= LED_WIFI_BLIP_MS;    // off only for the first blip of each period
+    digitalWrite(PIN_STATUS_LED, on ? HIGH : LOW);
+    ledState = on;
+    return;
+  }
+  if (millis() - lastLedToggleMs >= LED_BLINK_MS) {   // no network: ~2 Hz blink
     ledState = !ledState;
     digitalWrite(PIN_STATUS_LED, ledState ? HIGH : LOW);
     lastLedToggleMs = millis();
@@ -294,9 +423,23 @@ void printStatus() {
   } else {
     Serial.println("[STATUS] Link:       down (check the Cat6 cable and router LAN port)");
   }
-  Serial.printf("[STATUS] IP address: %s\n", ETH.localIP().toString().c_str());
+  Serial.printf("[STATUS] IP (ETH):   %s\n", ETH.localIP().toString().c_str());
   Serial.printf("[STATUS] MAC (ETH):  %s  <- key the router DHCP reservation to this\n",
                 ETH.macAddress().c_str());
+  Serial.printf("[STATUS] Active if:  %s\n", activeInterface());
+  // Wi-Fi fallback block. The Wi-Fi MAC differs from the Ethernet MAC — if you
+  // want the fallback to land on a fixed address too, add a second router
+  // reservation (e.g. 192.168.50.115) keyed to this MAC.
+  if (hasWifiCreds) {
+    Serial.printf("[STATUS] Wi-Fi SSID: %s (password: set)\n", wifiSsid.c_str());
+    Serial.printf("[STATUS] MAC (WiFi): %s\n", WiFi.macAddress().c_str());
+    if (wifiHasIp) {
+      Serial.printf("[STATUS] IP (WiFi):  %s (RSSI %d dBm)\n",
+                    WiFi.localIP().toString().c_str(), (int)WiFi.RSSI());
+    }
+  } else {
+    Serial.println("[STATUS] Wi-Fi SSID: (none stored — wired-only; SETWIFI to enable fallback)");
+  }
   Serial.printf("[STATUS] Hostname:   %s (.local)\n", HOSTNAME);
   Serial.printf("[STATUS] OSC target: %s:%d\n", MAX_HOST, OSC_PORT);
   Serial.printf("[STATUS] Volume:     %d\n", volume);
@@ -307,9 +450,36 @@ void printStatus() {
 void handleSerialCommand(const char* cmd) {
   while (*cmd == ' ') cmd++;  // ltrim
 
-  if (strcmp(cmd, "RESETWIFI") == 0) {
-    // Courtesy stub for FW 1.x muscle memory.
-    Serial.println("[INFO] RESETWIFI was removed in FW 3.x — Rev 3.0 is wired Ethernet; nothing to provision.");
+  if (strncmp(cmd, "SETWIFI ", 8) == 0) {
+    // SETWIFI <ssid> <password> — split at the FIRST space, so the password may
+    // contain spaces but the SSID may not. Credentials go to NVS, never echoed
+    // back and never committed to this file.
+    const char* args = cmd + 8;
+    while (*args == ' ') args++;             // tolerate extra spaces before the SSID
+    const char* sep = strchr(args, ' ');
+    if (sep == nullptr || sep == args) {
+      Serial.println("[WARN] Usage: SETWIFI <ssid> <password>  (SSID must not contain spaces)");
+      return;
+    }
+    String ssid = String(args).substring(0, sep - args);
+    String pass = String(sep + 1);          // everything after the first space, verbatim
+    if (pass.length() == 0) {
+      Serial.println("[WARN] Usage: SETWIFI <ssid> <password>  (password missing)");
+      return;
+    }
+    prefs.putString("wifi_ssid", ssid);
+    prefs.putString("wifi_pass", pass);
+    loadWifiCreds();
+    Serial.printf("[WIFI] Stored SSID \"%s\" (password: set). Fallback %s.\n",
+                  wifiSsid.c_str(),
+                  ETH.hasIP() ? "will engage if Ethernet drops"
+                              : "will engage shortly (Ethernet is down)");
+  } else if (strcmp(cmd, "RESETWIFI") == 0) {
+    prefs.remove("wifi_ssid");
+    prefs.remove("wifi_pass");
+    loadWifiCreds();
+    stopWifiFallback("Credentials cleared");
+    Serial.println("[WIFI] Cleared stored credentials — controller is now wired-only.");
   } else if (strcmp(cmd, "STATUS") == 0) {
     printStatus();
   } else if (strlen(cmd) > 0) {
@@ -318,7 +488,7 @@ void handleSerialCommand(const char* cmd) {
 }
 
 void checkSerial() {
-  static char buf[32];
+  static char buf[128];  // room for "SETWIFI " + 32-char SSID + space + 63-char WPA key
   static int  idx = 0;
   while (Serial.available()) {
     char c = (char)Serial.read();
@@ -340,8 +510,8 @@ void setup() {
   delay(100);  // let USB CDC enumerate before the first log line
   Serial.println();
   Serial.println("[BOOT] NaoDec Media Playback Controller starting...");
-  Serial.printf("[BOOT] Firmware version %s (hardware Rev 3.0, W5500 Ethernet)\n", FW_VERSION);
-  Serial.println("[BOOT] Serial commands: STATUS");
+  Serial.printf("[BOOT] Firmware version %s (hardware Rev 3.0, W5500 Ethernet + Wi-Fi fallback)\n", FW_VERSION);
+  Serial.println("[BOOT] Serial commands: STATUS, SETWIFI <ssid> <password>, RESETWIFI");
 
   // Safe boot state first: LED off, no OSC sent, before any control logic runs.
   pinMode(PIN_STATUS_LED, OUTPUT);
@@ -366,7 +536,16 @@ void setup() {
   // Not sent on boot: Max keeps its own gain until the operator turns the
   // knob, matching the "no commands sent on boot" rule for Play/Pause/Stop.
 
+  loadWifiCreds();
+  if (hasWifiCreds) {
+    Serial.printf("[WIFI] Fallback armed for SSID \"%s\" (used only if Ethernet is down)\n",
+                  wifiSsid.c_str());
+  } else {
+    Serial.println("[WIFI] No credentials stored — wired-only. SETWIFI to enable fallback.");
+  }
+
   Network.onEvent(onNetworkEvent);
+  WiFi.mode(WIFI_OFF);        // radio stays off until manageWifiFallback() needs it
   ETH.setHostname(HOSTNAME);  // belt; ETH_START latches it again (suspenders)
 
   bool ethOk = ETH.begin(ETH_PHY_W5500, ETH_PHY_ADDR_W5500, PIN_ETH_CS, PIN_ETH_INT,
@@ -401,6 +580,7 @@ void setup() {
 // ── loop ──────────────────────────────────────────────────────────────────────
 void loop() {
   checkSerial();
+  manageWifiFallback();
   updateStatusLed();
   updateButtons();
   updateEncoder();
