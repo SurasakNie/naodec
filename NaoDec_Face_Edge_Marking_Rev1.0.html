@@ -226,7 +226,8 @@
     const card = document.createElement('div');
     card.className = 'face-card';
     const badge = f.tag ? ` <span class="badge badge-${f.tag.toLowerCase()}">${f.tag}</span>` : '';
-    const aria = `Face ${f.n} edges: 1 ${f.e[0]}, 2 ${f.e[1]}, 3 ${f.e[2]}, 4 ${f.e[3]}, 5 ${f.e[4]}`;
+    const spoken = l => l === '–' ? 'ground' : l;
+    const aria = `Face ${f.n} edges: 1 ${spoken(f.e[0])}, 2 ${spoken(f.e[1])}, 3 ${spoken(f.e[2])}, 4 ${spoken(f.e[3])}, 5 ${spoken(f.e[4])}`;
     card.innerHTML = `<div class="face-title">Face ${f.n}${badge}</div>` + pentagonSVG(f.e, aria);
     grid.appendChild(card);
   });

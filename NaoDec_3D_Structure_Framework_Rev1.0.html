@@ -103,6 +103,9 @@
 
         .display-btn { transition: all 0.15s; }
         .display-btn.active { outline: 2px solid #3b82f6; }
+        .active-theme { background: var(--btn-bg-muted); outline: 2px solid #3b82f6; }
+
+        #left-panel { max-height: calc(100vh - 3rem); overflow-y: auto; }
 
         /* Left-panel tabs */
         .tab-btn {
@@ -210,9 +213,9 @@
                 <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-1 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-center" style="color:var(--text-muted)">Display</h4>
                     <div class="grid grid-cols-2 gap-1">
-                        <button id="display-vertex" onclick="toggleVertexView()" class="display-btn active px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#22c55e; color:#16a34a; background-color:rgba(34,197,94,0.1);">Vertices</button>
+                        <button id="display-vertex" onclick="toggleVertexView()" class="display-btn px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#cbd5e1; color:#94a3b8; background-color:transparent;">Vertices</button>
                         <button id="display-faces"  onclick="toggleFacesView()"  class="display-btn active px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#6366f1; color:#4f46e5; background-color:rgba(99,102,241,0.1);">Faces</button>
-                        <button id="display-nodelabels" onclick="toggleNodeLabels()" class="display-btn active col-span-2 px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#0d9488; color:#0f766e; background-color:rgba(20,184,166,0.1);">Node #</button>
+                        <button id="display-nodelabels" onclick="toggleNodeLabels()" class="display-btn col-span-2 px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#cbd5e1; color:#94a3b8; background-color:transparent;">Node #</button>
                     </div>
                     <button id="display-reset" onclick="resetDisplay()" class="w-full mt-1 px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#cbd5e1; color:#475569; background-color:rgba(148,163,184,0.1);">Reset</button>
                 </div>
@@ -265,6 +268,18 @@
                     <p class="text-slate-500 mb-1">Each face is a pentagon bounded by 5 vertices.</p>
                     <ul id="faces-list" class="space-y-1 mt-1"></ul>
                 </div>
+
+                <!-- Edges -->
+                <div class="mt-3 pt-2 border-t text-xs text-slate-600">
+                    <h4 class="font-bold text-slate-700 mb-1 text-sm">Structural Edges (A&ndash;AD)</h4>
+                    <p class="text-slate-500 mb-1">
+                        Reference labels for this diagram only (A&ndash;Z, then AA&ndash;AD for the
+                        last 4 of 30) &mdash; not the physical door/build letters in
+                        <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code>, which is a separately-built
+                        numbering with no confirmed correspondence to v1&ndash;v20 yet.
+                    </p>
+                    <ul id="edges-list" class="space-y-1 mt-1" style="columns: 2; column-gap: 1rem;"></ul>
+                </div>
             </div>
 
             <!-- Tab 2: Summary -->
@@ -281,13 +296,17 @@
                     <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code> for the 11 built faces and
                     their assembly edge marks.
                 </p>
+                <p class="text-slate-500 mt-2" style="font-size:0.7rem; line-height:1rem;">
+                    Edge letters (A&ndash;Z, AA&ndash;AD) are reference labels generated for this
+                    diagram only and are independent of that document's physical door/build letters.
+                </p>
             </div>
 
             <!-- Tab 3: Revisions -->
             <div id="tab-revisions" class="tab-content">
                 <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">Revision History</h3>
                 <ul class="space-y-2 text-xs text-slate-600">
-                    <li><strong class="text-slate-700">Rev 1.0</strong> &mdash; Initial release. Extracted the pure structural framework (vertices, structural edges, faces) from <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code>; removed the LED edge circuits (C1&ndash;C6), the vertex LED daisy-chain, the series coil circuit, node 0 (power-in), and the User POV/chair &mdash; see that file for the electrical/LED mapping.</li>
+                    <li><strong class="text-slate-700">Rev 1.0</strong> &mdash; Initial release. Extracted the pure structural framework (vertices, structural edges, faces) from <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code>; removed the LED edge circuits (C1&ndash;C6), the vertex LED daisy-chain, the series coil circuit, node 0 (power-in), and the User POV/chair &mdash; see that file for the electrical/LED mapping. Vertices and node numbers are hidden by default (toggle back on via Display); the 30 structural edges carry independent reference letters (A&ndash;Z, AA&ndash;AD) generated for this diagram only.</li>
                 </ul>
             </div>
         </div>
@@ -343,6 +362,21 @@
             [16,15], [17,7], [18,9], [19,11], [20,13]
         ];
 
+        // Fresh per-diagram reference letters (A-Z, then AA-AD for the last 4 of 30).
+        // Independent of NaoDec_Face_Edge_Marking_Rev1.0.html's physical door/build letters —
+        // there is no confirmed correspondence between the two numbering schemes.
+        function edgeLetter(n) {
+            let s = '';
+            n += 1;
+            while (n > 0) {
+                n--;
+                s = String.fromCharCode(65 + (n % 26)) + s;
+                n = Math.floor(n / 26);
+            }
+            return s;
+        }
+        const structuralEdgeLetters = structuralEdges.map((_, i) => edgeLetter(i));
+
         // --- Dodecahedron Faces (f1-f12) ---
         // f1 = Top (top-ring only); f12 = Bottom (base-ring only) — left unbuilt in the current install.
         const dodecahedronFaces = [
@@ -361,9 +395,9 @@
         ];
 
         // --- Display State ---
-        let showVertexView = true;
+        let showVertexView = false;
         let showFacesView  = true;
-        let showNodeLabels = true;
+        let showNodeLabels = false;
 
         // --- Render State ---
         const ISO_X = 0.45;   // ~25.8° pitch down
@@ -395,6 +429,7 @@
             const COL_EDGE  = (_css.getPropertyValue('--node-stroke-edge').trim() || '#94a3b8');
             const COL_NFILL = (_css.getPropertyValue('--node-fill').trim()        || '#ffffff');
             const COL_NTEXT = (_css.getPropertyValue('--node-text').trim()        || '#334155');
+            const COL_BGPAGE = (_css.getPropertyValue('--bg-page').trim()         || '#f1f5f9');
 
             const projNodes = {};
             Object.values(nodes3D).forEach(node => {
@@ -416,8 +451,9 @@
 
             let renderQueue = [];
 
-            // A. Structural edges (always shown; faint on the far side of the shape)
-            structuralEdges.forEach(([a, b]) => {
+            // A. Structural edges (always shown; faint on the far side of the shape), each with
+            // its fresh per-diagram reference letter (A-Z, AA-AD).
+            structuralEdges.forEach(([a, b], idx) => {
                 let p1 = projNodes[a], p2 = projNodes[b];
                 let zAvg = (p1.z + p2.z) / 2;
                 let opacity = zAvg > 0 ? 0.35 : 0.08;
@@ -425,6 +461,13 @@
                 renderQueue.push({
                     z: zAvg - 50,
                     html: `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${COL_EDGE}" stroke-width="${width}" opacity="${opacity}" />`
+                });
+                const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+                const lfs = zAvg > 0 ? 12 : 9;
+                const lop = zAvg > 0 ? 1.0 : 0.4;
+                renderQueue.push({
+                    z: zAvg + 0.5,
+                    html: `<text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" font-size="${lfs}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${COL_NTEXT}" opacity="${lop}" style="paint-order: stroke; stroke: ${COL_BGPAGE}; stroke-width: 3px;">${structuralEdgeLetters[idx]}</text>`
                 });
             });
 
@@ -454,20 +497,19 @@
                 });
             }
 
-            // C. Vertex nodes (gated on showVertexView / showNodeLabels)
+            // C. Vertex nodes — circle gated on showVertexView, v# label gated on showNodeLabels
+            // independently (each toggle controls only its own element).
             Object.values(projNodes).forEach(p => {
                 if (!showVertexView && !showNodeLabels) return;
                 let opacity = p.z > 0 ? 1.0 : 0.4;
                 let r = p.z > 0 ? 14 : 10;
                 let fs = p.z > 0 ? 11 : 8;
                 let fillColor = p.section === 'base' ? '#22c55e' : (p.section === 'mid' ? '#3b82f6' : '#a855f7');
+                const circle = showVertexView ? `<circle cx="0" cy="0" r="${r}" fill="${COL_NFILL}" stroke="${fillColor}" stroke-width="3" />` : '';
+                const label = showNodeLabels ? `<text x="0" y="${r/3}" font-size="${fs}" font-weight="600" text-anchor="middle" fill="${COL_NTEXT}">v${p.origId}</text>` : '';
                 renderQueue.push({
                     z: p.z + 10000,
-                    html: `
-                    <g class="node pointer-events-auto" transform="translate(${p.x}, ${p.y})" opacity="${opacity}">
-                        <circle cx="0" cy="0" r="${r}" fill="${COL_NFILL}" stroke="${fillColor}" stroke-width="3" />
-                        ${(showNodeLabels || showVertexView) ? `<text x="0" y="${r/3}" font-size="${fs}" font-weight="600" text-anchor="middle" fill="${COL_NTEXT}">v${p.origId}</text>` : ''}
-                    </g>`
+                    html: `<g class="node pointer-events-auto" transform="translate(${p.x}, ${p.y})" opacity="${opacity}">${circle}${label}</g>`
                 });
             });
 
@@ -548,15 +590,15 @@
             render();
         };
         window.resetDisplay = function() {
-            showVertexView = true;
+            showVertexView = false;
             showFacesView  = true;
-            showNodeLabels = true;
+            showNodeLabels = false;
 
             const vBtn = document.getElementById('display-vertex');
-            vBtn.classList.add('active');
-            vBtn.style.backgroundColor = 'rgba(34,197,94,0.1)';
-            vBtn.style.color = '#16a34a';
-            vBtn.style.borderColor = '#22c55e';
+            vBtn.classList.remove('active');
+            vBtn.style.backgroundColor = 'transparent';
+            vBtn.style.color = '#94a3b8';
+            vBtn.style.borderColor = '#cbd5e1';
 
             const fBtn = document.getElementById('display-faces');
             fBtn.classList.add('active');
@@ -565,10 +607,10 @@
             fBtn.style.borderColor = '#6366f1';
 
             const nBtn = document.getElementById('display-nodelabels');
-            nBtn.classList.add('active');
-            nBtn.style.backgroundColor = 'rgba(20,184,166,0.1)';
-            nBtn.style.color = '#0f766e';
-            nBtn.style.borderColor = '#0d9488';
+            nBtn.classList.remove('active');
+            nBtn.style.backgroundColor = 'transparent';
+            nBtn.style.color = '#94a3b8';
+            nBtn.style.borderColor = '#cbd5e1';
 
             render();
         };
@@ -587,6 +629,17 @@
             ul.innerHTML = html;
         }
         buildFacesList();
+
+        // --- Build the left-panel edges list dynamically ---
+        function buildEdgesList() {
+            const ul = document.getElementById('edges-list');
+            if (!ul) return;
+            const html = structuralEdges.map(([a, b], i) => {
+                return `<li><strong style="color:#0891b2;">${structuralEdgeLetters[i]}:</strong> v${a}&ndash;v${b}</li>`;
+            }).join('');
+            ul.innerHTML = html;
+        }
+        buildEdgesList();
 
         startAnimation();
 
