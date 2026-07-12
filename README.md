@@ -21,6 +21,7 @@ naodec/
 ├── index.html                                     # GitHub Pages auto-index
 ├── NaoDec_WS2815_LED_Controller_Rev1.6.html       # Full controller schematic (interactive)
 ├── NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.2.html  # 3D LED position & channel map
+├── NaoDec_Face_Edge_Marking_Rev1.0.html           # 11-face dodecahedron edge-letter marking guide (fabric-frame build)
 ├── NaoDec_Series_Coil_Build_Rev0_Pre-Release.html # Series coil / electromagnet subsystem (pre-release)
 ├── NaoDec_Vertex_Series_Coil_Rev1.0.html          # Interactive series-coil schematic (current in-file Rev 1.0a)
 ├── XL4015_CC_CV_Mockup_Test_Procedure.md          # Pre-coil converter qualification procedure
@@ -77,6 +78,22 @@ naodec/
 | 7 | GPIO6 (Slave) | U2 A7→B7 | #7 Edge F | 280 | ~8 m | 12 |
 
 **Total: 1,740 × WS2815 (12 V)**
+
+---
+
+## Physical Structure
+
+The rig is a regular dodecahedron built from 11 pentagon wooden-frame + stretched-fabric faces; the
+12th (bottom) face is intentionally left unbuilt as the entry opening. Every shared edge between two
+faces is marked with the same letter, so on-site assembly and tear-down only require matching
+identical letters — no face numbering or lookup needed. Full marking guide, with a labeled diagram
+per face and an auto-validated edge cross-reference:
+[`NaoDec_Face_Edge_Marking_Rev1.0.html`](NaoDec_Face_Edge_Marking_Rev1.0.html).
+
+- **Face 5** is the door.
+- **Face 10** is the top (opposite the unbuilt bottom).
+- Faces 1, 5, 6, 7, 8 carry the 5 unlettered edges that rest directly on the platform/ground instead
+  of meeting another face (the bottom face isn't built).
 
 ---
 
@@ -227,6 +244,7 @@ Each schematic supports:
 |------|-----|-------|
 | NaoDec_WS2815_LED_Controller | 1.6 | Current · 7-ch dual ESP32-S3 DDP |
 | NaoDec_3D_Vertex_and_Edges_LED_Mapping | 1.2 | Current · 3D position map |
+| NaoDec_Face_Edge_Marking | 1.0 | Current · edge-letter marks for the 11 built faces (bottom face not built) |
 | NaoDec_Series_Coil_Build | 0 (pre-release) | Pre-release · 60-coil series electromagnet subsystem |
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
 | NaoDec_Controller_Box_Configs | 1.1 | Current · electrical enclosure vs PC case · audited power calculations |
