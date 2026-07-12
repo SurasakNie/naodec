@@ -86,8 +86,11 @@ naodec/
 
 The rig is a regular dodecahedron: 20 vertices, 30 edges, 12 pentagon faces (Euler check
 20−30+12=2). The pure geometry — vertex/edge/face numbering (v1–v20, f1–f12), no LED wiring — is in
-[`NaoDec_3D_Structure_Framework_Rev1.0.html`](NaoDec_3D_Structure_Framework_Rev1.0.html); the full
-LED vertex/edge circuit mapping is in
+[`NaoDec_3D_Structure_Framework_Rev1.0.html`](NaoDec_3D_Structure_Framework_Rev1.0.html). Vertices
+and node numbers are hidden by default (toggle back on via Display); the default view is the 30
+structural edges only, each carrying a fresh per-diagram reference letter (A–Z, then AA–AD for the
+last 4) that is independent of the physical door/build letters below. The full LED vertex/edge
+circuit mapping is in
 [`NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html`](NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html).
 
 Eleven of the 12 faces are built as wooden-frame + stretched-fabric panels (`f12`, the bottom, is
