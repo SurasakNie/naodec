@@ -129,10 +129,10 @@
     <div class="pentagon-wrap" id="legend-pentagon"></div>
     <ol>
       <li><strong>Edge 1</strong> — lower-left side</li>
-      <li><strong>Edge 2</strong> — upper-left side</li>
-      <li><strong>Edge 3</strong> — upper-right side</li>
-      <li><strong>Edge 4</strong> — lower-right side</li>
-      <li><strong>Edge 5</strong> — bottom</li>
+      <li><strong>Edge 2</strong> — bottom</li>
+      <li><strong>Edge 3</strong> — lower-right side</li>
+      <li><strong>Edge 4</strong> — upper-right side</li>
+      <li><strong>Edge 5</strong> — upper-left side</li>
     </ol>
   </div>
   <p class="note ground-note">Hatched, unlettered edge — rests on the platform/ground instead of
@@ -170,8 +170,9 @@
   ];
 
   // Vertex pairs for edge1..edge5, matched to the hand-drawn reference convention:
-  // edge1 lower-left, edge2 upper-left, edge3 upper-right, edge4 lower-right, edge5 bottom.
-  const EDGE_VERT_PAIRS = [[3, 4], [4, 0], [0, 1], [1, 2], [2, 3]];
+  // edge1 lower-left (fixed), then edges 2-5 run counter-clockwise from there:
+  // edge2 bottom, edge3 lower-right, edge4 upper-right, edge5 upper-left.
+  const EDGE_VERT_PAIRS = [[3, 4], [2, 3], [1, 2], [0, 1], [4, 0]];
 
   function pentagonVerts(cx, cy, R) {
     const v = [];
@@ -218,7 +219,7 @@
   }
 
   document.getElementById('legend-pentagon').innerHTML =
-    pentagonSVG(['1', '2', '3', '4', '5'], 'Edge position key: 1 lower-left, 2 upper-left, 3 upper-right, 4 lower-right, 5 bottom');
+    pentagonSVG(['1', '2', '3', '4', '5'], 'Edge position key: 1 lower-left, 2 bottom, 3 lower-right, 4 upper-right, 5 upper-left');
 
   const grid = document.getElementById('face-grid');
   FACES.forEach(f => {
