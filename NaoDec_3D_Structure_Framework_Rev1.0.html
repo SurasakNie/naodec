@@ -173,7 +173,7 @@
     <header class="bg-slate-900 text-white p-4 shadow-md z-10 flex justify-between items-center relative">
         <div>
             <h1 class="text-xl font-bold tracking-wide">NaoDec: 3D Structure Framework Rev 1.0</h1>
-            <p class="text-slate-400 text-sm">Interactive Dodecahedron Geometry &mdash; Vertices, Structural Edges &amp; Faces</p>
+            <p class="text-slate-400 text-sm">Interactive Dodecahedron Geometry &mdash; Faces, Vertices &amp; Assembly-Lettered Structural Edges</p>
         </div>
     </header>
     <!-- Main Workspace -->
@@ -271,12 +271,14 @@
 
                 <!-- Edges -->
                 <div class="mt-3 pt-2 border-t text-xs text-slate-600">
-                    <h4 class="font-bold text-slate-700 mb-1 text-sm">Structural Edges (A&ndash;AD)</h4>
+                    <h4 class="font-bold text-slate-700 mb-1 text-sm">Assembly Letters (A&ndash;Z, no W)</h4>
                     <p class="text-slate-500 mb-1">
-                        Reference labels for this diagram only (A&ndash;Z, then AA&ndash;AD for the
-                        last 4 of 30) &mdash; not the physical door/build letters in
-                        <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code>, which is a separately-built
-                        numbering with no confirmed correspondence to v1&ndash;v20 yet.
+                        The physical assembly letters marked on the built frames &mdash; the same
+                        letters as <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code> and
+                        <code>NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html</code>
+                        (anchors: f1 = Top, f11 = Door). The 5
+                        <span style="color:#f97316; font-weight:700;">OPEN</span> edges border the
+                        unbuilt bottom face f12 and rest on the platform/ground.
                     </p>
                     <ul id="edges-list" class="space-y-1 mt-1" style="columns: 2; column-gap: 1rem;"></ul>
                 </div>
@@ -288,17 +290,21 @@
                 <table class="w-full text-xs text-slate-600">
                     <tr><td class="text-slate-500">Vertices</td><td class="text-right font-semibold">20</td></tr>
                     <tr><td class="text-slate-500">Structural Edges</td><td class="text-right font-semibold">30</td></tr>
-                    <tr><td class="text-slate-500">Faces</td><td class="text-right font-semibold">12</td></tr>
+                    <tr><td class="text-slate-500">&nbsp;&nbsp;&mdash; lettered joints</td><td class="text-right font-semibold">25</td></tr>
+                    <tr><td class="text-slate-500">&nbsp;&nbsp;&mdash; open (platform) edges</td><td class="text-right font-semibold">5</td></tr>
+                    <tr><td class="text-slate-500">Faces</td><td class="text-right font-semibold">12 (11 built)</td></tr>
                     <tr class="border-t border-slate-300"><td class="text-slate-700 font-bold pt-1">Euler check (V&minus;E+F)</td><td class="text-right font-bold pt-1">20&minus;30+12 = 2 &#10003;</td></tr>
                 </table>
                 <p class="text-slate-500 mt-3 pt-2 border-t" style="font-size:0.7rem; line-height:1rem;">
-                    Face f12 (Bottom) is left unbuilt in the current installation &mdash; see
-                    <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code> for the 11 built faces and
-                    their assembly edge marks.
+                    Face f1 is the Top, face f11 is the Door, and face f12 (Bottom) is left unbuilt
+                    in the current installation &mdash; its 5 edges are OPEN and rest on the
+                    platform/ground.
                 </p>
                 <p class="text-slate-500 mt-2" style="font-size:0.7rem; line-height:1rem;">
-                    Edge letters (A&ndash;Z, AA&ndash;AD) are reference labels generated for this
-                    diagram only and are independent of that document's physical door/build letters.
+                    Edge letters (A&ndash;Z, no W) are the physical assembly letters marked on the
+                    built frames, shared with <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code> and
+                    <code>NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html</code>: matching letters
+                    join.
                 </p>
             </div>
 
@@ -306,7 +312,7 @@
             <div id="tab-revisions" class="tab-content">
                 <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">Revision History</h3>
                 <ul class="space-y-2 text-xs text-slate-600">
-                    <li><strong class="text-slate-700">Rev 1.0</strong> &mdash; Initial release. Extracted the pure structural framework (vertices, structural edges, faces) from <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code>; removed the LED edge circuits (C1&ndash;C6), the vertex LED daisy-chain, the series coil circuit, node 0 (power-in), and the User POV/chair &mdash; see that file for the electrical/LED mapping. Vertices and node numbers are hidden by default (toggle back on via Display); the 30 structural edges carry independent reference letters (A&ndash;Z, AA&ndash;AD) generated for this diagram only.</li>
+                    <li><strong class="text-slate-700">Rev 1.0</strong> &mdash; Initial release. Pure structural framework (vertices, structural edges, faces) with the same v1&ndash;v20 node geometry as <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code>; all LED/electrical content (edge circuits, vertex LED daisy-chain, series coil, node 0 power-in, User POV/chair) lives in that file instead. The 30 structural edges carry the physical assembly letters (A&ndash;Z, no W) from the Face Edge Marking guides, derived from the anchors f1&nbsp;=&nbsp;Top and f11&nbsp;=&nbsp;Door; the 5 base-ring edges bordering the unbuilt bottom face f12 are OPEN. Vertices and node numbers are hidden by default (toggle back on via Display).</li>
                 </ul>
             </div>
         </div>
@@ -362,23 +368,9 @@
             [16,15], [17,7], [18,9], [19,11], [20,13]
         ];
 
-        // Fresh per-diagram reference letters (A-Z, then AA-AD for the last 4 of 30).
-        // Independent of NaoDec_Face_Edge_Marking_Rev1.0.html's physical door/build letters —
-        // there is no confirmed correspondence between the two numbering schemes.
-        function edgeLetter(n) {
-            let s = '';
-            n += 1;
-            while (n > 0) {
-                n--;
-                s = String.fromCharCode(65 + (n % 26)) + s;
-                n = Math.floor(n / 26);
-            }
-            return s;
-        }
-        const structuralEdgeLetters = structuralEdges.map((_, i) => edgeLetter(i));
-
         // --- Dodecahedron Faces (f1-f12) ---
-        // f1 = Top (top-ring only); f12 = Bottom (base-ring only) — left unbuilt in the current install.
+        // f1 = Top (top-ring only); f11 = Door; f12 = Bottom (base-ring only) — left unbuilt
+        // in the current install.
         const dodecahedronFaces = [
             { id: 'f1',  verts: [16, 17, 18, 19, 20], label: 'Top' },
             { id: 'f2',  verts: [16, 15,  6,  7, 17] },
@@ -390,9 +382,79 @@
             { id: 'f8',  verts: [ 1,  8,  9, 10,  2] },
             { id: 'f9',  verts: [ 2, 10, 11, 12,  3] },
             { id: 'f10', verts: [ 3, 12, 13, 14,  4] },
-            { id: 'f11', verts: [ 4, 14, 15,  6,  5] },
+            { id: 'f11', verts: [ 4, 14, 15,  6,  5], label: 'Door' },
             { id: 'f12', verts: [ 1,  2,  3,  4,  5], label: 'Bottom', notBuilt: true },
         ];
+
+        // --- Physical assembly letters ---
+        // Same 11-face letter table as NaoDec_Face_Edge_Marking_Rev1.0.html and
+        // NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html ('-' = open edge that rests
+        // on the platform/ground; the bottom face is not built).
+        const MARKING_FACES = [
+            { id: 'F01', edges: ['N', '-', 'O', 'H', 'G'] },
+            { id: 'F02', edges: ['A', 'R', 'V', 'Q', 'J'] },
+            { id: 'F03', edges: ['Q', 'U', 'P', 'H', 'I'] },
+            { id: 'F04', edges: ['T', 'Y', 'S', 'D', 'E'] },
+            { id: 'F05', edges: ['L', 'B', 'A', 'K', '-'] }, // DOOR
+            { id: 'F06', edges: ['C', 'L', '-', 'M', 'D'] },
+            { id: 'F07', edges: ['O', '-', 'K', 'J', 'I'] },
+            { id: 'F08', edges: ['N', 'F', 'E', 'M', '-'] },
+            { id: 'F09', edges: ['S', 'X', 'R', 'B', 'C'] },
+            { id: 'F10', edges: ['X', 'Y', 'Z', 'U', 'V'] }, // TOP
+            { id: 'F11', edges: ['T', 'F', 'G', 'P', 'Z'] },
+        ];
+
+        // Marking-face -> 3D-face correspondence. Anchors: F10 (TOP) = f1, F05 (DOOR) = f11,
+        // ground = f12 (not built). Under the marking guides' stated convention (edge letters
+        // listed counter-clockwise, faces viewed from outside), an orientation-preserving
+        // isomorphism search over the two face-adjacency graphs yields exactly this one
+        // solution. If the physical build turns out mirror-imaged, only this map changes.
+        const FACE_MAP = {
+            F10: 'f1', F09: 'f2', F04: 'f3', F11: 'f4', F03: 'f5', F02: 'f6',
+            F06: 'f7', F08: 'f8', F01: 'f9', F07: 'f10', F05: 'f11',
+        };
+
+        // Derive letter -> structural edge: each letter names the joint between two marking
+        // faces; map both through FACE_MAP and intersect those 3D faces' vertex sets.
+        const faceVerts = {};
+        dodecahedronFaces.forEach(f => { faceVerts[f.id] = new Set(f.verts); });
+        const letterFaces = {};
+        MARKING_FACES.forEach(f => f.edges.forEach(L => {
+            if (L !== '-') (letterFaces[L] = letterFaces[L] || []).push(f.id);
+        }));
+        const edgeKey = (a, b) => a < b ? `${a}-${b}` : `${b}-${a}`;
+        const letterByEdge = {};
+        let markingValid = Object.values(letterFaces).every(fs => fs.length === 2);
+        Object.entries(letterFaces).forEach(([L, faces]) => {
+            if (faces.length !== 2) return;
+            const va = faceVerts[FACE_MAP[faces[0]]], vb = faceVerts[FACE_MAP[faces[1]]];
+            const shared = [...va].filter(v => vb.has(v));
+            if (shared.length !== 2) { markingValid = false; return; }
+            const k = edgeKey(shared[0], shared[1]);
+            if (letterByEdge[k]) markingValid = false;
+            letterByEdge[k] = L;
+        });
+        // null = open edge: borders only the unbuilt bottom face f12, rests on the platform.
+        const structuralEdgeLetters = structuralEdges.map(([a, b]) => {
+            const L = letterByEdge[edgeKey(a, b)];
+            return L === undefined ? null : L;
+        });
+        (function validateMarking() {
+            const openIdx = structuralEdgeLetters
+                .map((L, i) => L === null ? i : -1).filter(i => i >= 0);
+            const bottom = faceVerts['f12'];
+            const openOnBottomOnly = structuralEdges.every(([a, b], i) =>
+                (structuralEdgeLetters[i] === null) === (bottom.has(a) && bottom.has(b)));
+            if (markingValid && Object.keys(letterFaces).length === 25 &&
+                openIdx.length === 5 && openOnBottomOnly) return;
+            const warn = document.createElement('div');
+            warn.textContent = '⚠ Assembly-letter data inconsistent — check MARKING_FACES / ' +
+                'FACE_MAP against the Face Edge Marking docs.';
+            warn.style.cssText = 'color:#b3261e; background:rgba(179,38,30,0.1); ' +
+                'border:1px solid #b3261e; border-radius:6px; padding:6px 8px; ' +
+                'font-size:11px; line-height:1.3; margin-bottom:8px;';
+            document.getElementById('tab-structure').prepend(warn);
+        })();
 
         // --- Display State ---
         let showVertexView = false;
@@ -452,22 +514,27 @@
             let renderQueue = [];
 
             // A. Structural edges (always shown; faint on the far side of the shape), each with
-            // its fresh per-diagram reference letter (A-Z, AA-AD).
+            // its physical assembly letter from the Face Edge Marking guides. The 5 base-ring
+            // edges are OPEN (they border only the unbuilt bottom face and rest on the platform).
             structuralEdges.forEach(([a, b], idx) => {
+                const letter = structuralEdgeLetters[idx];
+                const open = letter === null;
                 let p1 = projNodes[a], p2 = projNodes[b];
                 let zAvg = (p1.z + p2.z) / 2;
                 let opacity = zAvg > 0 ? 0.35 : 0.08;
                 let width = zAvg > 0 ? 2 : 1;
+                const strokeAttrs = open ? 'stroke="#f97316" stroke-dasharray="6 4"' : `stroke="${COL_EDGE}"`;
                 renderQueue.push({
                     z: zAvg - 50,
-                    html: `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${COL_EDGE}" stroke-width="${width}" opacity="${opacity}" />`
+                    html: `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" ${strokeAttrs} stroke-width="${width}" opacity="${opacity}" />`
                 });
                 const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
-                const lfs = zAvg > 0 ? 12 : 9;
+                const lfs = open ? (zAvg > 0 ? 8 : 6) : (zAvg > 0 ? 12 : 9);
                 const lop = zAvg > 0 ? 1.0 : 0.4;
+                const lfill = open ? '#f97316' : COL_NTEXT;
                 renderQueue.push({
                     z: zAvg + 0.5,
-                    html: `<text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" font-size="${lfs}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${COL_NTEXT}" opacity="${lop}" style="paint-order: stroke; stroke: ${COL_BGPAGE}; stroke-width: 3px;">${structuralEdgeLetters[idx]}</text>`
+                    html: `<text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" font-size="${lfs}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${lfill}" opacity="${lop}" style="paint-order: stroke; stroke: ${COL_BGPAGE}; stroke-width: 3px;">${open ? 'OPEN' : letter}</text>`
                 });
             });
 
@@ -634,9 +701,18 @@
         function buildEdgesList() {
             const ul = document.getElementById('edges-list');
             if (!ul) return;
-            const html = structuralEdges.map(([a, b], i) => {
-                return `<li><strong style="color:#0891b2;">${structuralEdgeLetters[i]}:</strong> v${a}&ndash;v${b}</li>`;
-            }).join('');
+            const lettered = [], openEdges = [];
+            structuralEdges.forEach(([a, b], i) => {
+                const L = structuralEdgeLetters[i];
+                if (L === null) openEdges.push([a, b]);
+                else lettered.push([L, a, b]);
+            });
+            lettered.sort((x, y) => x[0].localeCompare(y[0]));
+            const html = lettered.map(([L, a, b]) =>
+                `<li><strong style="color:#0891b2;">${L}:</strong> v${a}&ndash;v${b}</li>`
+            ).concat(openEdges.map(([a, b]) =>
+                `<li><strong style="color:#f97316;">OPEN:</strong> v${a}&ndash;v${b}</li>`
+            )).join('');
             ul.innerHTML = html;
         }
         buildEdgesList();

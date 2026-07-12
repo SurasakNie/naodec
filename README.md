@@ -89,8 +89,9 @@ The rig is a regular dodecahedron: 20 vertices, 30 edges, 12 pentagon faces (Eul
 20−30+12=2). The pure geometry — vertex/edge/face numbering (v1–v20, f1–f12), no LED wiring — is in
 [`NaoDec_3D_Structure_Framework_Rev1.0.html`](NaoDec_3D_Structure_Framework_Rev1.0.html). Vertices
 and node numbers are hidden by default (toggle back on via Display); the default view is the 30
-structural edges only, each carrying a fresh per-diagram reference letter (A–Z, then AA–AD for the
-last 4) that is independent of the physical door/build letters below. The full LED vertex/edge
+structural edges, each carrying its physical assembly letter (A–Z, no W) from the marking guides
+below — f1 is the top, f11 is the door, and the 5 base edges bordering the unbuilt bottom face
+`f12` are shown as OPEN (they rest on the platform). The full LED vertex/edge
 circuit mapping is in
 [`NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html`](NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html).
 
@@ -104,8 +105,8 @@ covering the same 11-face marking data, with an interactive joint-highlight drop
 static-only reference table, is in
 [`NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html`](NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html).
 
-- **Face 5** is the door.
-- **Face 10** is the top (opposite the unbuilt bottom).
+- **Face 5** is the door (face `f11` in the 3D framework page).
+- **Face 10** is the top (face `f1`), opposite the unbuilt bottom.
 - Faces 1, 5, 6, 7, 8 carry the 5 unlettered edges that rest directly on the platform/ground instead
   of meeting another face (the bottom face isn't built).
 
