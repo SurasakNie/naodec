@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec — Face Edge Marking (Rev 1.0)</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg:            #ffffff;
+    --fg:            #222222;
+    --muted:         #888888;
+    --rule:          #dddddd;
+    --card-bg:       #fafafa;
+    --accent:        #157a72;
+    --pent-fill:     rgba(21, 122, 114, 0.06);
+    --badge-door-bg: rgba(180, 83, 9, 0.12);
+    --badge-door-fg: #b45309;
+    --badge-top-bg:  rgba(67, 56, 202, 0.12);
+    --badge-top-fg:  #4338ca;
+    --ok-fg:         #1a7a3c;
+    --ok-bg:         rgba(26, 122, 60, 0.08);
+    --warn-fg:       #b3261e;
+    --warn-bg:       rgba(179, 38, 30, 0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:            #0b1113;
+      --fg:            #e6edef;
+      --muted:         #8eb5b8;
+      --rule:          rgba(142, 181, 184, 0.25);
+      --card-bg:       #0f1a1c;
+      --accent:        #7fe0d3;
+      --pent-fill:     rgba(127, 224, 211, 0.08);
+      --badge-door-bg: rgba(238, 201, 122, 0.14);
+      --badge-door-fg: #eec97a;
+      --badge-top-bg:  rgba(165, 180, 252, 0.14);
+      --badge-top-fg:  #a5b4fc;
+      --ok-fg:         #6fdb92;
+      --ok-bg:         rgba(111, 219, 146, 0.1);
+      --warn-fg:       #ff8a80;
+      --warn-bg:       rgba(255, 138, 128, 0.1);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, sans-serif; max-width: 980px;
+    margin: 3rem auto; padding: 0 1rem; line-height: 1.6;
+    background: var(--bg); color: var(--fg);
+  }
+  h1 { border-bottom: 1px solid var(--rule); padding-bottom: .4rem; }
+  h2 { margin-top: 2.5rem; font-size: 1.25rem; }
+  a { color: var(--accent); }
+  code { background: rgba(128,128,128,0.15); padding: 1px 4px; border-radius: 3px; }
+  .lede { color: var(--muted); max-width: 68ch; }
+  .note { color: var(--muted); font-size: .92rem; }
+
+  .legend {
+    border: 1px solid var(--rule); border-radius: 8px; padding: 1rem 1.5rem;
+    background: var(--card-bg);
+  }
+  .legend-row { display: flex; gap: 2rem; align-items: center; flex-wrap: wrap; }
+  .legend .pentagon-wrap { width: 140px; flex: none; }
+  .legend ol { margin: 0; padding-left: 1.2rem; }
+  .legend li { margin: .25rem 0; }
+  .ground-note { margin: .9rem 0 0; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 1.25rem; margin-top: 1.25rem;
+  }
+  .face-card {
+    border: 1px solid var(--rule); border-radius: 8px; padding: .9rem .75rem 1.1rem;
+    background: var(--card-bg); text-align: center; break-inside: avoid;
+  }
+  .face-title {
+    font-weight: 700; margin-bottom: .5rem;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+  }
+  .badge {
+    font-size: .68rem; font-weight: 700; letter-spacing: .04em;
+    padding: .15rem .45rem; border-radius: 999px;
+  }
+  .badge-door { background: var(--badge-door-bg); color: var(--badge-door-fg); }
+  .badge-top  { background: var(--badge-top-bg);  color: var(--badge-top-fg); }
+
+  .pentagon { width: 100%; max-width: 190px; height: auto; display: block; margin: 0 auto; }
+  .pent-fill { fill: var(--pent-fill); stroke: none; }
+  .edge-line { stroke: var(--accent); stroke-width: 3.5; stroke-linecap: round; }
+  .edge-ground { stroke: var(--muted); stroke-width: 3.5; stroke-linecap: round; opacity: .7; }
+  .edge-ground-tick { stroke: var(--muted); stroke-width: 2; stroke-linecap: round; opacity: .7; }
+  .edge-label { font: 700 22px/1 system-ui, sans-serif; fill: var(--fg); }
+
+  table { border-collapse: collapse; width: 100%; margin-top: 1rem; font-size: .92rem; }
+  th, td { border-bottom: 1px solid var(--rule); text-align: left; padding: .4rem .6rem; }
+  th { color: var(--muted); font-weight: 600; }
+
+  .status { border-radius: 8px; padding: .7rem 1rem; margin-top: 1rem; font-size: .92rem; }
+  .status.ok   { color: var(--ok-fg);   background: var(--ok-bg); }
+  .status.warn { color: var(--warn-fg); background: var(--warn-bg); }
+
+  footer { margin-top: 3rem; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--rule); padding-top: 1rem; }
+
+  @media print {
+    body { max-width: none; }
+    .face-card { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>NaoDec — Face Edge Marking</h1>
+<p class="lede">
+  The built structure is a regular dodecahedron with the bottom face left unbuilt — 11 pentagon
+  faces, each a wooden frame with stretched fabric. Every shared edge between two faces carries the
+  same letter, so assembly and tear-down only require matching identical letters — no numbering or
+  lookup required. Edges with no letter (hatched in the diagrams below) aren't shared with another
+  face at all — they rest directly on the platform/ground.
+</p>
+
+<h2>Edge position key</h2>
+<div class="legend">
+  <div class="legend-row">
+    <div class="pentagon-wrap" id="legend-pentagon"></div>
+    <ol>
+      <li><strong>Edge 1</strong> — lower-left side</li>
+      <li><strong>Edge 2</strong> — bottom</li>
+      <li><strong>Edge 3</strong> — lower-right side</li>
+      <li><strong>Edge 4</strong> — upper-right side</li>
+      <li><strong>Edge 5</strong> — upper-left side</li>
+    </ol>
+  </div>
+  <p class="note ground-note">Hatched, unlettered edge — rests on the platform/ground instead of
+  meeting another face. Only the 5 faces bordering the unbuilt bottom face have one.</p>
+</div>
+
+<h2>11 faces</h2>
+<div class="grid" id="face-grid"></div>
+
+<h2>Edge connection reference</h2>
+<div id="status"></div>
+<table id="ref-table">
+  <thead><tr><th>Letter</th><th>Face · edge</th><th>Face · edge</th></tr></thead>
+  <tbody></tbody>
+</table>
+
+<footer>
+  <p><strong>Rev 1.0</strong> — Initial release. Letters transcribed from the 11-face build table
+  (bottom face not built; hatched edges rest on the platform/ground instead of meeting another face).</p>
+</footer>
+
+<script>
+  const FACES = [
+    { n: 1,  e: ['N', '–', 'O', 'H', 'G'] },
+    { n: 2,  e: ['A', 'R', 'V', 'Q', 'J'] },
+    { n: 3,  e: ['Q', 'U', 'P', 'H', 'I'] },
+    { n: 4,  e: ['T', 'Y', 'S', 'D', 'E'] },
+    { n: 5,  e: ['L', 'B', 'A', 'K', '–'], tag: 'DOOR' },
+    { n: 6,  e: ['C', 'L', '–', 'M', 'D'] },
+    { n: 7,  e: ['O', '–', 'K', 'J', 'I'] },
+    { n: 8,  e: ['N', 'F', 'E', 'M', '–'] },
+    { n: 9,  e: ['S', 'X', 'R', 'B', 'C'] },
+    { n: 10, e: ['X', 'Y', 'Z', 'U', 'V'], tag: 'TOP' },
+    { n: 11, e: ['T', 'F', 'G', 'P', 'Z'] },
+  ];
+
+  // Vertex pairs for edge1..edge5, matched to the hand-drawn reference convention:
+  // edge1 lower-left (fixed), then edges 2-5 run counter-clockwise from there:
+  // edge2 bottom, edge3 lower-right, edge4 upper-right, edge5 upper-left.
+  const EDGE_VERT_PAIRS = [[3, 4], [2, 3], [1, 2], [0, 1], [4, 0]];
+
+  function pentagonVerts(cx, cy, R) {
+    const v = [];
+    for (let k = 0; k < 5; k++) {
+      const theta = (90 - 72 * k) * Math.PI / 180;
+      v.push([cx + R * Math.cos(theta), cy - R * Math.sin(theta)]);
+    }
+    return v;
+  }
+
+  function pentagonInner(labels) {
+    const cx = 90, cy = 92, R = 78;
+    const V = pentagonVerts(cx, cy, R);
+    const pts = V.map(p => p[0].toFixed(2) + ',' + p[1].toFixed(2)).join(' ');
+    let out = `<polygon points="${pts}" class="pent-fill"/>`;
+    EDGE_VERT_PAIRS.forEach(([a, b], i) => {
+      const label = labels[i];
+      const ground = label === '–';
+      const [ax, ay] = V[a], [bx, by] = V[b];
+      const mx = (ax + bx) / 2, my = (ay + by) / 2;
+      if (ground) {
+        // Ground/platform-contact edge: solid line + outward hatch ticks, no letter.
+        out += `<line x1="${ax.toFixed(2)}" y1="${ay.toFixed(2)}" x2="${bx.toFixed(2)}" y2="${by.toFixed(2)}" class="edge-ground"/>`;
+        const nlen = Math.hypot(mx - cx, my - cy) || 1;
+        const ux = (mx - cx) / nlen, uy = (my - cy) / nlen;
+        for (let k = 1; k <= 5; k++) {
+          const t = k / 6;
+          const px = ax + (bx - ax) * t, py = ay + (by - ay) * t;
+          const qx = px + ux * 9, qy = py + uy * 9;
+          out += `<line x1="${px.toFixed(2)}" y1="${py.toFixed(2)}" x2="${qx.toFixed(2)}" y2="${qy.toFixed(2)}" class="edge-ground-tick"/>`;
+        }
+      } else {
+        out += `<line x1="${ax.toFixed(2)}" y1="${ay.toFixed(2)}" x2="${bx.toFixed(2)}" y2="${by.toFixed(2)}" class="edge-line"/>`;
+        const lx = cx + (mx - cx) * 0.78, ly = cy + (my - cy) * 0.78;
+        out += `<text x="${lx.toFixed(2)}" y="${ly.toFixed(2)}" text-anchor="middle" dy="0.32em" class="edge-label">${label}</text>`;
+      }
+    });
+    return out;
+  }
+
+  function pentagonSVG(labels, ariaLabel) {
+    const aria = ariaLabel ? ` role="img" aria-label="${ariaLabel}"` : '';
+    return `<svg class="pentagon" viewBox="0 0 180 190"${aria}>${pentagonInner(labels)}</svg>`;
+  }
+
+  document.getElementById('legend-pentagon').innerHTML =
+    pentagonSVG(['1', '2', '3', '4', '5'], 'Edge position key: 1 lower-left, 2 bottom, 3 lower-right, 4 upper-right, 5 upper-left');
+
+  const grid = document.getElementById('face-grid');
+  FACES.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'face-card';
+    const badge = f.tag ? ` <span class="badge badge-${f.tag.toLowerCase()}">${f.tag}</span>` : '';
+    const spoken = l => l === '–' ? 'ground' : l;
+    const aria = `Face ${f.n} edges: 1 ${spoken(f.e[0])}, 2 ${spoken(f.e[1])}, 3 ${spoken(f.e[2])}, 4 ${spoken(f.e[3])}, 5 ${spoken(f.e[4])}`;
+    card.innerHTML = `<div class="face-title">Face ${f.n}${badge}</div>` + pentagonSVG(f.e, aria);
+    grid.appendChild(card);
+  });
+
+  // Cross-reference + validation, derived from FACES so it can never drift from the diagrams above.
+  const locations = {};
+  let openCount = 0;
+  const openFaces = new Set();
+  FACES.forEach(f => f.e.forEach((letter, i) => {
+    if (letter === '–') { openCount++; openFaces.add(f.n); return; }
+    (locations[letter] = locations[letter] || []).push({ face: f.n, edge: i + 1 });
+  }));
+
+  const tbody = document.querySelector('#ref-table tbody');
+  Object.keys(locations).sort().forEach(letter => {
+    const locs = locations[letter];
+    const cells = [letter, ...locs.map(l => `Face ${l.face} · edge ${l.edge}`)];
+    while (cells.length < 3) cells.push('—');
+    const tr = document.createElement('tr');
+    tr.innerHTML = cells.map(c => `<td>${c}</td>`).join('');
+    tbody.appendChild(tr);
+  });
+
+  const letters = Object.keys(locations);
+  const allPaired = letters.every(l => locations[l].length === 2);
+  const ok = allPaired && openCount === 5 && openFaces.size === 5 && FACES.length === 11;
+  const statusEl = document.getElementById('status');
+  if (ok) {
+    statusEl.className = 'status ok';
+    statusEl.textContent = `✓ Validated — ${letters.length} shared edges, each matched on exactly two faces. ` +
+      `${openCount} edges across faces ${[...openFaces].sort((a, b) => a - b).join(', ')} rest on the platform/ground (bottom face not built).`;
+  } else {
+    statusEl.className = 'status warn';
+    statusEl.textContent = `⚠ Marking data looks inconsistent — check for a letter used once or three-plus times, ` +
+      `or a ground-edge count other than 5. (${letters.length} letters, ${openCount} ground edges across ${openFaces.size} faces.)`;
+  }
+</script>
+</body>
+</html>

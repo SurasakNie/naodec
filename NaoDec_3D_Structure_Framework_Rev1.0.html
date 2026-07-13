@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NaoDec: 3D Structure Framework Rev 1.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-page:        #f1f5f9;
+            --bg-grid:        #cbd5e1;
+            --bg-panel:       rgba(255,255,255,0.92);
+            --bg-panel-solid: #ffffff;
+            --text-primary:   #1e293b;
+            --text-muted:     #64748b;
+            --text-faint:     #94a3b8;
+            --border:         #cbd5e1;
+            --header-bg:      #0f172a;
+            --header-text:    #ffffff;
+            --node-stroke-edge: #94a3b8;
+            --node-text:      #334155;
+            --node-fill:      #ffffff;
+            --btn-bg:         #ffffff;
+            --btn-bg-hover:   #f8fafc;
+            --btn-bg-muted:   #f1f5f9;
+        }
+        [data-theme="dark"] {
+            --bg-page:        #0b1220;
+            --bg-grid:        #1e293b;
+            --bg-panel:       rgba(15,23,42,0.92);
+            --bg-panel-solid: #0f172a;
+            --text-primary:   #e2e8f0;
+            --text-muted:     #94a3b8;
+            --text-faint:     #64748b;
+            --border:         #334155;
+            --header-bg:      #020617;
+            --header-text:    #e2e8f0;
+            --node-stroke-edge: #475569;
+            --node-text:      #e2e8f0;
+            --node-fill:      #1e293b;
+            --btn-bg:         #1e293b;
+            --btn-bg-hover:   #334155;
+            --btn-bg-muted:   #1e293b;
+        }
+        body { font-family: 'Inter', sans-serif; overflow: hidden; background-color: var(--bg-page); color: var(--text-primary); margin: 0; }
+        #canvas-wrapper { cursor: grab; }
+        #canvas-wrapper:active { cursor: grabbing; }
+
+        header { background-color: var(--header-bg) !important; color: var(--header-text) !important; }
+
+        .themed-panel { background: var(--bg-panel) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+        [data-theme="dark"] .themed-panel h3,
+        [data-theme="dark"] .themed-panel h4,
+        [data-theme="dark"] .themed-panel p,
+        [data-theme="dark"] .themed-panel li,
+        [data-theme="dark"] .themed-panel td,
+        [data-theme="dark"] .themed-panel div { color: var(--text-primary); }
+        [data-theme="dark"] .themed-panel .text-slate-500,
+        [data-theme="dark"] .themed-panel .text-slate-600 { color: var(--text-muted) !important; }
+        [data-theme="dark"] .themed-panel .text-slate-700,
+        [data-theme="dark"] .themed-panel .text-slate-800 { color: var(--text-primary) !important; }
+        [data-theme="dark"] .themed-panel .border-t,
+        [data-theme="dark"] .themed-panel .border-b,
+        [data-theme="dark"] .themed-panel .border-slate-300 { border-color: var(--border) !important; }
+        [data-theme="dark"] .themed-panel .bg-slate-100 { background-color: var(--btn-bg-muted) !important; }
+        [data-theme="dark"] .themed-panel .bg-slate-100.hover\:bg-slate-200:hover { background-color: var(--btn-bg-hover) !important; }
+        [data-theme="dark"] .view-btn { background-color: var(--btn-bg) !important; color: var(--text-primary) !important; border-color: var(--border) !important; }
+        [data-theme="dark"] .view-btn:hover { background-color: var(--btn-bg-hover) !important; }
+        [data-theme="dark"] .view-btn.active { background-color: #1e3a8a !important; border-color: #3b82f6 !important; color: #bfdbfe !important; }
+
+        /* Node Hover Effects */
+        .node circle { transition: all 0.2s; }
+        .node:hover circle { fill: #fbbf24 !important; stroke: #b45309 !important; stroke-width: 4 !important; }
+        .node:hover text { font-weight: bold; fill: #000; }
+
+        /* Grid background */
+        .bg-grid {
+            background-image: linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
+                              linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.5;
+            position: absolute; inset: 0; z-index: -1;
+        }
+        .view-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1rem;
+            font-weight: 700;
+            color: #334155;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.25rem;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+            transition: background-color 0.15s, color 0.15s;
+            cursor: pointer;
+        }
+        .view-btn:hover { background-color: #f8fafc; color: #2563eb; }
+        .view-btn.active {
+            background-color: #eff6ff;
+            border-color: #93c5fd;
+            color: #1d4ed8;
+        }
+
+        .display-btn { transition: all 0.15s; }
+        .display-btn.active { outline: 2px solid #3b82f6; }
+        .active-theme { background: var(--btn-bg-muted); outline: 2px solid #3b82f6; }
+
+        /* Reset: a clickable action button (not a toggle), styled active in both themes */
+        #display-reset {
+            border-color: #3b82f6; color: #2563eb; background-color: rgba(59,130,246,0.12);
+            transition: background-color 0.15s, color 0.15s;
+        }
+        #display-reset:hover { background-color: rgba(59,130,246,0.22); color: #1d4ed8; }
+        [data-theme="dark"] #display-reset { color: #93c5fd; border-color: #3b82f6; background-color: rgba(59,130,246,0.2); }
+        [data-theme="dark"] #display-reset:hover { background-color: rgba(59,130,246,0.32); color: #bfdbfe; }
+
+        /* Keep list items intact across the 2-column split */
+        #faces-list li { break-inside: avoid; }
+
+        #left-panel { max-height: calc(100vh - 3rem); overflow-y: auto; }
+
+        /* Left-panel tabs */
+        .tab-btn {
+            flex: 1;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            background-color: transparent;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 0.25rem 0.25rem 0 0;
+            cursor: pointer;
+            transition: background-color 0.15s, color 0.15s;
+        }
+        .tab-btn:hover { background-color: var(--btn-bg-hover); color: var(--text-primary); }
+        .tab-btn.active {
+            background-color: #eff6ff;
+            border-color: #93c5fd;
+            color: #1d4ed8;
+        }
+        [data-theme="dark"] .tab-btn.active {
+            background-color: #1e3a8a;
+            border-color: #3b82f6;
+            color: #bfdbfe;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Mobile/tablet collapsible side panels */
+        .panel-toggle { display: none; }
+        @media (max-width: 768px) {
+            header h1 { font-size: 1rem; line-height: 1.2; }
+            header p { font-size: 0.7rem; }
+            .panel-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px; height: 44px;
+                background: var(--bg-panel-solid);
+                color: var(--text-primary);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+                cursor: pointer;
+                font-size: 18px;
+                font-weight: 700;
+                touch-action: manipulation;
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .panel-toggle:active { background: var(--btn-bg-hover); }
+            #left-panel, #right-panel { display: none; }
+            #left-panel.open { display: block; position: absolute; top: 56px; left: 8px; right: 8px; max-width: none; max-height: 75vh; overflow-y: auto; }
+            #right-panel.open { display: flex; position: absolute; top: 56px; left: 8px; right: 8px; flex-direction: column; gap: 8px; max-height: 75vh; overflow-y: auto; }
+            #right-panel.open > div { width: 100%; }
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex flex-col">
+    <!-- Header Panel -->
+    <header class="bg-slate-900 text-white p-4 shadow-md z-10 flex justify-between items-center relative">
+        <div>
+            <h1 class="text-xl font-bold tracking-wide">NaoDec: 3D Structure Framework Rev 1.0</h1>
+            <p class="text-slate-400 text-sm">Interactive Dodecahedron Geometry &mdash; Faces, Vertices &amp; Assembly-Lettered Structural Edges</p>
+        </div>
+    </header>
+    <!-- Main Workspace -->
+    <main class="flex-grow relative overflow-hidden" id="canvas-wrapper">
+        <div class="bg-grid pointer-events-none"></div>
+
+        <!-- Panel toggle buttons (mobile/tablet only) -->
+        <button class="panel-toggle absolute top-2 left-2 z-30"
+                onclick="togglePanel('left-panel')"
+                ontouchend="event.preventDefault(); event.stopPropagation(); togglePanel('left-panel');"
+                onmousedown="event.stopPropagation()"
+                ontouchstart="event.stopPropagation()"
+                aria-label="Info">i</button>
+        <button class="panel-toggle absolute top-2 right-2 z-30"
+                onclick="togglePanel('right-panel')"
+                ontouchend="event.preventDefault(); event.stopPropagation(); togglePanel('right-panel');"
+                onmousedown="event.stopPropagation()"
+                ontouchstart="event.stopPropagation()"
+                aria-label="Controls">&#9776;</button>
+
+        <!-- View Controls (Top Right) -->
+        <div id="right-panel" class="absolute top-6 right-6 z-20 flex flex-col gap-3 items-end">
+
+            <!-- Theme -->
+            <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-1 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-center" style="color:var(--text-muted)">Theme</h4>
+                <div class="flex gap-1">
+                    <button id="theme-light" onclick="setTheme('light')" class="flex-1 px-1 py-1.5 text-sm font-bold rounded transition-colors cursor-pointer" title="Light" aria-label="Light theme">&#9728;</button>
+                    <button id="theme-auto"  onclick="setTheme('auto')"  class="flex-1 px-1 py-1.5 text-[10px] font-bold rounded transition-colors cursor-pointer" title="Auto (match device)" aria-label="Auto theme">AUTO</button>
+                    <button id="theme-dark"  onclick="setTheme('dark')"  class="flex-1 px-1 py-1.5 text-sm font-bold rounded transition-colors cursor-pointer" title="Dark" aria-label="Dark theme">&#9790;</button>
+                </div>
+            </div>
+
+            <!-- Display + Standard Views + Zoom column -->
+            <div id="display-panel-div" class="flex flex-col gap-3">
+                <!-- Display toggles -->
+                <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-1 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-center" style="color:var(--text-muted)">Display</h4>
+                    <div class="grid grid-cols-2 gap-1">
+                        <button id="display-faces"  onclick="toggleFacesView()"  class="display-btn active px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#6366f1; color:#4f46e5; background-color:rgba(99,102,241,0.1);">Faces</button>
+                        <button id="display-nodelabels" onclick="toggleNodeLabels()" class="display-btn px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#cbd5e1; color:#94a3b8; background-color:transparent;">Node #</button>
+                    </div>
+                    <button id="display-reset" onclick="resetDisplay()" class="w-full mt-1 px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer">Reset</button>
+                </div>
+                <!-- Standard Views -->
+                <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-1 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 text-center">Standard Views</h4>
+                    <button onclick="setView('iso', this)"    class="view-btn active">Isometric</button>
+                    <button onclick="setView('top', this)"    class="view-btn">Top</button>
+                    <button onclick="setView('front', this)"  class="view-btn">Front</button>
+                    <button onclick="setView('bottom', this)" class="view-btn">Bottom</button>
+                    <button onclick="setView('right', this)"  class="view-btn">Right-Side</button>
+                </div>
+                <!-- Zoom -->
+                <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex justify-between items-center" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                    <button onclick="changeZoom(-0.2)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-lg">-</button>
+                    <span class="text-xs font-bold text-slate-500">ZOOM</span>
+                    <button onclick="changeZoom(0.2)" class="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold text-lg">+</button>
+                </div>
+            </div>
+        </div>
+        <!-- Instructions (Top Left) -->
+        <div id="left-panel" class="themed-panel absolute top-6 left-6 z-20 bg-white/90 p-4 rounded-lg shadow-lg border border-slate-200 max-w-sm" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+            <!-- Tabs -->
+            <div class="flex gap-1 mb-3">
+                <button id="tab-btn-structure"  class="tab-btn active" onclick="switchLeftTab('structure')">Structure</button>
+                <button id="tab-btn-summary"    class="tab-btn"        onclick="switchLeftTab('summary')">Summary</button>
+                <button id="tab-btn-revisions"  class="tab-btn"        onclick="switchLeftTab('revisions')">Revisions</button>
+            </div>
+
+            <!-- Tab 1: Structure -->
+            <div id="tab-structure" class="tab-content active">
+                <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">3D Controls</h3>
+                <p class="text-slate-500 mb-3 border-b pb-2" style="font-size: 0.6rem; line-height: 0.85rem;">
+                    <strong>Left Click + Drag</strong> to Rotate<br>
+                    <strong>Right Click + Drag</strong> to Pan<br>
+                    <strong>Scroll Wheel</strong> to Zoom
+                </p>
+
+                <!-- Node Rings -->
+                <div class="text-xs text-slate-600 space-y-1">
+                    <h4 class="font-bold text-slate-700 mb-1 text-sm">Node Rings (v1&ndash;v20)</h4>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-green-500 bg-white inline-block"></span> <strong class="text-green-600">Base Ring</strong> (v1&ndash;v5): Bottom pentagon</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-blue-500 bg-white inline-block"></span> <strong class="text-blue-600">Middle Ring</strong> (v6&ndash;v15): Decagon band</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-purple-500 bg-white inline-block"></span> <strong class="text-purple-600">Top Ring</strong> (v16&ndash;v20): Top pentagon</div>
+                </div>
+
+                <!-- Faces -->
+                <div class="mt-3 pt-2 border-t text-xs text-slate-600">
+                    <h4 class="font-bold text-slate-700 mb-1 text-sm">Faces (f1&ndash;f12)</h4>
+                    <p class="text-slate-500 mb-1">Each face is a pentagon bounded by 5 vertices.</p>
+                    <ul id="faces-list" class="space-y-1 mt-1" style="columns: 2; column-gap: 1rem;"></ul>
+                </div>
+
+                <!-- Edges -->
+                <div class="mt-3 pt-2 border-t text-xs text-slate-600">
+                    <h4 class="font-bold text-slate-700 mb-1 text-sm">Assembly Letters (A&ndash;Z, no W)</h4>
+                    <ul class="text-slate-500 space-y-1" style="list-style: disc; padding-left: 1.1rem;">
+                        <li>The physical assembly letters marked on the built frames.</li>
+                        <li>Anchors: f1 = Top, f11 = Door.</li>
+                        <li>The 5 <span style="color:#f97316; font-weight:700;">OPEN</span> edges
+                            border the unbuilt bottom face f12 and rest on the platform/ground.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tab 2: Summary -->
+            <div id="tab-summary" class="tab-content">
+                <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">Summary</h3>
+                <table class="w-full text-xs text-slate-600">
+                    <tr><td class="text-slate-500">Vertices</td><td class="text-right font-semibold">20</td></tr>
+                    <tr><td class="text-slate-500">Structural Edges</td><td class="text-right font-semibold">30</td></tr>
+                    <tr><td class="text-slate-500">&nbsp;&nbsp;&mdash; lettered joints</td><td class="text-right font-semibold">25</td></tr>
+                    <tr><td class="text-slate-500">&nbsp;&nbsp;&mdash; open (platform) edges</td><td class="text-right font-semibold">5</td></tr>
+                    <tr><td class="text-slate-500">Faces</td><td class="text-right font-semibold">12 (11 built)</td></tr>
+                    <tr class="border-t border-slate-300"><td class="text-slate-700 font-bold pt-1">Euler check (V&minus;E+F)</td><td class="text-right font-bold pt-1">20&minus;30+12 = 2 &#10003;</td></tr>
+                </table>
+                <p class="text-slate-500 mt-3 pt-2 border-t" style="font-size:0.7rem; line-height:1rem;">
+                    Face f1 is the Top, face f11 is the Door, and face f12 (Bottom) is left unbuilt
+                    in the current installation &mdash; its 5 edges are OPEN and rest on the
+                    platform/ground.
+                </p>
+                <p class="text-slate-500 mt-2" style="font-size:0.7rem; line-height:1rem;">
+                    Edge letters (A&ndash;Z, no W) are the physical assembly letters marked on the
+                    built frames, shared with <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code> and
+                    <code>NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html</code>: matching letters
+                    join.
+                </p>
+            </div>
+
+            <!-- Tab 3: Revisions -->
+            <div id="tab-revisions" class="tab-content">
+                <h3 class="font-bold text-slate-800 mb-2 border-b pb-1">Revision History</h3>
+                <ul class="space-y-2 text-xs text-slate-600">
+                    <li><strong class="text-slate-700">Rev 1.0</strong> &mdash; Initial release. Pure structural framework (vertices, structural edges, faces) with the same v1&ndash;v20 node geometry as <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code>; all LED/electrical content (edge circuits, vertex LED daisy-chain, series coil, node 0 power-in, User POV/chair) lives in that file instead. The 30 structural edges carry the physical assembly letters (A&ndash;Z, no W) from the Face Edge Marking guides, derived from the anchors f1&nbsp;=&nbsp;Top and f11&nbsp;=&nbsp;Door; the 5 base-ring edges bordering the unbuilt bottom face f12 are OPEN. Vertices and node numbers are hidden by default (toggle back on via Display).</li>
+                </ul>
+            </div>
+        </div>
+        <!-- SVG Rendering Area -->
+        <svg id="diagram" width="100%" height="100%" class="absolute inset-0 pointer-events-none">
+            <g id="render-group"></g>
+        </svg>
+    </main>
+    <script>
+        // --- Mobile panel toggle (defensive: also re-render so SVG sizes correctly when shown) ---
+        window.togglePanel = function(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('open');
+        };
+        // --- Left-panel tab switcher ---
+        window.switchLeftTab = function(tabId) {
+            ['structure', 'summary', 'revisions'].forEach(id => {
+                const content = document.getElementById('tab-' + id);
+                const btn = document.getElementById('tab-btn-' + id);
+                if (content) content.classList.toggle('active', id === tabId);
+                if (btn) btn.classList.toggle('active', id === tabId);
+            });
+        };
+        // --- 3D Dodecahedron Geometry Data ---
+        const R1 = 152;
+        const R2 = 246;
+        const Y1 = 199;
+        const Y2 = 47;
+        const nodes3D = {};
+        function addRing(ids, anglesDeg, y, r, section) {
+            ids.forEach((id, i) => {
+                const rad = anglesDeg[i] * Math.PI / 180;
+                nodes3D[id] = {
+                    id: id,
+                    x: r * Math.cos(rad),
+                    y: y,
+                    z: r * Math.sin(rad),
+                    section: section
+                };
+            });
+        }
+        addRing([17, 18, 19, 20, 16], [90, 18, 306, 234, 162], Y1, R1, 'top');
+        addRing([7, 9, 11, 13, 15],   [90, 18, 306, 234, 162], Y2, R2, 'mid');
+        addRing([6, 8, 10, 12, 14],   [126, 54, 342, 270, 198], -Y2, R2, 'mid');
+        addRing([5, 1, 2, 3, 4],      [126, 54, 342, 270, 198], -Y1, R1, 'base');
+
+        // --- Structural Edges (30) ---
+        const structuralEdges = [
+            [1,2], [2,3], [3,4], [4,5], [5,1],
+            [16,17], [17,18], [18,19], [19,20], [20,16],
+            [6,7], [7,8], [8,9], [9,10], [10,11], [11,12], [12,13], [13,14], [14,15], [15,6],
+            [1,8], [2,10], [3,12], [4,14], [5,6],
+            [16,15], [17,7], [18,9], [19,11], [20,13]
+        ];
+
+        // --- Dodecahedron Faces (f1-f12) ---
+        // f1 = Top (top-ring only); f11 = Door; f12 = Bottom (base-ring only) — left unbuilt
+        // in the current install.
+        const dodecahedronFaces = [
+            { id: 'f1',  verts: [16, 17, 18, 19, 20], label: 'Top' },
+            { id: 'f2',  verts: [16, 15,  6,  7, 17] },
+            { id: 'f3',  verts: [17,  7,  8,  9, 18] },
+            { id: 'f4',  verts: [18,  9, 10, 11, 19] },
+            { id: 'f5',  verts: [19, 11, 12, 13, 20] },
+            { id: 'f6',  verts: [20, 13, 14, 15, 16] },
+            { id: 'f7',  verts: [ 5,  6,  7,  8,  1] },
+            { id: 'f8',  verts: [ 1,  8,  9, 10,  2] },
+            { id: 'f9',  verts: [ 2, 10, 11, 12,  3] },
+            { id: 'f10', verts: [ 3, 12, 13, 14,  4] },
+            { id: 'f11', verts: [ 4, 14, 15,  6,  5], label: 'Door' },
+            { id: 'f12', verts: [ 1,  2,  3,  4,  5], label: 'Bottom', notBuilt: true },
+        ];
+
+        // --- Physical assembly letters ---
+        // Same 11-face letter table as NaoDec_Face_Edge_Marking_Rev1.0.html and
+        // NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html ('-' = open edge that rests
+        // on the platform/ground; the bottom face is not built).
+        const MARKING_FACES = [
+            { id: 'F01', edges: ['N', '-', 'O', 'H', 'G'] },
+            { id: 'F02', edges: ['A', 'R', 'V', 'Q', 'J'] },
+            { id: 'F03', edges: ['Q', 'U', 'P', 'H', 'I'] },
+            { id: 'F04', edges: ['T', 'Y', 'S', 'D', 'E'] },
+            { id: 'F05', edges: ['L', 'B', 'A', 'K', '-'] }, // DOOR
+            { id: 'F06', edges: ['C', 'L', '-', 'M', 'D'] },
+            { id: 'F07', edges: ['O', '-', 'K', 'J', 'I'] },
+            { id: 'F08', edges: ['N', 'F', 'E', 'M', '-'] },
+            { id: 'F09', edges: ['S', 'X', 'R', 'B', 'C'] },
+            { id: 'F10', edges: ['X', 'Y', 'Z', 'U', 'V'] }, // TOP
+            { id: 'F11', edges: ['T', 'F', 'G', 'P', 'Z'] },
+        ];
+
+        // Marking-face -> 3D-face correspondence. Anchors: F10 (TOP) = f1, F05 (DOOR) = f11,
+        // ground = f12 (not built). Under the marking guides' stated convention (edge letters
+        // listed counter-clockwise, faces viewed from outside), an orientation-preserving
+        // isomorphism search over the two face-adjacency graphs yields exactly this one
+        // solution. If the physical build turns out mirror-imaged, only this map changes.
+        const FACE_MAP = {
+            F10: 'f1', F09: 'f2', F04: 'f3', F11: 'f4', F03: 'f5', F02: 'f6',
+            F06: 'f7', F08: 'f8', F01: 'f9', F07: 'f10', F05: 'f11',
+        };
+
+        // Derive letter -> structural edge: each letter names the joint between two marking
+        // faces; map both through FACE_MAP and intersect those 3D faces' vertex sets.
+        const faceVerts = {};
+        dodecahedronFaces.forEach(f => { faceVerts[f.id] = new Set(f.verts); });
+        const letterFaces = {};
+        MARKING_FACES.forEach(f => f.edges.forEach(L => {
+            if (L !== '-') (letterFaces[L] = letterFaces[L] || []).push(f.id);
+        }));
+        const edgeKey = (a, b) => a < b ? `${a}-${b}` : `${b}-${a}`;
+        const letterByEdge = {};
+        let markingValid = Object.values(letterFaces).every(fs => fs.length === 2);
+        Object.entries(letterFaces).forEach(([L, faces]) => {
+            if (faces.length !== 2) return;
+            const va = faceVerts[FACE_MAP[faces[0]]], vb = faceVerts[FACE_MAP[faces[1]]];
+            const shared = [...va].filter(v => vb.has(v));
+            if (shared.length !== 2) { markingValid = false; return; }
+            const k = edgeKey(shared[0], shared[1]);
+            if (letterByEdge[k]) markingValid = false;
+            letterByEdge[k] = L;
+        });
+        // null = open edge: borders only the unbuilt bottom face f12, rests on the platform.
+        const structuralEdgeLetters = structuralEdges.map(([a, b]) => {
+            const L = letterByEdge[edgeKey(a, b)];
+            return L === undefined ? null : L;
+        });
+        (function validateMarking() {
+            const openIdx = structuralEdgeLetters
+                .map((L, i) => L === null ? i : -1).filter(i => i >= 0);
+            const bottom = faceVerts['f12'];
+            const openOnBottomOnly = structuralEdges.every(([a, b], i) =>
+                (structuralEdgeLetters[i] === null) === (bottom.has(a) && bottom.has(b)));
+            if (markingValid && Object.keys(letterFaces).length === 25 &&
+                openIdx.length === 5 && openOnBottomOnly) return;
+            const warn = document.createElement('div');
+            warn.textContent = '⚠ Assembly-letter data inconsistent — check MARKING_FACES / ' +
+                'FACE_MAP against the Face Edge Marking docs.';
+            warn.style.cssText = 'color:#b3261e; background:rgba(179,38,30,0.1); ' +
+                'border:1px solid #b3261e; border-radius:6px; padding:6px 8px; ' +
+                'font-size:11px; line-height:1.3; margin-bottom:8px;';
+            document.getElementById('tab-structure').prepend(warn);
+        })();
+
+        // --- Display State ---
+        let showFacesView  = true;
+        let showNodeLabels = false;
+
+        // --- Render State ---
+        const ISO_X = 0.45;   // ~25.8° pitch down
+        const ISO_Y = 0.35;   // ~20° yaw right
+        let targetRotX = ISO_X;
+        let targetRotY = ISO_Y;
+        let targetRotZ = 0;
+        let currentRotX = targetRotX;
+        let currentRotY = targetRotY;
+        let currentRotZ = targetRotZ;
+        let targetPanX = 0, targetPanY = 0;
+        let currentPanX = 0, currentPanY = 0;
+        let targetScale = 0.8;
+        let currentScale = 0.8;
+
+        const renderGroup = document.getElementById('render-group');
+        const container = document.getElementById('canvas-wrapper');
+
+        // --- Projection & Rendering Loop ---
+        function render() {
+            const cx = container.clientWidth / 2;
+            const cy = container.clientHeight / 2;
+
+            const cosX = Math.cos(currentRotX), sinX = Math.sin(currentRotX);
+            const cosY = Math.cos(currentRotY), sinY = Math.sin(currentRotY);
+            const cosZ = Math.cos(currentRotZ), sinZ = Math.sin(currentRotZ);
+
+            const _css = getComputedStyle(document.documentElement);
+            const COL_EDGE  = (_css.getPropertyValue('--node-stroke-edge').trim() || '#94a3b8');
+            const COL_NTEXT = (_css.getPropertyValue('--node-text').trim()        || '#334155');
+            const COL_BGPAGE = (_css.getPropertyValue('--bg-page').trim()         || '#f1f5f9');
+
+            const projNodes = {};
+            Object.values(nodes3D).forEach(node => {
+                let x0 = node.x * cosZ - node.y * sinZ;
+                let y0 = node.x * sinZ + node.y * cosZ;
+                let z0 = node.z;
+                let y1 = y0 * cosX - z0 * sinX;
+                let z1 = y0 * sinX + z0 * cosX;
+                let x2 = x0 * cosY + z1 * sinY;
+                let z2 = -x0 * sinY + z1 * cosY;
+                projNodes[node.id] = {
+                    origId: node.id,
+                    section: node.section,
+                    x: cx + currentPanX + x2 * currentScale,
+                    y: cy + currentPanY - y1 * currentScale,
+                    z: z2
+                };
+            });
+
+            let renderQueue = [];
+
+            // A. Structural edges (always shown; faint on the far side of the shape), each with
+            // its physical assembly letter from the Face Edge Marking guides. The 5 base-ring
+            // edges are OPEN (they border only the unbuilt bottom face and rest on the platform).
+            structuralEdges.forEach(([a, b], idx) => {
+                const letter = structuralEdgeLetters[idx];
+                const open = letter === null;
+                let p1 = projNodes[a], p2 = projNodes[b];
+                let zAvg = (p1.z + p2.z) / 2;
+                let opacity = zAvg > 0 ? 0.35 : 0.08;
+                let width = zAvg > 0 ? 2 : 1;
+                const strokeAttrs = open ? 'stroke="#f97316" stroke-dasharray="6 4"' : `stroke="${COL_EDGE}"`;
+                renderQueue.push({
+                    z: zAvg - 50,
+                    html: `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" ${strokeAttrs} stroke-width="${width}" opacity="${opacity}" />`
+                });
+                const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+                const lfs = open ? (zAvg > 0 ? 12 : 9) : (zAvg > 0 ? 18 : 13.5);
+                const lop = zAvg > 0 ? 1.0 : 0.4;
+                const lfill = open ? '#f97316' : COL_NTEXT;
+                renderQueue.push({
+                    z: zAvg + 0.5,
+                    html: `<text x="${mx.toFixed(1)}" y="${my.toFixed(1)}" font-size="${lfs}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="${lfill}" opacity="${lop}" style="paint-order: stroke; stroke: ${COL_BGPAGE}; stroke-width: 3px;">${open ? 'OPEN' : letter}</text>`
+                });
+            });
+
+            // B. Dodecahedron face polygons + labels (when Faces view is on)
+            if (showFacesView) {
+                dodecahedronFaces.forEach(face => {
+                    const pts2d = face.verts.map(id => projNodes[id]);
+                    let zSum = 0;
+                    pts2d.forEach(p => zSum += p.z);
+                    const zAvg = zSum / pts2d.length;
+                    const pts = pts2d.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+                    const cx2 = pts2d.reduce((s, p) => s + p.x, 0) / pts2d.length;
+                    const cy2 = pts2d.reduce((s, p) => s + p.y, 0) / pts2d.length;
+                    const opacity = zAvg > 0 ? 1.0 : 0.4;
+                    const fillAttr = face.notBuilt ? `fill="none" stroke="#f97316" stroke-width="1.5" stroke-dasharray="6 4"` : `fill="rgba(99,102,241,0.07)" stroke="none"`;
+                    renderQueue.push({
+                        z: zAvg - 5,
+                        html: `<polygon points="${pts}" ${fillAttr} opacity="${opacity}" />`
+                    });
+                    const ffs = zAvg > 0 ? 17 : 12;
+                    const labelColor = face.notBuilt ? '#f97316' : (face.label === 'Door' ? '#ec4899' : '#6366f1');
+                    const labelText = face.label ? `${face.id} &middot; ${face.label}` : face.id;
+                    renderQueue.push({
+                        z: zAvg + 1,
+                        html: `<text x="${cx2.toFixed(1)}" y="${cy2.toFixed(1)}" font-size="${ffs}" font-weight="600" text-anchor="middle" dominant-baseline="middle" fill="${labelColor}" opacity="${opacity}">${labelText}</text>`
+                    });
+                });
+            }
+
+            // C. Vertex node labels (green), gated on the Node # toggle. Circles were removed
+            // with the Vertices toggle; nodes are now shown by their v# label only.
+            if (showNodeLabels) {
+                Object.values(projNodes).forEach(p => {
+                    let opacity = p.z > 0 ? 1.0 : 0.4;
+                    let fs = p.z > 0 ? 16.5 : 12;
+                    renderQueue.push({
+                        z: p.z + 10000,
+                        html: `<g class="node pointer-events-auto" transform="translate(${p.x}, ${p.y})" opacity="${opacity}"><text x="0" y="0" font-size="${fs}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#22c55e" style="paint-order: stroke; stroke: ${COL_BGPAGE}; stroke-width: 3px;">v${p.origId}</text></g>`
+                    });
+                });
+            }
+
+            renderQueue.sort((a, b) => a.z - b.z);
+            renderGroup.innerHTML = renderQueue.map(item => item.html).join('');
+        }
+
+        // --- Animation Loop ---
+        let animating = false;
+        const EPSILON = 0.0001;
+        function needsUpdate() {
+            return Math.abs(targetRotX - currentRotX) > EPSILON ||
+                   Math.abs(targetRotY - currentRotY) > EPSILON ||
+                   Math.abs(targetRotZ - currentRotZ) > EPSILON ||
+                   Math.abs(targetPanX - currentPanX) > 0.5 ||
+                   Math.abs(targetPanY - currentPanY) > 0.5 ||
+                   Math.abs(targetScale - currentScale) > EPSILON;
+        }
+        function startAnimation() {
+            if (!animating) { animating = true; requestAnimationFrame(animate); }
+        }
+        function animate() {
+            currentRotX += (targetRotX - currentRotX) * 0.1;
+            currentRotY += (targetRotY - currentRotY) * 0.1;
+            currentRotZ += (targetRotZ - currentRotZ) * 0.1;
+            currentPanX += (targetPanX - currentPanX) * 0.2;
+            currentPanY += (targetPanY - currentPanY) * 0.2;
+            currentScale += (targetScale - currentScale) * 0.2;
+            render();
+            if (needsUpdate()) requestAnimationFrame(animate);
+            else animating = false;
+        }
+
+        // --- Display Toggles ---
+        window.toggleFacesView = function() {
+            showFacesView = !showFacesView;
+            const btn = document.getElementById('display-faces');
+            btn.classList.toggle('active', showFacesView);
+            if (showFacesView) {
+                btn.style.backgroundColor = 'rgba(99,102,241,0.1)';
+                btn.style.color = '#4f46e5';
+                btn.style.borderColor = '#6366f1';
+            } else {
+                btn.style.backgroundColor = 'transparent';
+                btn.style.color = '#94a3b8';
+                btn.style.borderColor = '#cbd5e1';
+            }
+            render();
+        };
+        window.toggleNodeLabels = function() {
+            showNodeLabels = !showNodeLabels;
+            const btn = document.getElementById('display-nodelabels');
+            btn.classList.toggle('active', showNodeLabels);
+            if (showNodeLabels) {
+                btn.style.backgroundColor = 'rgba(20,184,166,0.1)';
+                btn.style.color = '#0f766e';
+                btn.style.borderColor = '#0d9488';
+            } else {
+                btn.style.backgroundColor = 'transparent';
+                btn.style.color = '#94a3b8';
+                btn.style.borderColor = '#cbd5e1';
+            }
+            render();
+        };
+        window.resetDisplay = function() {
+            showFacesView  = true;
+            showNodeLabels = false;
+
+            const fBtn = document.getElementById('display-faces');
+            fBtn.classList.add('active');
+            fBtn.style.backgroundColor = 'rgba(99,102,241,0.1)';
+            fBtn.style.color = '#4f46e5';
+            fBtn.style.borderColor = '#6366f1';
+
+            const nBtn = document.getElementById('display-nodelabels');
+            nBtn.classList.remove('active');
+            nBtn.style.backgroundColor = 'transparent';
+            nBtn.style.color = '#94a3b8';
+            nBtn.style.borderColor = '#cbd5e1';
+
+            render();
+        };
+
+        // --- Build the left-panel faces list dynamically ---
+        function buildFacesList() {
+            const ul = document.getElementById('faces-list');
+            if (!ul) return;
+            const html = dodecahedronFaces.map(f => {
+                const verts = f.verts.map(v => 'v' + v).join(', ');
+                let tag = '';
+                if (f.notBuilt) tag = ` <span style="color:#f97316; font-weight:700;">(${f.label} &mdash; not built)</span>`;
+                else if (f.label) tag = ` <span style="color:#6366f1; font-weight:700;">(${f.label})</span>`;
+                return `<li><strong style="color:#6366f1;">${f.id}:</strong> ${verts}${tag}</li>`;
+            }).join('');
+            ul.innerHTML = html;
+        }
+        buildFacesList();
+
+        startAnimation();
+
+        // --- Interaction Handlers ---
+        let isDragging = false;
+        let dragMode = null;
+        let lastX, lastY;
+
+        // Helper: ignore touches that start on UI controls
+        function isOnUIControl(target) {
+            return !!(target && target.closest && target.closest('.panel-toggle, #left-panel, #right-panel'));
+        }
+
+        container.addEventListener('mousedown', e => {
+            if (isOnUIControl(e.target)) return;
+            isDragging = true;
+            dragMode = e.button === 2 ? 'pan' : 'rotate';
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+        container.addEventListener('contextmenu', e => e.preventDefault());
+        window.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            lastX = e.clientX;
+            lastY = e.clientY;
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            if (dragMode === 'rotate') {
+                targetRotY += dx * 0.01;
+                targetRotX += dy * 0.01;
+                targetRotZ = 0;
+            } else if (dragMode === 'pan') {
+                targetPanX += dx;
+                targetPanY += dy;
+            }
+            startAnimation();
+        });
+        window.addEventListener('mouseup', () => isDragging = false);
+
+        // --- Touch Support ---
+        let lastTouchDist = 0;
+        container.addEventListener('touchstart', e => {
+            // Defensive: don't hijack taps on UI controls (so panel toggle buttons stay clickable on mobile)
+            if (isOnUIControl(e.target)) return;
+            if (e.touches.length === 1) {
+                isDragging = true;
+                dragMode = 'rotate';
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+                isDragging = true;
+                dragMode = 'pinch';
+                lastTouchDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                lastX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                lastY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            }
+            e.preventDefault();
+        }, { passive: false });
+        container.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            if (isOnUIControl(e.target)) return;
+            e.preventDefault();
+            if (dragMode === 'rotate' && e.touches.length === 1) {
+                const dx = e.touches[0].clientX - lastX;
+                const dy = e.touches[0].clientY - lastY;
+                lastX = e.touches[0].clientX;
+                lastY = e.touches[0].clientY;
+                document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+                targetRotY += dx * 0.01;
+                targetRotX += dy * 0.01;
+                targetRotZ = 0;
+                startAnimation();
+            } else if (dragMode === 'pinch' && e.touches.length === 2) {
+                const dist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                changeZoom((dist - lastTouchDist) * 0.005);
+                targetPanX += midX - lastX;
+                targetPanY += midY - lastY;
+                lastTouchDist = dist;
+                lastX = midX;
+                lastY = midY;
+                startAnimation();
+            }
+        }, { passive: false });
+        container.addEventListener('touchend', () => isDragging = false);
+        window.addEventListener('keydown', e => {
+            if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].indexOf(e.key) === -1) return;
+            e.preventDefault();
+            const step = Math.PI / 12; // 15°
+            if (e.key === 'ArrowLeft')  targetRotY -= step;
+            if (e.key === 'ArrowRight') targetRotY += step;
+            if (e.key === 'ArrowUp')    targetRotX -= step;
+            if (e.key === 'ArrowDown')  targetRotX += step;
+            targetRotZ = 0;
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            startAnimation();
+        });
+        container.addEventListener('wheel', e => {
+            e.preventDefault();
+            changeZoom(e.deltaY < 0 ? 0.15 : -0.15);
+        });
+        function changeZoom(delta) {
+            targetScale = Math.max(0.3, Math.min(targetScale + delta, 3));
+            startAnimation();
+        }
+        window.changeZoom = changeZoom;
+
+        // --- Preset Views ---
+        const viewAngles = {
+            'iso':    { x: ISO_X, y: ISO_Y, z: 0 },
+            'top':    { x: Math.PI/2, y: 0, z: 0 },
+            'bottom': { x: -Math.PI/2, y: 0, z: 0 },
+            'front':  { x: 0, y: 0, z: 0 },
+            'right':  { x: 0, y: -Math.PI/2, z: 0 }
+        };
+        window.setView = function(view, btnElement) {
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+            targetRotX = viewAngles[view].x;
+            targetRotY = viewAngles[view].y;
+            targetRotZ = viewAngles[view].z;
+            targetPanX = 0; targetPanY = 0;
+            startAnimation();
+        };
+
+        window.addEventListener('resize', () => { render(); startAnimation(); });
+        window.addEventListener('load', render);
+
+        // --- Theme Switcher: Light / Dark / Auto ---
+        function applyTheme(mode) {
+            const effective = mode === 'auto'
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : mode;
+            document.documentElement.setAttribute('data-theme', effective);
+            ['light', 'auto', 'dark'].forEach(m => {
+                const b = document.getElementById('theme-' + m);
+                if (b) b.classList.toggle('active-theme', m === mode);
+            });
+            render();
+        }
+        window.setTheme = function(mode) {
+            localStorage.setItem('naodec-theme', mode);
+            applyTheme(mode);
+        };
+        const _savedTheme = localStorage.getItem('naodec-theme') || 'auto';
+        applyTheme(_savedTheme);
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if ((localStorage.getItem('naodec-theme') || 'auto') === 'auto') applyTheme('auto');
+            });
+        }
+    </script>
+</body>
+</html>
