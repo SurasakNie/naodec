@@ -146,22 +146,27 @@
 
 <footer>
   <p><strong>Rev 1.0</strong> — Initial release. Letters transcribed from the 11-face build table
-  (bottom face not built; hatched edges rest on the platform/ground instead of meeting another face).</p>
+  (bottom face not built; hatched edges rest on the platform/ground instead of meeting another face).
+  Face numbers match the 3D face ids <code>f1</code>–<code>f12</code> in
+  <code>NaoDec_3D_Structure_Framework_Rev1.0.html</code> (f1 = Top, f11 = Door; the unbuilt
+  bottom is f12).</p>
 </footer>
 
 <script>
+  // Face numbers match the 3D face ids f1–f12 in NaoDec_3D_Structure_Framework_Rev1.0.html
+  // (f1 = Top, f11 = Door, f12 = the unbuilt bottom).
   const FACES = [
-    { n: 1,  e: ['N', '–', 'O', 'H', 'G'] },
-    { n: 2,  e: ['A', 'R', 'V', 'Q', 'J'] },
-    { n: 3,  e: ['Q', 'U', 'P', 'H', 'I'] },
-    { n: 4,  e: ['T', 'Y', 'S', 'D', 'E'] },
-    { n: 5,  e: ['L', 'B', 'A', 'K', '–'], tag: 'DOOR' },
-    { n: 6,  e: ['C', 'L', '–', 'M', 'D'] },
-    { n: 7,  e: ['O', '–', 'K', 'J', 'I'] },
+    { n: 1,  e: ['X', 'Y', 'Z', 'U', 'V'], tag: 'TOP' },
+    { n: 2,  e: ['S', 'X', 'R', 'B', 'C'] },
+    { n: 3,  e: ['T', 'Y', 'S', 'D', 'E'] },
+    { n: 4,  e: ['T', 'F', 'G', 'P', 'Z'] },
+    { n: 5,  e: ['Q', 'U', 'P', 'H', 'I'] },
+    { n: 6,  e: ['A', 'R', 'V', 'Q', 'J'] },
+    { n: 7,  e: ['C', 'L', '–', 'M', 'D'] },
     { n: 8,  e: ['N', 'F', 'E', 'M', '–'] },
-    { n: 9,  e: ['S', 'X', 'R', 'B', 'C'] },
-    { n: 10, e: ['X', 'Y', 'Z', 'U', 'V'], tag: 'TOP' },
-    { n: 11, e: ['T', 'F', 'G', 'P', 'Z'] },
+    { n: 9,  e: ['N', '–', 'O', 'H', 'G'] },
+    { n: 10, e: ['O', '–', 'K', 'J', 'I'] },
+    { n: 11, e: ['L', 'B', 'A', 'K', '–'], tag: 'DOOR' },
   ];
 
   // Vertex pairs for edge1..edge5, matched to the hand-drawn reference convention:

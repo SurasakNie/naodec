@@ -399,27 +399,26 @@
         // NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html ('-' = open edge that rests
         // on the platform/ground; the bottom face is not built).
         const MARKING_FACES = [
-            { id: 'F01', edges: ['N', '-', 'O', 'H', 'G'] },
-            { id: 'F02', edges: ['A', 'R', 'V', 'Q', 'J'] },
-            { id: 'F03', edges: ['Q', 'U', 'P', 'H', 'I'] },
-            { id: 'F04', edges: ['T', 'Y', 'S', 'D', 'E'] },
-            { id: 'F05', edges: ['L', 'B', 'A', 'K', '-'] }, // DOOR
-            { id: 'F06', edges: ['C', 'L', '-', 'M', 'D'] },
-            { id: 'F07', edges: ['O', '-', 'K', 'J', 'I'] },
+            { id: 'F01', edges: ['X', 'Y', 'Z', 'U', 'V'] }, // TOP
+            { id: 'F02', edges: ['S', 'X', 'R', 'B', 'C'] },
+            { id: 'F03', edges: ['T', 'Y', 'S', 'D', 'E'] },
+            { id: 'F04', edges: ['T', 'F', 'G', 'P', 'Z'] },
+            { id: 'F05', edges: ['Q', 'U', 'P', 'H', 'I'] },
+            { id: 'F06', edges: ['A', 'R', 'V', 'Q', 'J'] },
+            { id: 'F07', edges: ['C', 'L', '-', 'M', 'D'] },
             { id: 'F08', edges: ['N', 'F', 'E', 'M', '-'] },
-            { id: 'F09', edges: ['S', 'X', 'R', 'B', 'C'] },
-            { id: 'F10', edges: ['X', 'Y', 'Z', 'U', 'V'] }, // TOP
-            { id: 'F11', edges: ['T', 'F', 'G', 'P', 'Z'] },
+            { id: 'F09', edges: ['N', '-', 'O', 'H', 'G'] },
+            { id: 'F10', edges: ['O', '-', 'K', 'J', 'I'] },
+            { id: 'F11', edges: ['L', 'B', 'A', 'K', '-'] }, // DOOR
         ];
 
-        // Marking-face -> 3D-face correspondence. Anchors: F10 (TOP) = f1, F05 (DOOR) = f11,
-        // ground = f12 (not built). Under the marking guides' stated convention (edge letters
-        // listed counter-clockwise, faces viewed from outside), an orientation-preserving
-        // isomorphism search over the two face-adjacency graphs yields exactly this one
-        // solution. If the physical build turns out mirror-imaged, only this map changes.
+        // Marking-face -> 3D-face correspondence. The marking guides are numbered to match
+        // the f1-f12 face ids on this page (F01 = f1 = Top, F11 = f11 = Door, ground = f12,
+        // not built), so the map is the identity. It is kept, together with the validation
+        // below, to guard against the two data sets drifting apart again.
         const FACE_MAP = {
-            F10: 'f1', F09: 'f2', F04: 'f3', F11: 'f4', F03: 'f5', F02: 'f6',
-            F06: 'f7', F08: 'f8', F01: 'f9', F07: 'f10', F05: 'f11',
+            F01: 'f1', F02: 'f2', F03: 'f3', F04: 'f4', F05: 'f5', F06: 'f6',
+            F07: 'f7', F08: 'f8', F09: 'f9', F10: 'f10', F11: 'f11',
         };
 
         // Derive letter -> structural edge: each letter names the joint between two marking

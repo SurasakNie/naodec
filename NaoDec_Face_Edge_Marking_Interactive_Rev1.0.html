@@ -50,8 +50,9 @@
         <span><strong>Orientation:</strong> view each face from outside</span>
         <span><strong>Edge order:</strong> 1 at top, then counter-clockwise</span>
         <span><strong>Joint rule:</strong> join identical letters</span>
+        <span><strong>Numbering:</strong> F01&ndash;F11 = faces <code>f1</code>&ndash;<code>f11</code> in the 3D Structure Framework</span>
       </div>
-      <p class="notice"><strong>Open bottom boundary:</strong> F01 edge 2, F05 edge 5, F06 edge 3, F07 edge 2, and F08 edge 5 remain unjoined.</p>
+      <p class="notice"><strong>Open bottom boundary:</strong> F07 edge 3, F08 edge 5, F09 edge 2, F10 edge 2, and F11 edge 5 remain unjoined.</p>
     </header>
 
     <section aria-labelledby="faces-heading">
@@ -75,18 +76,20 @@
   </main>
 
   <script>
+    // Face numbers match the 3D face ids f1–f12 in NaoDec_3D_Structure_Framework_Rev1.0.html
+    // (f1 = Top, f11 = Door, f12 = the unbuilt bottom).
     const faces = [
-      { id: 'F01', edges: ['N', '-', 'O', 'H', 'G'] },
-      { id: 'F02', edges: ['A', 'R', 'V', 'Q', 'J'] },
-      { id: 'F03', edges: ['Q', 'U', 'P', 'H', 'I'] },
-      { id: 'F04', edges: ['T', 'Y', 'S', 'D', 'E'] },
-      { id: 'F05', note: 'DOOR', edges: ['L', 'B', 'A', 'K', '-'] },
-      { id: 'F06', edges: ['C', 'L', '-', 'M', 'D'] },
-      { id: 'F07', edges: ['O', '-', 'K', 'J', 'I'] },
+      { id: 'F01', note: 'TOP', edges: ['X', 'Y', 'Z', 'U', 'V'] },
+      { id: 'F02', edges: ['S', 'X', 'R', 'B', 'C'] },
+      { id: 'F03', edges: ['T', 'Y', 'S', 'D', 'E'] },
+      { id: 'F04', edges: ['T', 'F', 'G', 'P', 'Z'] },
+      { id: 'F05', edges: ['Q', 'U', 'P', 'H', 'I'] },
+      { id: 'F06', edges: ['A', 'R', 'V', 'Q', 'J'] },
+      { id: 'F07', edges: ['C', 'L', '-', 'M', 'D'] },
       { id: 'F08', edges: ['N', 'F', 'E', 'M', '-'] },
-      { id: 'F09', edges: ['S', 'X', 'R', 'B', 'C'] },
-      { id: 'F10', note: 'TOP', edges: ['X', 'Y', 'Z', 'U', 'V'] },
-      { id: 'F11', edges: ['T', 'F', 'G', 'P', 'Z'] }
+      { id: 'F09', edges: ['N', '-', 'O', 'H', 'G'] },
+      { id: 'F10', edges: ['O', '-', 'K', 'J', 'I'] },
+      { id: 'F11', note: 'DOOR', edges: ['L', 'B', 'A', 'K', '-'] }
     ];
     const pairs = [[0, 1], [4, 0], [3, 4], [2, 3], [1, 2]];
     const seamLocations = new Map();
