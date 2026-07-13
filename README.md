@@ -19,6 +19,9 @@ The design uses two ESP32-S3-WROOM-1 N16R8 modules running WLED in a master/slav
 ```
 naodec/
 ├── index.html                                     # GitHub Pages auto-index
+├── NaoDec_Build_Work_Instructions.md               # Full build sequence index — links to per-step docs
+├── NaoDec_Build_Step1_Base_Platform_Setup.md       # Step 1: pallet, rise-up platform, chair platform
+├── NaoDec_Build_Step2_Structure_Setup.md           # Step 2: pentagon panel build & structure set-up
 ├── NaoDec_WS2815_LED_Controller_Rev1.6.html       # Full controller schematic (interactive)
 ├── NaoDec_3D_Structure_Framework_Rev1.0.html      # Pure geometry: vertices/edges/faces, no LED wiring
 ├── NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html  # 3D LED position & channel map
@@ -109,6 +112,18 @@ static-only reference table, is in
 - **Face 10** is the top (face `f1`), opposite the unbuilt bottom.
 - Faces 1, 5, 6, 7, 8 carry the 5 unlettered edges that rest directly on the platform/ground instead
   of meeting another face (the bottom face isn't built).
+
+---
+
+## Build Work Instructions
+
+Step-by-step physical build sequence — platform, then structure, with further steps (LED install,
+controller box, coil subsystem, media/scent controllers, finishing, commissioning) to be added. Each
+step is a self-contained document, indexed from one top-level file:
+[`NaoDec_Build_Work_Instructions.md`](NaoDec_Build_Work_Instructions.md).
+
+> **Status:** in progress. Steps 1–2 are drafted; later steps aren't defined yet, and several open
+> items (load ratings, panel materials, the door-panel build) are flagged in the doc itself.
 
 ---
 
@@ -266,6 +281,9 @@ Each schematic supports:
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
 | NaoDec_Controller_Box_Configs | 1.1 | Current · electrical enclosure vs PC case · audited power calculations |
 | NaoDec_Power_and_Controller_Box_Report | 1.0 | Full power budget, PSU specs, voltage-drop analysis, audit findings |
+| NaoDec_Build_Work_Instructions | 1.0 | In progress · top-level build sequence index, links to per-step docs |
+| NaoDec_Build_Step1_Base_Platform_Setup | 1.0 | In progress · pallet, rise-up platform, chair platform — materials/load rating pending |
+| NaoDec_Build_Step2_Structure_Setup | 1.0 | In progress · pentagon panel build — 2.2 not yet defined |
 
 ---
 
