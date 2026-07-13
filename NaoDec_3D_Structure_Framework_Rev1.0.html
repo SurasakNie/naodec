@@ -105,6 +105,18 @@
         .display-btn.active { outline: 2px solid #3b82f6; }
         .active-theme { background: var(--btn-bg-muted); outline: 2px solid #3b82f6; }
 
+        /* Reset: a clickable action button (not a toggle), styled active in both themes */
+        #display-reset {
+            border-color: #3b82f6; color: #2563eb; background-color: rgba(59,130,246,0.12);
+            transition: background-color 0.15s, color 0.15s;
+        }
+        #display-reset:hover { background-color: rgba(59,130,246,0.22); color: #1d4ed8; }
+        [data-theme="dark"] #display-reset { color: #93c5fd; border-color: #3b82f6; background-color: rgba(59,130,246,0.2); }
+        [data-theme="dark"] #display-reset:hover { background-color: rgba(59,130,246,0.32); color: #bfdbfe; }
+
+        /* Keep list items intact across the 2-column split */
+        #faces-list li { break-inside: avoid; }
+
         #left-panel { max-height: calc(100vh - 3rem); overflow-y: auto; }
 
         /* Left-panel tabs */
@@ -213,11 +225,10 @@
                 <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-1 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
                     <h4 class="text-xs font-bold uppercase tracking-wider text-center" style="color:var(--text-muted)">Display</h4>
                     <div class="grid grid-cols-2 gap-1">
-                        <button id="display-vertex" onclick="toggleVertexView()" class="display-btn px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#cbd5e1; color:#94a3b8; background-color:transparent;">Vertices</button>
                         <button id="display-faces"  onclick="toggleFacesView()"  class="display-btn active px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#6366f1; color:#4f46e5; background-color:rgba(99,102,241,0.1);">Faces</button>
-                        <button id="display-nodelabels" onclick="toggleNodeLabels()" class="display-btn col-span-2 px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#cbd5e1; color:#94a3b8; background-color:transparent;">Node #</button>
+                        <button id="display-nodelabels" onclick="toggleNodeLabels()" class="display-btn px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#cbd5e1; color:#94a3b8; background-color:transparent;">Node #</button>
                     </div>
-                    <button id="display-reset" onclick="resetDisplay()" class="w-full mt-1 px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer" style="border-color:#cbd5e1; color:#475569; background-color:rgba(148,163,184,0.1);">Reset</button>
+                    <button id="display-reset" onclick="resetDisplay()" class="w-full mt-1 px-1 py-1 text-[10px] font-bold border-2 rounded cursor-pointer">Reset</button>
                 </div>
                 <!-- Standard Views -->
                 <div class="themed-panel bg-white/90 p-2 rounded-lg shadow-lg border border-slate-200 flex flex-col gap-1 w-32" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
@@ -266,21 +277,18 @@
                 <div class="mt-3 pt-2 border-t text-xs text-slate-600">
                     <h4 class="font-bold text-slate-700 mb-1 text-sm">Faces (f1&ndash;f12)</h4>
                     <p class="text-slate-500 mb-1">Each face is a pentagon bounded by 5 vertices.</p>
-                    <ul id="faces-list" class="space-y-1 mt-1"></ul>
+                    <ul id="faces-list" class="space-y-1 mt-1" style="columns: 2; column-gap: 1rem;"></ul>
                 </div>
 
                 <!-- Edges -->
                 <div class="mt-3 pt-2 border-t text-xs text-slate-600">
                     <h4 class="font-bold text-slate-700 mb-1 text-sm">Assembly Letters (A&ndash;Z, no W)</h4>
-                    <p class="text-slate-500 mb-1">
-                        The physical assembly letters marked on the built frames &mdash; the same
-                        letters as <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code> and
-                        <code>NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html</code>
-                        (anchors: f1 = Top, f11 = Door). The 5
-                        <span style="color:#f97316; font-weight:700;">OPEN</span> edges border the
-                        unbuilt bottom face f12 and rest on the platform/ground.
-                    </p>
-                    <ul id="edges-list" class="space-y-1 mt-1" style="columns: 2; column-gap: 1rem;"></ul>
+                    <ul class="text-slate-500 space-y-1" style="list-style: disc; padding-left: 1.1rem;">
+                        <li>The physical assembly letters marked on the built frames.</li>
+                        <li>Anchors: f1 = Top, f11 = Door.</li>
+                        <li>The 5 <span style="color:#f97316; font-weight:700;">OPEN</span> edges
+                            border the unbuilt bottom face f12 and rest on the platform/ground.</li>
+                    </ul>
                 </div>
             </div>
 
@@ -457,7 +465,6 @@
         })();
 
         // --- Display State ---
-        let showVertexView = false;
         let showFacesView  = true;
         let showNodeLabels = false;
 
@@ -489,7 +496,6 @@
 
             const _css = getComputedStyle(document.documentElement);
             const COL_EDGE  = (_css.getPropertyValue('--node-stroke-edge').trim() || '#94a3b8');
-            const COL_NFILL = (_css.getPropertyValue('--node-fill').trim()        || '#ffffff');
             const COL_NTEXT = (_css.getPropertyValue('--node-text').trim()        || '#334155');
             const COL_BGPAGE = (_css.getPropertyValue('--bg-page').trim()         || '#f1f5f9');
 
@@ -529,7 +535,7 @@
                     html: `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" ${strokeAttrs} stroke-width="${width}" opacity="${opacity}" />`
                 });
                 const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
-                const lfs = open ? (zAvg > 0 ? 8 : 6) : (zAvg > 0 ? 12 : 9);
+                const lfs = open ? (zAvg > 0 ? 12 : 9) : (zAvg > 0 ? 18 : 13.5);
                 const lop = zAvg > 0 ? 1.0 : 0.4;
                 const lfill = open ? '#f97316' : COL_NTEXT;
                 renderQueue.push({
@@ -564,21 +570,18 @@
                 });
             }
 
-            // C. Vertex nodes — circle gated on showVertexView, v# label gated on showNodeLabels
-            // independently (each toggle controls only its own element).
-            Object.values(projNodes).forEach(p => {
-                if (!showVertexView && !showNodeLabels) return;
-                let opacity = p.z > 0 ? 1.0 : 0.4;
-                let r = p.z > 0 ? 14 : 10;
-                let fs = p.z > 0 ? 11 : 8;
-                let fillColor = p.section === 'base' ? '#22c55e' : (p.section === 'mid' ? '#3b82f6' : '#a855f7');
-                const circle = showVertexView ? `<circle cx="0" cy="0" r="${r}" fill="${COL_NFILL}" stroke="${fillColor}" stroke-width="3" />` : '';
-                const label = showNodeLabels ? `<text x="0" y="${r/3}" font-size="${fs}" font-weight="600" text-anchor="middle" fill="${COL_NTEXT}">v${p.origId}</text>` : '';
-                renderQueue.push({
-                    z: p.z + 10000,
-                    html: `<g class="node pointer-events-auto" transform="translate(${p.x}, ${p.y})" opacity="${opacity}">${circle}${label}</g>`
+            // C. Vertex node labels (green), gated on the Node # toggle. Circles were removed
+            // with the Vertices toggle; nodes are now shown by their v# label only.
+            if (showNodeLabels) {
+                Object.values(projNodes).forEach(p => {
+                    let opacity = p.z > 0 ? 1.0 : 0.4;
+                    let fs = p.z > 0 ? 16.5 : 12;
+                    renderQueue.push({
+                        z: p.z + 10000,
+                        html: `<g class="node pointer-events-auto" transform="translate(${p.x}, ${p.y})" opacity="${opacity}"><text x="0" y="0" font-size="${fs}" font-weight="700" text-anchor="middle" dominant-baseline="middle" fill="#22c55e" style="paint-order: stroke; stroke: ${COL_BGPAGE}; stroke-width: 3px;">v${p.origId}</text></g>`
+                    });
                 });
-            });
+            }
 
             renderQueue.sort((a, b) => a.z - b.z);
             renderGroup.innerHTML = renderQueue.map(item => item.html).join('');
@@ -611,21 +614,6 @@
         }
 
         // --- Display Toggles ---
-        window.toggleVertexView = function() {
-            showVertexView = !showVertexView;
-            const btn = document.getElementById('display-vertex');
-            btn.classList.toggle('active', showVertexView);
-            if (showVertexView) {
-                btn.style.backgroundColor = 'rgba(34,197,94,0.1)';
-                btn.style.color = '#16a34a';
-                btn.style.borderColor = '#22c55e';
-            } else {
-                btn.style.backgroundColor = 'transparent';
-                btn.style.color = '#94a3b8';
-                btn.style.borderColor = '#cbd5e1';
-            }
-            render();
-        };
         window.toggleFacesView = function() {
             showFacesView = !showFacesView;
             const btn = document.getElementById('display-faces');
@@ -657,15 +645,8 @@
             render();
         };
         window.resetDisplay = function() {
-            showVertexView = false;
             showFacesView  = true;
             showNodeLabels = false;
-
-            const vBtn = document.getElementById('display-vertex');
-            vBtn.classList.remove('active');
-            vBtn.style.backgroundColor = 'transparent';
-            vBtn.style.color = '#94a3b8';
-            vBtn.style.borderColor = '#cbd5e1';
 
             const fBtn = document.getElementById('display-faces');
             fBtn.classList.add('active');
@@ -696,26 +677,6 @@
             ul.innerHTML = html;
         }
         buildFacesList();
-
-        // --- Build the left-panel edges list dynamically ---
-        function buildEdgesList() {
-            const ul = document.getElementById('edges-list');
-            if (!ul) return;
-            const lettered = [], openEdges = [];
-            structuralEdges.forEach(([a, b], i) => {
-                const L = structuralEdgeLetters[i];
-                if (L === null) openEdges.push([a, b]);
-                else lettered.push([L, a, b]);
-            });
-            lettered.sort((x, y) => x[0].localeCompare(y[0]));
-            const html = lettered.map(([L, a, b]) =>
-                `<li><strong style="color:#0891b2;">${L}:</strong> v${a}&ndash;v${b}</li>`
-            ).concat(openEdges.map(([a, b]) =>
-                `<li><strong style="color:#f97316;">OPEN:</strong> v${a}&ndash;v${b}</li>`
-            )).join('');
-            ul.innerHTML = html;
-        }
-        buildEdgesList();
 
         startAnimation();
 
