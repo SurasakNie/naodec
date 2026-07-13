@@ -561,7 +561,7 @@
                         html: `<polygon points="${pts}" ${fillAttr} opacity="${opacity}" />`
                     });
                     const ffs = zAvg > 0 ? 17 : 12;
-                    const labelColor = face.notBuilt ? '#f97316' : '#6366f1';
+                    const labelColor = face.notBuilt ? '#f97316' : (face.label === 'Door' ? '#ec4899' : '#6366f1');
                     const labelText = face.label ? `${face.id} &middot; ${face.label}` : face.id;
                     renderQueue.push({
                         z: zAvg + 1,
