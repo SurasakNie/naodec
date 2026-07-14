@@ -20,6 +20,16 @@ credentials stored the board is wired-only, identical to FW 3.0.
 The firmware version tracks the schematic revision it targets, with the minor
 digit bumping for firmware feature releases on that hardware (FW 3.0.x =
 Ethernet only; FW 3.1.x = Ethernet + Wi-Fi fallback; both ↔ Schematic Rev 3.0).
+The patch digit is for firmware-only fixes on the same feature set:
+- **FW 3.1.1** enables the ESP32's internal weak pull-ups on the encoder `A`/`B`
+  pins (GPIO7/8), so those lines idle high even if a fitted KY-040 clone lacks
+  its own onboard pull-ups. It touches no other pin.
+- **FW 3.1.2** treats the three transport buttons as mutually exclusive: if two
+  press edges arrive in the same debounce instant (impossible from a human on
+  separate panel switches, but exactly what a GPIO9↔GPIO10 short produces), the
+  event is rejected and logged as a `[FAULT]` instead of emitting a wrong
+  transport command. See the Play/Pause note below — this is a guard and a
+  diagnostic, **not** a substitute for clearing the short.
 
 Full hardware assembly, wiring, network setup, and acceptance tests:
 [`NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md`](../../NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md)
@@ -139,6 +149,42 @@ troubleshooting table), flip `ENCODER_REVERSED` to `1` instead of re-wiring A/B.
 If FUNC-05/06 show about half the expected step (ten detents move volume ~10
 points instead of ~20), the fitted encoder emits two quadrature transitions per
 detent rather than four — set `ENCODER_STEPS_PER_DETENT` to `2`.
+
+`PIN_ENC_A`/`PIN_ENC_B` are configured `INPUT_PULLUP` (FW 3.1.1+) rather than
+plain `INPUT`. The NEBDS-01's Schmitt push-pull output is unaffected by the
+added internal pull-up; a bare KY-040 clone with no onboard CLK/DT pull-ups
+now still idles high instead of floating. `R1`/`R2` (external 10 kOhm) remain
+DNP by default per Build doc Section 3 — only populate them if encoder
+misreads persist after this firmware change.
+
+> This pull-up change is unrelated to Play/Pause/Stop: those buttons (GPIO9-11)
+> were already `INPUT_PULLUP` and are untouched by FW 3.1.1.
+
+### Play/Pause cross-trigger (one button fires two commands)
+
+If pressing Play also fires Pause (or vice-versa), the root cause is a **short
+between the adjacent button GPIOs — GPIO9 (Play) and GPIO10 (Pause)**, which sit
+next to each other on the DevKitC-1 header. When bridged (solder whisker, stray
+strand, pinched harness) both lines pull LOW together, so one physical press
+reads as two. The audit ruled out the other layers:
+
+- **Firmware button logic** debounces each pin independently — no cross-coupling.
+- **Max test patch** routes `/transport/play` and `/transport/pause` through
+  separate `OSC-route` objects with no cross-wire — verified in
+  `TransportReceiveTest1.maxpat`.
+
+So a firmware/patch change cannot *cure* a hard short — both pins read the same
+value. What FW 3.1.2 does is **detect and contain** it: two simultaneous edges
+are rejected with a `[FAULT] Simultaneous transport inputs …` log line that
+names the suspect pins, turning a confusing phantom-Pause into an obvious,
+logged fault. The fix itself is hardware: power off and run the **GPIO9↔GPIO10
+continuity check** in Build doc Section 10 (≈0 Ω = header/PCB bridge; ≈200 Ω =
+panel-side harness short; ≈20 kΩ = healthy).
+
+> **Max patch note:** the bundled `TransportReceiveTest1.maxpat` had its Stop
+> route mis-cased as `/transport/Stop/`, which never matched the firmware's
+> lowercase `/transport/stop`; it is corrected to `/transport/stop/` so all four
+> routes match. (Unrelated to the Play/Pause short, but found in the same audit.)
 
 ## Status LED
 

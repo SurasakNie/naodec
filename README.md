@@ -44,8 +44,9 @@ naodec/
 ├── NaoDec_Media_Playback_Controller_Schematic_Rev3.0.html  # ESP32-S3 operator panel + W5500 wired Ethernet (interactive, current)
 ├── NaoDec_Media_Playback_Controller_Schematic_Rev1.0.html  # Previous revision (kept for reference)
 ├── NaoDec_Media_Playback_Controller_Rev3_Ethernet_Rationale.md # Why Rev 3.0 moved to wired Ethernet (6 m wire problem + new parts)
-├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md # Playback controller build, network & Max/MSP setup (Rev 2.2)
+├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md # Playback controller build, network & Max/MSP setup (Rev 3.2)
 ├── NaoDec_Media_Playback_Controller_Build_and_Max_Setup.docx # Word copy of the build/setup doc, for non-Markdown readers
+├── NaoDec_Media_Playback_Controller_PlayPause_CrossTrigger_Fix.md # Play/Pause cross-trigger: GPIO9↔GPIO10 short — FW 3.1.2 guard + fix
 ├── Simple_WS2815_Controller_Rev_1.0.html          # Simplified single-controller reference
 ├── firmware/
 │   └── media_playback_controller/                 # ESP32-S3 Arduino sketch — OSC operator panel
