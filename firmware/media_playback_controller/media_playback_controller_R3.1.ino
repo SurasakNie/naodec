@@ -23,6 +23,14 @@
  * The board is safe to boot with the cable unplugged (LED blinks until a link
  * comes up on either interface).
  *
+ * FW 3.1.1: the encoder A/B pins (GPIO7/8) now enable the ESP32's internal weak
+ * pull-ups. This is a safety net for the optional KY-040 replacement module
+ * (Build doc Section 3) on boards/clones whose own CLK/DT pull-ups are absent
+ * or unwired, so the lines idle high instead of floating. It has no effect on
+ * the NEBDS-01's Schmitt push-pull output beyond a negligible parallel load,
+ * and is unrelated to the Play/Pause/Stop buttons (GPIO9-11), which already
+ * used INPUT_PULLUP.
+ *
  * Requires the esp32 Arduino core >= 3.0.0 (W5500 support lives in the core's
  * ETH.h; WiFi.h is also part of the core). No third-party libraries.
  */
@@ -37,8 +45,9 @@
 // ── Firmware ──────────────────────────────────────────────────────────────────
 // major tracks the schematic revision this firmware targets (Rev 3.x hardware);
 // minor bumps for firmware feature releases on that hardware (3.1 = Wi-Fi
-// fallback); the patch digit is for firmware-only fixes.
-#define FW_VERSION "3.1.0"
+// fallback); the patch digit is for firmware-only fixes (3.1.1 = internal
+// pull-ups on the encoder A/B pins).
+#define FW_VERSION "3.1.1"
 
 // ── Hardware (see Build doc Section 3 — Pin Connections) ────────────────────
 #define PIN_ENC_A       7
@@ -524,8 +533,8 @@ void setup() {
   btnPause.begin(PIN_BTN_PAUSE);
   btnStop.begin(PIN_BTN_STOP);
 
-  pinMode(PIN_ENC_A, INPUT);
-  pinMode(PIN_ENC_B, INPUT);
+  pinMode(PIN_ENC_A, INPUT_PULLUP);   // internal pull-ups: works even if the KY-040's own CLK/DT pull-ups are absent/unwired
+  pinMode(PIN_ENC_B, INPUT_PULLUP);
   encoderPrevState = (digitalRead(PIN_ENC_A) << 1) | digitalRead(PIN_ENC_B);
   attachInterrupt(digitalPinToInterrupt(PIN_ENC_A), onEncoderChange, CHANGE);
   attachInterrupt(digitalPinToInterrupt(PIN_ENC_B), onEncoderChange, CHANGE);

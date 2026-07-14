@@ -20,6 +20,11 @@ credentials stored the board is wired-only, identical to FW 3.0.
 The firmware version tracks the schematic revision it targets, with the minor
 digit bumping for firmware feature releases on that hardware (FW 3.0.x =
 Ethernet only; FW 3.1.x = Ethernet + Wi-Fi fallback; both ↔ Schematic Rev 3.0).
+The patch digit is for firmware-only fixes on the same feature set — **FW 3.1.1**
+enables the ESP32's internal weak pull-ups on the encoder `A`/`B` pins (GPIO7/8),
+so those lines idle high even if a fitted KY-040 clone lacks its own onboard
+pull-ups. It touches no other pin and is not a fix for button behavior — see
+the Play/Pause troubleshooting note below.
 
 Full hardware assembly, wiring, network setup, and acceptance tests:
 [`NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md`](../../NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md)
@@ -139,6 +144,20 @@ troubleshooting table), flip `ENCODER_REVERSED` to `1` instead of re-wiring A/B.
 If FUNC-05/06 show about half the expected step (ten detents move volume ~10
 points instead of ~20), the fitted encoder emits two quadrature transitions per
 detent rather than four — set `ENCODER_STEPS_PER_DETENT` to `2`.
+
+`PIN_ENC_A`/`PIN_ENC_B` are configured `INPUT_PULLUP` (FW 3.1.1+) rather than
+plain `INPUT`. The NEBDS-01's Schmitt push-pull output is unaffected by the
+added internal pull-up; a bare KY-040 clone with no onboard CLK/DT pull-ups
+now still idles high instead of floating. `R1`/`R2` (external 10 kOhm) remain
+DNP by default per Build doc Section 3 — only populate them if encoder
+misreads persist after this firmware change.
+
+> This pull-up change is unrelated to Play/Pause/Stop: those buttons (GPIO9-11)
+> were already `INPUT_PULLUP` and are untouched by FW 3.1.1. If one button
+> triggers another's transport command, that is a wiring/hardware fault (or a
+> Max patch mapping issue), not something a firmware pin-mode change fixes —
+> see the Build doc Section 10 troubleshooting row for the GPIO9↔GPIO10
+> continuity check.
 
 ## Status LED
 
