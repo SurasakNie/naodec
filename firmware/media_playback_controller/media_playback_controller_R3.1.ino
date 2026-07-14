@@ -31,6 +31,14 @@
  * and is unrelated to the Play/Pause/Stop buttons (GPIO9-11), which already
  * used INPUT_PULLUP.
  *
+ * FW 3.1.2: the transport buttons are treated as mutually exclusive. If two
+ * press edges land in the same debounce instant — which a human cannot produce
+ * on separate panel switches — the event is rejected and logged as a fault,
+ * because that is the signature of a short between adjacent button GPIOs
+ * (typically GPIO9<->GPIO10, Play/Pause). This stops one physical press from
+ * emitting two transport commands; the real remedy is to clear the short (Build
+ * doc Section 10). It changes nothing on a correctly wired panel.
+ *
  * Requires the esp32 Arduino core >= 3.0.0 (W5500 support lives in the core's
  * ETH.h; WiFi.h is also part of the core). No third-party libraries.
  */
@@ -46,8 +54,9 @@
 // major tracks the schematic revision this firmware targets (Rev 3.x hardware);
 // minor bumps for firmware feature releases on that hardware (3.1 = Wi-Fi
 // fallback); the patch digit is for firmware-only fixes (3.1.1 = internal
-// pull-ups on the encoder A/B pins).
-#define FW_VERSION "3.1.1"
+// pull-ups on the encoder A/B pins; 3.1.2 = mutually-exclusive transport-button
+// guard that rejects and logs the GPIO9<->GPIO10 short signature).
+#define FW_VERSION "3.1.2"
 
 // ── Hardware (see Build doc Section 3 — Pin Connections) ────────────────────
 #define PIN_ENC_A       7
@@ -397,16 +406,44 @@ void updateStatusLed() {
 }
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
+// The three transport buttons are mutually exclusive by design — each is a
+// separate panel switch, and a human cannot close two of them within the same
+// debounce instant. So if more than one press edge lands in a single pass it is
+// not a real double-press: it is the electrical signature of a short (or heavy
+// crosstalk) between adjacent button GPIOs — classically GPIO9<->GPIO10
+// (Play/Pause), which sit next to each other on the DevKitC-1 header and, when
+// bridged, pull LOW together so one physical press reads as two. Firmware cannot
+// tell which button was really meant in that case, so it rejects the ambiguous
+// event and logs a fault pointing at the short instead of emitting a wrong
+// transport command (e.g. a phantom Pause every time Play is pressed). See the
+// Build doc Section 10 troubleshooting row for the GPIO9<->GPIO10 continuity
+// check that locates the bridge. With correct wiring exactly one edge fires per
+// press and this guard never triggers.
 void updateButtons() {
-  if (btnPlay.pressedEdge()) {
+  // pressedEdge() is stateful (it advances the debounce state) — call each once
+  // per pass, then decide, so a suppressed event still consumes its edge.
+  bool play  = btnPlay.pressedEdge();
+  bool pause = btnPause.pressedEdge();
+  bool stop  = btnStop.pressedEdge();
+
+  if ((play + pause + stop) > 1) {
+    Serial.printf("[FAULT] Simultaneous transport inputs (%s%s%s) — a single "
+                  "press cannot trigger two buttons; suspect a short between "
+                  "the button GPIOs (check GPIO9<->GPIO10, Build doc Section 10). "
+                  "Command suppressed.\n",
+                  play ? "Play " : "", pause ? "Pause " : "", stop ? "Stop" : "");
+    return;
+  }
+
+  if (play) {
     sendOscInt("/transport/play", 1);
     Serial.println("[BTN]  Play -> /transport/play 1");
   }
-  if (btnPause.pressedEdge()) {
+  if (pause) {
     sendOscInt("/transport/pause", 1);
     Serial.println("[BTN]  Pause -> /transport/pause 1");
   }
-  if (btnStop.pressedEdge()) {
+  if (stop) {
     sendOscInt("/transport/stop", 1);
     Serial.println("[BTN]  Stop -> /transport/stop 1");
   }

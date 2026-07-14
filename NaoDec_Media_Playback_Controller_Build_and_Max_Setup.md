@@ -6,10 +6,13 @@
 **Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev3.0.html`
 
 > Rev 3.2 — Added a "Symptom / Check" row to Section 10 for cross-triggering between
-> Play and Pause (one button also firing the other's transport command): isolate with
-> `[print OSC_IN]` first, then an unpowered GPIO9↔GPIO10 continuity check to localize a
-> header/PCB bridge vs. a panel-side harness short vs. a firmware pin-map bug.
-> Documentation only — hardware is unchanged at Rev 3.0.
+> Play and Pause (one button also firing the other's transport command): the root
+> cause is a GPIO9↔GPIO10 short, localized with an unpowered continuity check
+> (header/PCB bridge vs. panel-side harness short vs. healthy). FW 3.1.2 now detects
+> the short's two-simultaneous-edges signature, suppresses the wrong command, and
+> logs a `[FAULT]` line naming the pins. Also corrected the bundled Max test patch's
+> Stop route (`/transport/Stop/` → `/transport/stop/`). Documentation + firmware/patch
+> only — hardware is unchanged at Rev 3.0.
 >
 > Rev 3.1 — Added a Quick Reference table ahead of Section 1: all four OSC addresses
 > (including `/volume` for the encoder — not just the transport switches), mDNS
@@ -413,7 +416,7 @@ If Max receives nothing:
 | Wrong port | Confirm both firmware and Max use UDP `9000` |
 | ESP32 not reachable | LED1 blinking means no link/lease: check the Cat6 at both ends, the router LAN port, and the DHCP reservation (type `STATUS` for link/IP/MAC). Then confirm same LAN/VLAN |
 | Duplicate button messages | Increase firmware debounce or check switch wiring |
-| One button triggers a second transport command (e.g. Play also fires Pause) | Confirm with `[print OSC_IN]`: both messages printing means the fault is upstream of Max. Power off and check continuity GPIO9↔GPIO10 (Play↔Pause) unpowered: ~0 Ohm is a bridge at the adjacent DevKitC-1 header pins or PCB node; ~200 Ohm is a panel-side short in the button harness or connectors; ~20 kOhm (R3+R4 through the 3V3 bus) is healthy wiring — check the firmware's GPIO pin map instead. Only one message printing means the fault is in the Max `[route]` patching or the player's own play/pause toggle behavior |
+| One button triggers a second transport command (e.g. Play also fires Pause) | This is a short between the adjacent GPIO9 (Play) and GPIO10 (Pause) header pins. FW 3.1.2+ detects it and prints `[FAULT] Simultaneous transport inputs …` on the USB serial monitor (and suppresses the wrong command) — if you see that line, it is the short. Power off and check continuity GPIO9↔GPIO10 unpowered: ~0 Ohm is a bridge at the adjacent DevKitC-1 header pins or PCB node; ~200 Ohm is a panel-side short in the button harness or connectors; ~20 kOhm (R3+R4 through the 3V3 bus) is healthy wiring. If instead `[print OSC_IN]` shows only one message yet the player still double-acts, the fault is in the Max `[route]` patching or the player's own play/pause toggle behavior |
 | Encoder direction reversed | Swap A/B wiring or reverse direction in firmware |
 | Volume affects lights | The Max patch is mapped to NeoDDP brightness instead of media gain |
 
