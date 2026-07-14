@@ -18,10 +18,10 @@ Step 2 builds and erects the NaoDec frame itself on top of the Step 1 platform: 
 | Vertices / edges / faces | 20 / 30 / 12 (Euler check 20−30+12=2) |
 | Faces built | 11 of 12 — `f12` (bottom) intentionally left unbuilt as the entry opening |
 | Panel construction | Wooden frame + stretched fabric |
-| Door face | Face 5 (`f11`) |
-| Top / ceiling face | Face 10 (`f1`) |
+| Door face | `f11` |
+| Top / ceiling face | `f1` |
 | Joint marking | Shared edges between built faces share a letter, A–Z (no `W`) — 25 lettered joints; match identical letters to assemble/disassemble, no face lookup needed |
-| Edges resting on the platform | 5 unlettered edges, on faces 1, 5, 6, 7, 8 |
+| Edges resting on the platform | 5 unlettered edges, on faces `f7`–`f11` |
 
 ## 2.1 Pentagon Panel
 
@@ -43,8 +43,8 @@ Whatever the build method, every panel still needs its **assembly letters** tran
 Your outline splits the panel build method into **Side** and **Ceiling** variants. Two things worth deciding before this goes further (see Open Items #2–3):
 
 - **Side** presumably covers the 9 faces that are neither the top, nor the door, nor the unbuilt bottom.
-- **Ceiling** is face 10 (`f1`) — the top, opposite the unbuilt bottom.
-- Not yet covered by this split: the **door** (face 5 / `f11`), which per the README needs to open or be removable — arguably a third build variant, not a Side panel. Also not addressed: how the frame confirms the bottom (`f12`) stays unbuilt/open at the platform interface.
+- **Ceiling** is `f1` — the top, opposite the unbuilt bottom.
+- Not yet covered by this split: the **door** (`f11`), which per the README needs to open or be removable — arguably a third build variant, not a Side panel. Also not addressed: how the frame confirms the bottom (`f12`) stays unbuilt/open at the platform interface.
 
 *(TBD — the actual build steps, materials, and what specifically differs between Side and Ceiling panels are pending your input.)*
 
@@ -75,7 +75,7 @@ The erected frame surrounds and stands over the Step 1 chair platform and its oc
 ## Open Items
 
 1. **2.2 has no title or content** — left as "Not yet defined."
-2. **Door face isn't addressed in the Side/Ceiling split** — face 5 (`f11`) needs its own build variant if it's meant to open or be removable.
+2. **Door face isn't addressed in the Side/Ceiling split** — `f11` needs its own build variant if it's meant to open or be removable.
 3. **Bottom face (`f12`) interface isn't described** — it's intentionally unbuilt (5 unlettered edges resting on the platform, per the structure framework doc), but how those edges physically land on/attach to the Step 1 platform isn't specified in either step.
 4. **Panel construction specifics** — frame material/section, joinery, fabric type/attachment, fasteners, finished dimensions and weight: none specified yet.
 5. **Side vs. Ceiling build differences** — what actually differs between the two (e.g. rigging points on the ceiling panel, orientation, reinforcement) isn't described yet.

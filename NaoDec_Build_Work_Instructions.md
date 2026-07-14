@@ -26,7 +26,7 @@ This is the top-level index for building the physical NaoDec installation — pl
 Gaps noticed while drafting Steps 1–2 — flagged per your request so you can decide what to do with each, not decisions made on your behalf.
 
 1. **Step 2.2 is currently blank.** Your outline stops at `2.2.` with no title, so it's left as "Not yet defined" in `NaoDec_Build_Step2_Structure_Setup.md` rather than guessed at.
-2. **The "Side and Ceiling" split (2.1.1.1) doesn't mention the Door face.** Per `README.md` / `NaoDec_Face_Edge_Marking_Rev1.0.html`, face 5 (`f11`) is a **door** — presumably needs to open/close or be removable, which reads like a third panel-build type, not a Side variant.
+2. **The "Side and Ceiling" split (2.1.1.1) doesn't mention the Door face.** Per `README.md` / `NaoDec_Face_Edge_Marking_Rev1.0.html`, `f11` is the **door** — presumably needs to open/close or be removable, which reads like a third panel-build type, not a Side variant.
 3. **The unbuilt bottom face (`f12`) isn't addressed.** The 3D structure framework treats the bottom as intentionally open (5 unlettered edges resting on the platform). Neither step yet says how those edges physically land on / attach to the Step 1 platform — that's the actual physical interface between the two steps you've written so far.
 4. **No step yet covers the subsystems this repo already documents in detail:**
    - LED strip install & wiring per channel (`NaoDec_WS2815_LED_Controller_Rev1.6.html`, `NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html`)
