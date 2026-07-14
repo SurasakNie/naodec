@@ -52,6 +52,8 @@ jobs:
                      margin: 3rem auto; padding: 0 1rem; line-height: 1.6;
                      background: var(--bg); color: var(--fg); }
               h1 { border-bottom: 1px solid var(--rule); padding-bottom: .4rem; }
+              h2 { font-size: 1.1rem; margin-top: 2rem; border-bottom: 1px solid var(--rule);
+                   padding-bottom: .3rem; }
               ul { padding-left: 1.2rem; }
               li { margin: .3rem 0; }
               a { color: var(--link); text-decoration: none; }
@@ -62,18 +64,48 @@ jobs:
           </head>
           <body>
             <h1>NaoDec — Wiring and Schematics Index</h1>
-            <p>Rendered HTML and selected Markdown documents in this repository. Click to open.</p>
-            <ul>
+            <p>Rendered HTML and selected Markdown documents in this repository, grouped by type. Click to open.</p>
           HEAD
-            {
+
+            # Group assignment by filename — first matching pattern wins.
+            # *Series_Coil_Build* must precede *Series_Coil* (build guide vs schematic).
+            categorize() {
+              case "$1" in
+                *Series_Coil_Build*)                                        echo guides ;;
+                *Schematic*|*LED_Controller*|*Series_Coil*|Simple_WS2815*)  echo schematics ;;
+                *3D_*)                                                      echo 3d ;;
+                *Face_Edge_Marking*|*Controller_Box*|*Build_and_Max_Setup*) echo guides ;;
+                *)                                                          echo other ;;
+              esac
+            }
+
+            files=$( {
               ls *.html 2>/dev/null | grep -v '^index\.html$' || true
               printf '%s\n' NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md
-            } | sort | while read -r f; do
-              [ -f "$f" ] || continue
-              printf '    <li><a href="%s">%s</a></li>\n' "$f" "$f"
-            done
+            } | sort )
+
+            emit_group() {
+              key=$1; title=$2
+              members=$(printf '%s\n' "$files" | while read -r f; do
+                if [ -f "$f" ] && [ "$(categorize "$f")" = "$key" ]; then
+                  printf '%s\n' "$f"
+                fi
+              done)
+              [ -n "$members" ] || return 0
+              printf '  <h2>%s</h2>\n  <ul>\n' "$title"
+              printf '%s\n' "$members" | while read -r f; do
+                pretty=$(printf '%s' "$f" | sed 's/\.[^.]*$//; s/_/ /g')
+                printf '    <li><a href="%s">%s</a></li>\n' "$f" "$pretty"
+              done
+              printf '  </ul>\n'
+            }
+
+            emit_group schematics 'Schematics'
+            emit_group 3d         '3D Structure &amp; LED Mapping'
+            emit_group guides     'Build &amp; Assembly Guides'
+            emit_group other      'Other Documents'
+
             cat <<'TAIL'
-            </ul>
             <footer>Auto-generated — see <code>.github/workflows/update-index.yml</code>.</footer>
           </body>
           </html>

@@ -108,9 +108,10 @@ covering the same 11-face marking data, with an interactive joint-highlight drop
 static-only reference table, is in
 [`NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html`](NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html).
 
-- **Face 5** is the door (face `f11` in the 3D framework page).
-- **Face 10** is the top (face `f1`), opposite the unbuilt bottom.
-- Faces 1, 5, 6, 7, 8 carry the 5 unlettered edges that rest directly on the platform/ground instead
+- Face numbers in the marking guides match the 3D framework's `f1`–`f12` face ids.
+- **Face 1** is the top (`f1`), opposite the unbuilt bottom.
+- **Face 11** is the door (`f11`).
+- Faces 7–11 carry the 5 unlettered edges that rest directly on the platform/ground instead
   of meeting another face (the bottom face isn't built).
 
 ---
