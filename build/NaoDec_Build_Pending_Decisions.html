@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec Build — Decision Record (Steps 3–9) — NaoDec</title>
+<style>
+:root{color-scheme:light dark;
+ --bg:#ffffff;--fg:#1e2222;--muted:#6b7a7a;--rule:#dce3e3;--link:#0b6a63;--link-hover:#0b63d6;
+ --code-bg:rgba(128,128,128,.12);--card:#f6f8f8;--accent:#0f766e;--warn-bg:#fff4e5;--warn-br:#e0a34d;--warn-fg:#7a4a00;}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b1113;--fg:#e6edef;--muted:#8eb5b8;--rule:rgba(142,181,184,.25);--link:#88e2d6;--link-hover:#eaddaa;
+ --code-bg:rgba(142,181,184,.15);--card:#111a1c;--accent:#88e2d6;--warn-bg:#2a2012;--warn-br:#7a5a2a;--warn-fg:#eaddaa;}}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;
+ padding:0 1.1rem 4rem;line-height:1.65;background:var(--bg);color:var(--fg);}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);
+ padding:.7rem 0;margin-bottom:1.5rem;display:flex;align-items:baseline;gap:.6rem;font-size:.85rem;z-index:5;}
+header.top .brand{font-weight:700;color:var(--accent);letter-spacing:.02em;}
+header.top .sub{color:var(--muted);}
+h1{border-bottom:2px solid var(--rule);padding-bottom:.35rem;line-height:1.25;}
+h2{margin-top:2.2rem;border-bottom:1px solid var(--rule);padding-bottom:.25rem;}
+h3{margin-top:1.6rem;}h4{margin-top:1.2rem;color:var(--muted);}
+a{color:var(--link);text-decoration:none;}a:hover{color:var(--link-hover);text-decoration:underline;}
+p.nav{font-size:.9rem;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.5rem .8rem;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.9em;}
+pre{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.9rem 1rem;overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:var(--warn-bg);border-left:4px solid var(--warn-br);
+ border-radius:0 6px 6px 0;color:var(--warn-fg);}
+blockquote p{margin:.35rem 0;}
+.table-wrap{overflow-x:auto;margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{border:1px solid var(--rule);padding:.4rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--card);}
+figure.diagram{margin:1.3rem 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1rem;
+ overflow-x:auto;text-align:center;}
+figure.diagram svg{max-width:100%;height:auto;}
+img{max-width:100%;height:auto;border-radius:6px;}
+figcaption,em img+em{color:var(--muted);}
+hr{border:none;border-top:1px solid var(--rule);margin:2rem 0;}
+footer.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.8rem;}
+</style>
+</head>
+<body>
+<header class="top"><span class="brand">NaoDec</span><span class="sub">Build Work Instructions</span></header>
+<main>
+<h1>NaoDec Build — Decision Record (Steps 3–9)</h1>
+<p><strong>Date asked:</strong> 2026-07-14 · <strong>Date answered:</strong> 2026-07-14
+<strong>Status:</strong> ✅ <strong>All answered.</strong> This file is now the decision record for the build work-instruction docs (<code>NaoDec_Build_Step3…Step9</code>). The answers below are folded into the step docs; residual unknowns each decision left open are flagged in the step docs&#39; Open Items.</p>
+<blockquote>
+<p>Background: items 1–3 were originally submitted as revision notes via the plan-approval dialog on 2026-07-14, but a session connection failure dropped the note text before it reached the assistant. This file exists so no decision can be lost that way again.</p>
+</blockquote>
+<hr>
+<h2>1. Node 0 vs &quot;node 1&quot; (cable entry point)</h2>
+<p>The LED mapping doc (<code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code>) defines the common cable entry as <strong>Node 0 &quot;POWER IN&quot;</strong>, a synthetic bus point below the base center; feeds fan out from it to base vertices v1–v5. The build outline says all cables &quot;start from node 1&quot; (v1 is the chair-facing vertex and the start of the vertex chain, circuits C1/C6, and the coil positive).</p>
+<p><strong>Answer:</strong> <strong>Node 0 is the controller unit itself.</strong> The original plan put the unit under the platform (hence the mapping doc drawing Node 0 below the base center). The current build places the controller unit <strong>outside the structure framework, ~2–3 m from node 1 (v1)</strong>. The operator station and the Mac mini (controlling media: light, sound, vibration) are in the same area.</p>
+<hr>
+<h2>2. Audio hardware</h2>
+<p>Nothing in the repo documented the audio chain: 6 speakers (edges A, H, C, F, Y, M), the subwoofer, the 4 chair transducers, or any amplifier / audio interface out of the Mac mini.</p>
+<p><strong>Answer:</strong> Mac mini → <strong>3.5 mm jack cable → subwoofer</strong> (direct). Mac mini → <strong>USB Type-C → Wondom GAB8</strong> amplifier board, powered from <strong>24 VDC</strong>. The GAB8 outputs drive the <strong>6 speakers</strong> and <strong>2 transducer sets</strong> (back set + seat set; 4 transducers total).</p>
+<hr>
+<h2>3. Series-coil routing</h2>
+<p>The series-coil / electromagnet subsystem (60 coils at the vertex units, pre-release Rev 0) was absent from the step outline, but its wiring shares the Node 0 → v1 path with the CH1 vertex LED chain.</p>
+<p><strong>Answer:</strong> <strong>The coils route along the same path as the vertex units</strong> → documented inside Step 3 (Vertex Units Installation), pre-release caveats retained.</p>
+<hr>
+<h2>4. Scent unit location</h2>
+<p>The outline placed &quot;scent control&quot; next to the subwoofer; the repo docs put the Waveshare board inside the controller box.</p>
+<p><strong>Answer:</strong> <strong>Only the atomizer/mist unit sits by the subwoofer. The Waveshare board stays inside the controller unit.</strong></p>
+<hr>
+<h2>5. Controller unit contents</h2>
+<p><strong>Answer:</strong></p>
+<ol>
+<li>LED Master + LED Slave (2× ESP32-S3)</li>
+<li>The Waveshare (which is an ESP32-S3) → <strong>3 ESP32-class boards total in the unit</strong></li>
+<li>The media playback controller&#39;s ESP32 is <strong>inside the media playback controller at the chair</strong> — a design change from the original in-unit plan, made because of the signal-wire issue (matches the Placement Requirement in <code>NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md</code> §1). Its LAN cable runs from the <strong>router (inside the controller unit)</strong> to the chair and plugs into the W5500 module&#39;s RJ45.</li>
+<li>The <strong>Mac mini is NOT inside the controller unit</strong> — it sits on a table, side-by-side with the unit.</li>
+</ol>
+<hr>
+<h2>6. + 7. Door hinge edge · Hinges at the other joints</h2>
+<p><strong>Answer (combined):</strong> <strong>Every pentagon-panel edge gets 2 hinges</strong> — this is how the panels attach together rigidly. <strong>Only the edges resting on the ground/platform have no hinges</strong> (the 5 unlettered base edges). So all 25 lettered joints are hinged, 2 hinges each (50 hinges total).</p>
+<blockquote>
+<p>Residual open item (flagged in Step 2): with all four of its lettered edges hinged, the mechanism by which the door (f11) opens — swing side, lift-off pins, or fully removable — still needs deciding.</p>
+</blockquote>
+<hr>
+<h2>8. Commissioning step</h2>
+<p><strong>Answer:</strong> <strong>Add Step 9 — Commissioning &amp; Test.</strong></p>
+<hr>
+<h2>9. Clarified installation order + edge covers <em>(added with the second revision message)</em></h2>
+<p><strong>Answer:</strong> After all 11 pentagon panels are up:</p>
+<ol>
+<li>Install the <strong>vertex units</strong>, routing all wires/cables</li>
+<li>Install the <strong>internal edge units</strong>, routing all wires/cables</li>
+<li>Install the <strong>speakers</strong>, routing all wires/cables</li>
+<li><strong>Move the scent control, subwoofer, and the chair in.</strong> Position the chair, then route all cables</li>
+<li><strong>Cover all the external edges with the edge covers — 25 pieces</strong></li>
+</ol>
+<p>Resulting step numbering: <strong>1</strong> Platform · <strong>2</strong> Structure · <strong>3</strong> Vertex Units · <strong>4</strong> Internal Edge Units · <strong>5</strong> Speakers · <strong>6</strong> Move-In · <strong>7</strong> Edge Covers · <strong>8</strong> Controller Unit Hookup · <strong>9</strong> Commissioning &amp; Test.</p>
+<hr>
+<h2>10. Pictures in the docs <em>(added via the plan dialog)</em></h2>
+<p><strong>Answer:</strong> <strong>Mermaid diagrams + snapshots of the interactive 3D pages</strong> (no photo placeholders). Snapshots live in <a href="../images/build/"><code>images/build/</code></a> and are generated headless from <code>NaoDec_3D_Structure_Framework_Rev1.0.html</code> and <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code>.</p>
+
+</main>
+<footer class="foot">Self-contained HTML — diagrams pre-rendered, no external dependencies. Generated from the Markdown build docs in this repository.</footer>
+</body>
+</html>

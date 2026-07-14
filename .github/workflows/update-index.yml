@@ -74,7 +74,7 @@ jobs:
                 *Series_Coil_Build*)                                        echo guides ;;
                 *Schematic*|*LED_Controller*|*Series_Coil*|Simple_WS2815*)  echo schematics ;;
                 *3D_*)                                                      echo 3d ;;
-                *Face_Edge_Marking*|*Controller_Box*|*Build_and_Max_Setup*) echo guides ;;
+                *Face_Edge_Marking*|*Controller_Box*|*Build_and_Max_Setup*|*Build_Work_Instructions*) echo guides ;;
                 *)                                                          echo other ;;
               esac
             }

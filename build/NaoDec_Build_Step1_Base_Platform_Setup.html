@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec Build — Step 1: Base Platform Setup — NaoDec</title>
+<style>
+:root{color-scheme:light dark;
+ --bg:#ffffff;--fg:#1e2222;--muted:#6b7a7a;--rule:#dce3e3;--link:#0b6a63;--link-hover:#0b63d6;
+ --code-bg:rgba(128,128,128,.12);--card:#f6f8f8;--accent:#0f766e;--warn-bg:#fff4e5;--warn-br:#e0a34d;--warn-fg:#7a4a00;}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b1113;--fg:#e6edef;--muted:#8eb5b8;--rule:rgba(142,181,184,.25);--link:#88e2d6;--link-hover:#eaddaa;
+ --code-bg:rgba(142,181,184,.15);--card:#111a1c;--accent:#88e2d6;--warn-bg:#2a2012;--warn-br:#7a5a2a;--warn-fg:#eaddaa;}}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;
+ padding:0 1.1rem 4rem;line-height:1.65;background:var(--bg);color:var(--fg);}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);
+ padding:.7rem 0;margin-bottom:1.5rem;display:flex;align-items:baseline;gap:.6rem;font-size:.85rem;z-index:5;}
+header.top .brand{font-weight:700;color:var(--accent);letter-spacing:.02em;}
+header.top .sub{color:var(--muted);}
+h1{border-bottom:2px solid var(--rule);padding-bottom:.35rem;line-height:1.25;}
+h2{margin-top:2.2rem;border-bottom:1px solid var(--rule);padding-bottom:.25rem;}
+h3{margin-top:1.6rem;}h4{margin-top:1.2rem;color:var(--muted);}
+a{color:var(--link);text-decoration:none;}a:hover{color:var(--link-hover);text-decoration:underline;}
+p.nav{font-size:.9rem;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.5rem .8rem;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.9em;}
+pre{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.9rem 1rem;overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:var(--warn-bg);border-left:4px solid var(--warn-br);
+ border-radius:0 6px 6px 0;color:var(--warn-fg);}
+blockquote p{margin:.35rem 0;}
+.table-wrap{overflow-x:auto;margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{border:1px solid var(--rule);padding:.4rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--card);}
+figure.diagram{margin:1.3rem 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1rem;
+ overflow-x:auto;text-align:center;}
+figure.diagram svg{max-width:100%;height:auto;}
+img{max-width:100%;height:auto;border-radius:6px;}
+figcaption,em img+em{color:var(--muted);}
+hr{border:none;border-top:1px solid var(--rule);margin:2rem 0;}
+footer.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.8rem;}
+</style>
+</head>
+<body>
+<header class="top"><span class="brand">NaoDec</span><span class="sub">Build Work Instructions</span></header>
+<main>
+<h1>NaoDec Build — Step 1: Base Platform Setup</h1>
+<p><strong>Revision:</strong> 1.1
+<strong>Date:</strong> 2026-07-14
+<strong>Status:</strong> Drafted from the author&#39;s outline — materials, dimensions, and load rating are not yet specified (see Open Items). Do not place an occupant on the finished platform until those are filled in and the Release Gate passes.</p>
+<blockquote>
+<p>Rev 1.1 — Cable-egress open items updated for decision 1 (controller unit sits <em>outside</em>
+the structure, ~2–3 m from node 1 — not under the platform as originally planned), plus
+floor cable protection on the walk-in path. See
+<a href="NaoDec_Build_Pending_Decisions.html"><code>NaoDec_Build_Pending_Decisions.html</code></a>.</p>
+</blockquote>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Next: <a href="NaoDec_Build_Step2_Structure_Setup.html">Step 2 — NaoDec Structure Set-Up</a></p>
+<h2>Purpose</h2>
+<p>Step 1 builds the load path the whole installation stands and sits on, bottom to top:</p>
+<pre><code>ground → plastic pallet → rise-up platform → chair platform → chair → occupant
+                              └── also carries the NaoDec frame (Step 2) ──┘
+</code></pre>
+<p>The pallet spreads load to the ground; the riser lifts the frame clear of the vertex hardware; the chair platform carries the chair and occupant and routes their weight back down through the riser to the pallet.</p>
+<h2>Quick Reference</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Sub-step</th>
+<th>Element</th>
+<th>Carries</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1.1</td>
+<td>Plastic pallet</td>
+<td>Everything above it — the foundation</td>
+</tr>
+<tr>
+<td>1.2</td>
+<td>Rise-up platform</td>
+<td>The NaoDec frame (Step 2); sets clearance for the Vertex units</td>
+</tr>
+<tr>
+<td>1.3</td>
+<td>Chair platform</td>
+<td>The chair + occupant; routes weight to the pallet</td>
+</tr>
+</tbody></table></div>
+<h2>1.1 The Plastic Pallet</h2>
+<p><strong>Purpose:</strong> base of the chair platform — the foundation layer the rest of Step 1 sits on.</p>
+<p><strong>Inputs needed (not yet specified — fill in before build):</strong></p>
+<ul>
+<li>Pallet size, quantity, and layout (single pallet vs. multiple joined together)</li>
+<li>Rated load capacity of the pallet(s)</li>
+<li>Ground/floor surface it sits on, and whether it needs leveling shims or anchoring</li>
+<li>Whether pallets are fixed to each other or to the ground</li>
+</ul>
+<p><strong>Procedure</strong></p>
+<ol>
+<li><em>(TBD — confirm the pallet spec above first)</em> Select and inspect the pallet(s): no cracked or missing deck boards/ribs, rated for the expected load.</li>
+<li>Position on level, solid ground in the final installation footprint.</li>
+<li>Check level in both axes; shim as needed.</li>
+<li><em>(TBD)</em> If more than one pallet is used, join them per the layout above.</li>
+</ol>
+<p><strong>Acceptance check:</strong> pallet(s) level, stable underfoot, no rock/flex when weight is applied at the corners.</p>
+<h2>1.2 Structure Rise-Up Platform</h2>
+<p><strong>Purpose:</strong> raises the NaoDec framework structure up off the pallet, adding clearance underneath for the Vertex units.</p>
+<p><strong>Inputs needed (not yet specified):</strong></p>
+<ul>
+<li>Riser height (driven by how much clearance the Vertex units need underneath — see Open Items)</li>
+<li>Riser material and construction</li>
+<li>Attachment method to the pallet below and to the structure above</li>
+<li>Whether the riser is a full platform (deck) or a perimeter/frame support</li>
+</ul>
+<p><strong>Procedure</strong></p>
+<ol>
+<li><em>(TBD)</em> Build/position the riser at the specified height on top of the pallet(s).</li>
+<li>Fasten to the pallet per the attachment method above.</li>
+<li>Verify clearance underneath matches what the Vertex units (Step 2 / LED channel 1 hardware — see <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code>) actually need.</li>
+<li>Recheck level after the riser is on.</li>
+</ol>
+<p><strong>Acceptance check:</strong> riser is level, fixed to the pallet (no shift), and clearance underneath matches the Vertex unit requirement.</p>
+<h2>1.3 The Chair Platform</h2>
+<p><strong>Purpose:</strong> base for the chair and occupant. Distributes their combined weight down to the pallet. The chair sits on this platform with its legs <strong>position-locked</strong> so it can&#39;t shift.</p>
+<p><strong>Inputs needed (not yet specified):</strong></p>
+<ul>
+<li>Platform size/shape and material</li>
+<li>Rated load: chair weight + max occupant weight + safety factor <em>(see Safety, below — this is the one that matters most)</em></li>
+<li>Chair make/model and leg footprint (spacing/pattern), so the lock hardware lines up</li>
+<li>Lock mechanism at the chair legs (e.g. cleats, brackets, track, pins — not yet chosen)</li>
+</ul>
+<p><strong>Procedure</strong></p>
+<ol>
+<li><em>(TBD)</em> Build/position the chair platform on top of the riser (1.2), fastened per its attachment method.</li>
+<li>Mark and install the chair-leg lock hardware at the chair&#39;s actual leg footprint.</li>
+<li>Place the chair and engage the leg locks.</li>
+<li>Test: apply expected occupant weight and confirm no shift, rock, or leg walk at the locks.</li>
+</ol>
+<p><strong>Acceptance check:</strong> chair platform fixed to the riser; chair legs locked and immovable under test load.</p>
+<h2>Safety</h2>
+<p><strong>This platform is going to carry a seated person.</strong> None of the load-path elements above (pallet, riser, chair platform) have a stated rated load or safety factor yet. Following the same standard the Series Coil subsystem holds itself to (no live current until the loop resistance is measured and gated) — <strong>don&#39;t allow an occupant until:</strong></p>
+<ul>
+<li>A rated load (with safety factor) is specified for the full stack, and</li>
+<li>The assembled stack has been tested at that load without shift, rock, or structural concern.</li>
+</ul>
+<h2>Release Gate</h2>
+<p>Don&#39;t proceed to erecting Step 2 on top of this platform until:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Required Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pallet</td>
+<td>Level, stable, rated load specified</td>
+</tr>
+<tr>
+<td>Rise-up platform</td>
+<td>Level, fixed to pallet, clearance confirmed against Vertex unit needs</td>
+</tr>
+<tr>
+<td>Chair platform</td>
+<td>Fixed to riser, rated load specified</td>
+</tr>
+<tr>
+<td>Chair leg lock</td>
+<td>Installed, tested under expected occupant weight, no shift</td>
+</tr>
+<tr>
+<td>Occupant safety</td>
+<td>Rated load + safety factor confirmed (see Safety)</td>
+</tr>
+</tbody></table></div>
+<h2>Open Items</h2>
+<ol>
+<li><strong>Pallet spec</strong> — size, quantity/layout, rated load: not given yet.</li>
+<li><strong>Riser height and clearance figure</strong> — how much clearance the Vertex units need underneath isn&#39;t stated; needed to size the riser.</li>
+<li><strong>Chair platform load rating</strong> — no number yet for chair + occupant + safety factor. Safety-relevant; see the Safety section above.</li>
+<li><strong>Chair leg lock hardware</strong> — mechanism not chosen (cleat/bracket/track/pin), and depends on the actual chair&#39;s leg footprint.</li>
+<li><strong>Interface to Step 2</strong> — how the dodecahedron&#39;s open bottom face (<code>f12</code>, per <code>NaoDec_3D_Structure_Framework_Rev1.0.html</code>) actually lands on / attaches to this platform isn&#39;t described yet in either step.</li>
+<li><strong>Cable exit at node 1</strong> — every wire run (Steps 3–6) leaves the structure near the v1 base corner toward the controller unit ~2–3 m away, at ground level. The pass-through (under a ground edge? a notch in the platform lip? a grommeted channel?) has to be provisioned in this step&#39;s build, and isn&#39;t specified.</li>
+<li><strong>Floor cable protection</strong> — the occupant walks in through the door (<code>f11</code>) and across the platform to the chair; the base-edge LED runs and the node-1 harness cross that path. Ramped covers / routing away from the walk path: not specified.</li>
+</ol>
+<hr>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Next: <a href="NaoDec_Build_Step2_Structure_Setup.html">Step 2 — NaoDec Structure Set-Up</a></p>
+
+</main>
+<footer class="foot">Self-contained HTML — diagrams pre-rendered, no external dependencies. Generated from the Markdown build docs in this repository.</footer>
+</body>
+</html>

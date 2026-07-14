@@ -67,7 +67,7 @@ Run the controller's own acceptance suite as-is — `NaoDec_Media_Playback_Contr
 
 ## 9.8 Coils (pre-release gate — do this last, cautiously)
 
-- **Do not energize** until the XL4015 is qualified per the mockup procedure (`XL4015_CC_CV_Mockup_Test_Procedure.md`, referenced by the coil docs [`NaoDec_Series_Coil_Build_Rev0_Pre-Release.html`](NaoDec_Series_Coil_Build_Rev0_Pre-Release.html) / [`NaoDec_Vertex_Series_Coil_Rev1.0.html`](NaoDec_Vertex_Series_Coil_Rev1.0.html)) **and** the assembled-loop resistance is measured against the ~1.85 Ω estimate.
+- **Do not energize** until the XL4015 is qualified per [`XL4015_CC_CV_Mockup_Test_Procedure.md`](XL4015_CC_CV_Mockup_Test_Procedure.md) **and** the assembled-loop resistance is measured against the ~1.85 Ω estimate.
 - Set CV 11.0 V, CC 3.0 A on the bench first; exact-3 A fuse in; thermal cutoff bonded.
 - Only then bring the loop up through the buck; watch the TCO and connector temperatures.
 - This subsystem stays **pre-release** — commissioning it is a gated experiment, not a routine power-up.

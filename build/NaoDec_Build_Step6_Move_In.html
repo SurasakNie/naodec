@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec Build — Step 6: Move-In — Scent · Subwoofer · Chair — NaoDec</title>
+<style>
+:root{color-scheme:light dark;
+ --bg:#ffffff;--fg:#1e2222;--muted:#6b7a7a;--rule:#dce3e3;--link:#0b6a63;--link-hover:#0b63d6;
+ --code-bg:rgba(128,128,128,.12);--card:#f6f8f8;--accent:#0f766e;--warn-bg:#fff4e5;--warn-br:#e0a34d;--warn-fg:#7a4a00;}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b1113;--fg:#e6edef;--muted:#8eb5b8;--rule:rgba(142,181,184,.25);--link:#88e2d6;--link-hover:#eaddaa;
+ --code-bg:rgba(142,181,184,.15);--card:#111a1c;--accent:#88e2d6;--warn-bg:#2a2012;--warn-br:#7a5a2a;--warn-fg:#eaddaa;}}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;
+ padding:0 1.1rem 4rem;line-height:1.65;background:var(--bg);color:var(--fg);}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);
+ padding:.7rem 0;margin-bottom:1.5rem;display:flex;align-items:baseline;gap:.6rem;font-size:.85rem;z-index:5;}
+header.top .brand{font-weight:700;color:var(--accent);letter-spacing:.02em;}
+header.top .sub{color:var(--muted);}
+h1{border-bottom:2px solid var(--rule);padding-bottom:.35rem;line-height:1.25;}
+h2{margin-top:2.2rem;border-bottom:1px solid var(--rule);padding-bottom:.25rem;}
+h3{margin-top:1.6rem;}h4{margin-top:1.2rem;color:var(--muted);}
+a{color:var(--link);text-decoration:none;}a:hover{color:var(--link-hover);text-decoration:underline;}
+p.nav{font-size:.9rem;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.5rem .8rem;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.9em;}
+pre{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.9rem 1rem;overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:var(--warn-bg);border-left:4px solid var(--warn-br);
+ border-radius:0 6px 6px 0;color:var(--warn-fg);}
+blockquote p{margin:.35rem 0;}
+.table-wrap{overflow-x:auto;margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{border:1px solid var(--rule);padding:.4rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--card);}
+figure.diagram{margin:1.3rem 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1rem;
+ overflow-x:auto;text-align:center;}
+figure.diagram svg{max-width:100%;height:auto;}
+img{max-width:100%;height:auto;border-radius:6px;}
+figcaption,em img+em{color:var(--muted);}
+hr{border:none;border-top:1px solid var(--rule);margin:2rem 0;}
+footer.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.8rem;}
+</style>
+</head>
+<body>
+<header class="top"><span class="brand">NaoDec</span><span class="sub">Build Work Instructions</span></header>
+<main>
+<h1>NaoDec Build — Step 6: Move-In — Scent · Subwoofer · Chair</h1>
+<p><strong>Revision:</strong> 1.0
+<strong>Date:</strong> 2026-07-14
+<strong>Status:</strong> Drafted from the author&#39;s outline + decisions 1, 2, 4, 5, 9. Equipment models and mains routing TBD (see Open Items).</p>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step5_Speaker_Installation.html">Step 5 — Speaker Installation</a> · Next: <a href="NaoDec_Build_Step7_Edge_Covers.html">Step 7 — Edge Covers</a></p>
+<h2>Purpose</h2>
+<p>One move-in wave (decision 9④): bring the <strong>scent atomizer unit</strong>, the <strong>subwoofer</strong>, and the <strong>chair</strong> in through the door, position the chair on its footing guide, then route all their cables out at node 1.</p>
+<h2>Quick Reference</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Placement</th>
+<th>Signal/drive</th>
+<th>Power</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Scent atomizer/mist unit</td>
+<td>beside the subwoofer</td>
+<td>4 drive lines from the Waveshare relay board <strong>in the controller unit</strong> (decision 4)</td>
+<td>via drive lines (12 V atomizer branch)</td>
+</tr>
+<tr>
+<td>Subwoofer</td>
+<td>on the platform, <strong>left of the chair</strong></td>
+<td><strong>3.5 mm jack direct from the Mac mini</strong> (decision 2)</td>
+<td>own mains — <strong>inside the structure</strong> (flag)</td>
+</tr>
+<tr>
+<td>Chair</td>
+<td>center, <strong>facing v1</strong>, legs in the Step 1.3 position locks</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>4× transducers in the chair</td>
+<td><strong>back set</strong> (upper back + lower back) · <strong>seat set</strong> (left seat + right seat)</td>
+<td>2 × GAB8 channels (decision 2)</td>
+<td>via GAB8</td>
+</tr>
+<tr>
+<td>Media playback controller</td>
+<td>under the <strong>right armrest</strong></td>
+<td>LAN: router (in the controller unit) → node 1 → chair → <strong>W5500 RJ45</strong></td>
+<td>local <strong>5 V/2 A USB adapter</strong> — mains at the chair (flag)</td>
+</tr>
+</tbody></table></div>
+<p><img src="../images/build/step6_user_pov.png" alt="Interior, occupant POV">
+<em>Inside view with the chair prop — the chair faces v1 (bottom center). Snapshot of <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code> (User POV).</em></p>
+<h2>6.1 Scent atomizer unit in</h2>
+<ol>
+<li>Carry the atomizer/mist unit (4 × JY-M27AO discs per <code>NaoDec_Scent_Controller_Schematic_Rev2.0.html</code>) through the door; stage it at the subwoofer position (left of chair) — final placement after the sub is in.</li>
+<li>The <strong>Waveshare board does not move in</strong> — it stays in the controller unit (decision 4); only mist hardware and its drive lines are inside.</li>
+<li>Mind drip/condensation orientation: mist outlet away from the media controller, LED strips, and fabric (see Safety).</li>
+</ol>
+<h2>6.2 Subwoofer in</h2>
+<ol>
+<li>Carry in through the door <strong>over the base-edge LED strips</strong> — lay protection over the strips on the carry path first (e26–e30 are freshly installed).</li>
+<li>Place on the platform, left of the chair position, clear of the door&#39;s swing/egress path.</li>
+<li>Its 3.5 mm line runs to the <strong>Mac mini</strong> (outside, on the table next to the controller unit); its mains lead is an <strong>inside-the-structure power run</strong> — routing TBD (Open Item #3).</li>
+</ol>
+<h2>6.3 Chair in + positioning</h2>
+<ol>
+<li>Confirm door aperture vs. chair dimensions <strong>before lifting</strong> (unverified — Open Item #1).</li>
+<li>Carry in over the protected base edges; set the legs into the <strong>Step 1.3 footing-guide locks</strong>; engage the locks. The chair faces <strong>v1</strong>.</li>
+<li>Transducers — fit before or after carry-in per what access allows (author&#39;s call): <strong>back set</strong> at upper + lower back, <strong>seat set</strong> at left + right seat. Each set wires as one GAB8 channel pair run (2 runs total).</li>
+<li>Mount the <strong>media playback controller</strong> under the right armrest with its switches and volume control reachable by the seated occupant. Its ESP32 lives in this enclosure by design — moved out of the controller unit because panel signal wires don&#39;t tolerate length (see the Placement Requirement in <code>NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md</code> §1). Keep its panel runs ≤ 0.5 m per that doc.</li>
+<li>Plug the W5500&#39;s RJ45 with the LAN run (next section); the controller&#39;s 5 V/2 A USB adapter needs <strong>mains at the chair</strong> (Open Item #3).</li>
+</ol>
+<h2>6.4 Route all cables to node 1</h2>
+<figure class="diagram"><svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 770px; background-color: white;" viewBox="0 0 770 486" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#333333;stroke:#333333;}#my-svg .marker.cross{stroke:#333333;}#my-svg svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#my-svg .cluster-label text{fill:#333;}#my-svg .cluster-label span{color:#333;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#333;color:#333;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#my-svg .arrowheadPath{fill:#333333;}#my-svg .edgePath .path{stroke:#333333;stroke-width:1px;}#my-svg .flowchart-link{stroke:#333333;fill:none;}#my-svg .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#my-svg .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#my-svg .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#my-svg .cluster text{fill:#333;}#my-svg .cluster span{color:#333;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#my-svg .icon-shape .label rect,#my-svg .image-shape .label rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#9370DB;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].swimlane.cluster rect{filter:none;}#my-svg [data-look="neo"].node path{stroke:#9370DB;stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#9370DB;filter:none;}#my-svg [data-look="neo"].node circle{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M256.672,35L262,35C267.328,35,277.984,35,298.974,64.578C319.965,94.155,351.288,153.31,366.95,182.888L382.612,212.465" id="my-svg-L_TB_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_TB_N1_0" data-points="W3sieCI6MjU2LjY3MTg3NSwieSI6MzV9LHsieCI6Mjg4LjY0MDYyNSwieSI6MzV9LHsieCI6Mzg0LjQ4NDE0OTYzOTQyMzEsInkiOjIxNn1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M254.898,139L260.522,139C266.146,139,277.393,139,296.123,151.376C314.853,163.751,341.066,188.503,354.172,200.878L367.279,213.254" id="my-svg-L_TS_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_TS_N1_0" data-points="W3sieCI6MjU0Ljg5ODQzNzUsInkiOjEzOX0seyJ4IjoyODguNjQwNjI1LCJ5IjoxMzl9LHsieCI6MzcwLjE4NzA0OTI3ODg0NjEzLCJ5IjoyMTZ9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M263.641,243L267.807,243C271.974,243,280.307,243,287.974,243C295.641,243,302.641,243,306.141,243L309.641,243" id="my-svg-L_LAN_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_LAN_N1_0" data-points="W3sieCI6MjYzLjY0MDYyNSwieSI6MjQzfSx7IngiOjI4OC42NDA2MjUsInkiOjI0M30seyJ4IjozMTMuNjQwNjI1LCJ5IjoyNDN9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M232.961,347L242.241,347C251.521,347,270.081,347,292.467,334.624C314.853,322.249,341.066,297.497,354.172,285.122L367.279,272.746" id="my-svg-L_SUB_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SUB_N1_0" data-points="W3sieCI6MjMyLjk2MDkzNzUsInkiOjM0N30seyJ4IjoyODguNjQwNjI1LCJ5IjozNDd9LHsieCI6MzcwLjE4NzA0OTI3ODg0NjEzLCJ5IjoyNzB9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M235.859,451L244.656,451C253.453,451,271.047,451,295.506,421.422C319.965,391.845,351.288,332.69,366.95,303.112L382.612,273.535" id="my-svg-L_SCENT_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SCENT_N1_0" data-points="W3sieCI6MjM1Ljg1OTM3NSwieSI6NDUxfSx7IngiOjI4OC42NDA2MjUsInkiOjQ1MX0seyJ4IjozODQuNDg0MTQ5NjM5NDIzMSwieSI6MjcwfV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M417.844,216L433.024,194.5C448.203,173,478.563,130,497.242,108.5C515.922,87,522.922,87,526.422,87L529.922,87" id="my-svg-L_N1_GAB8_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_N1_GAB8_0" data-points="W3sieCI6NDE3Ljg0NDA1MDQ4MDc2OTIsInkiOjIxNn0seyJ4Ijo1MDguOTIxODc1LCJ5Ijo4N30seyJ4Ijo1MzMuOTIxODc1LCJ5Ijo4N31d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M455.97,216L464.795,211.833C473.62,207.667,491.271,199.333,503.818,195.167C516.365,191,523.807,191,527.529,191L531.25,191" id="my-svg-L_N1_RTR_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_N1_RTR_0" data-points="W3sieCI6NDU1Ljk2OTY1MTQ0MjMwNzcsInkiOjIxNn0seyJ4Ijo1MDguOTIxODc1LCJ5IjoxOTF9LHsieCI6NTM1LjI1LCJ5IjoxOTF9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M455.97,270L464.795,274.167C473.62,278.333,491.271,286.667,506.565,290.833C521.859,295,534.797,295,541.266,295L547.734,295" id="my-svg-L_N1_MAC_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_N1_MAC_0" data-points="W3sieCI6NDU1Ljk2OTY1MTQ0MjMwNzcsInkiOjI3MH0seyJ4Ijo1MDguOTIxODc1LCJ5IjoyOTV9LHsieCI6NTUxLjczNDM3NSwieSI6Mjk1fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M417.844,270L433.024,291.5C448.203,313,478.563,356,498.404,377.5C518.245,399,527.568,399,532.229,399L536.891,399" id="my-svg-L_N1_WAVE_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_N1_WAVE_0" data-points="W3sieCI6NDE3Ljg0NDA1MDQ4MDc2OTIsInkiOjI3MH0seyJ4Ijo1MDguOTIxODc1LCJ5IjozOTl9LHsieCI6NTQwLjg5MDYyNSwieSI6Mzk5fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_TB_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_TS_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_LAN_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_SUB_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_SCENT_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_N1_GAB8_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_N1_RTR_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_N1_MAC_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_N1_WAVE_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-TB-0" data-look="classic" transform="translate(135.8203125, 35)"><rect class="basic label-container" style="" x="-120.8515625" y="-27" width="241.703125" height="54"/><g class="label" style="" transform="translate(-90.8515625, -12)"><rect/><foreignObject width="181.703125" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Transducer run · back set</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-N1-1" data-look="classic" transform="translate(398.78125, 243)"><rect class="basic label-container" style="" x="-85.140625" y="-27" width="170.28125" height="54"/><g class="label" style="" transform="translate(-55.140625, -12)"><rect/><foreignObject width="110.28125" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>node 1 (v1) exit</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-TS-2" data-look="classic" transform="translate(135.8203125, 139)"><rect class="basic label-container" style="" x="-119.078125" y="-27" width="238.15625" height="54"/><g class="label" style="" transform="translate(-89.078125, -12)"><rect/><foreignObject width="178.15625" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Transducer run · seat set</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-LAN-4" data-look="classic" transform="translate(135.8203125, 243)"><rect class="basic label-container" style="" x="-127.8203125" y="-27" width="255.640625" height="54"/><g class="label" style="" transform="translate(-97.8203125, -12)"><rect/><foreignObject width="195.640625" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>LAN (W5500 RJ45 at chair)</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SUB-6" data-look="classic" transform="translate(135.8203125, 347)"><rect class="basic label-container" style="" x="-97.140625" y="-27" width="194.28125" height="54"/><g class="label" style="" transform="translate(-67.140625, -12)"><rect/><foreignObject width="134.28125" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Subwoofer 3.5 mm</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SCENT-8" data-look="classic" transform="translate(135.8203125, 451)"><rect class="basic label-container" style="" x="-100.0390625" y="-27" width="200.078125" height="54"/><g class="label" style="" transform="translate(-70.0390625, -12)"><rect/><foreignObject width="140.078125" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Scent drive lines ×4</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-GAB8-11" data-look="classic" transform="translate(647.9609375, 87)"><rect class="basic label-container" style="" x="-114.0390625" y="-27" width="228.078125" height="54"/><g class="label" style="" transform="translate(-84.0390625, -12)"><rect/><foreignObject width="168.078125" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>GAB8 (2 transducer ch)</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-RTR-13" data-look="classic" transform="translate(647.9609375, 191)"><rect class="basic label-container" style="" x="-112.7109375" y="-27" width="225.421875" height="54"/><g class="label" style="" transform="translate(-82.7109375, -12)"><rect/><foreignObject width="165.421875" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Router in controller unit</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-MAC-15" data-look="classic" transform="translate(647.9609375, 295)"><rect class="basic label-container" style="" x="-96.2265625" y="-27" width="192.453125" height="54"/><g class="label" style="" transform="translate(-66.2265625, -12)"><rect/><foreignObject width="132.453125" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Mac mini (3.5 mm)</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-WAVE-17" data-look="classic" transform="translate(647.9609375, 399)"><rect class="basic label-container" style="" x="-107.0703125" y="-27" width="214.140625" height="54"/><g class="label" style="" transform="translate(-77.0703125, -12)"><rect/><foreignObject width="154.140625" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Waveshare relay outs</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs></svg></figure>
+<ol>
+<li>Dress every run to the v1 corner and out the pass-through: <code>XDCR-BACK</code>, <code>XDCR-SEAT</code>, <code>LAN-CHAIR</code>, <code>SUB-3.5</code>, <code>SCENT-1…4</code>. Label both ends.</li>
+<li>Keep the floor runs out of the door→chair walk path, or under ramped protection (Step 1 Open Item #7).</li>
+<li>Landing happens in Step 8 (GAB8, router, Waveshare, Mac mini).</li>
+</ol>
+<h2>Safety</h2>
+<ul>
+<li><strong>De-energized work:</strong> Steps 3–5 wiring is all in place around you — nothing is connected to a PSU yet, and it stays that way until Step 9.</li>
+<li><strong>Platform load</strong> — chair + occupant + subwoofer now sit on a stack whose load rating is still unspecified (Step 1 Safety). The gate below inherits that requirement.</li>
+<li><strong>Egress</strong> — subwoofer + scent unit sit between the occupant and the door quadrant; keep a clear walk path.</li>
+<li><strong>Mist near electronics</strong> — atomizer output must not condense onto the media controller, strips, or connectors; fragrance dosing limits for an enclosed occupant are unassessed (Open Item #5).</li>
+</ul>
+<h2>Release Gate</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Required Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Chair</td>
+<td>Legs locked in the footing guides; no shift under test load; facing v1</td>
+</tr>
+<tr>
+<td>Transducers</td>
+<td>Both sets secured in the chair, runs labeled</td>
+</tr>
+<tr>
+<td>Media controller</td>
+<td>Mounted under right armrest; panel runs ≤ 0.5 m; RJ45 connected</td>
+</tr>
+<tr>
+<td>Subwoofer + scent unit</td>
+<td>Placed left of chair, secured, clear of egress</td>
+</tr>
+<tr>
+<td>Cables</td>
+<td>All runs labeled and at node 1 with service loops; walk path protected</td>
+</tr>
+<tr>
+<td>Base-edge LEDs</td>
+<td>Undamaged after carry-ins (re-run the Step 4 continuity spot-check)</td>
+</tr>
+</tbody></table></div>
+<h2>Open Items</h2>
+<ol>
+<li><strong>Door aperture vs. chair dimensions</strong> — unverified; measure both before move-in day.</li>
+<li><strong>Transducer models/impedance</strong> vs. GAB8 channel rating; per-set series/parallel wiring plan.</li>
+<li><strong>Mains inside the structure</strong> — subwoofer mains + chair USB adapter: source, routing, and protection are unspecified (ties into index Open Item #4).</li>
+<li><strong>Scent drive-line spec</strong> — length/gauge for controller unit → node 1 → atomizer unit (~2–3 m + interior run) vs. the schematic&#39;s fusing.</li>
+<li><strong>Humidity/condensation + fragrance exposure</strong> for a person in an enclosed volume — nothing in the repo addresses either.</li>
+<li><strong>Carry-in order within the wave</strong> (sub → scent → chair vs. chair last confirmed) and whether transducers fit before or after the chair enters.</li>
+</ol>
+<hr>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step5_Speaker_Installation.html">Step 5 — Speaker Installation</a> · Next: <a href="NaoDec_Build_Step7_Edge_Covers.html">Step 7 — Edge Covers</a></p>
+
+</main>
+<footer class="foot">Self-contained HTML — diagrams pre-rendered, no external dependencies. Generated from the Markdown build docs in this repository.</footer>
+</body>
+</html>

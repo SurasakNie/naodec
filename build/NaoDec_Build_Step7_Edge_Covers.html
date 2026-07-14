@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec Build — Step 7: Edge Covers — NaoDec</title>
+<style>
+:root{color-scheme:light dark;
+ --bg:#ffffff;--fg:#1e2222;--muted:#6b7a7a;--rule:#dce3e3;--link:#0b6a63;--link-hover:#0b63d6;
+ --code-bg:rgba(128,128,128,.12);--card:#f6f8f8;--accent:#0f766e;--warn-bg:#fff4e5;--warn-br:#e0a34d;--warn-fg:#7a4a00;}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b1113;--fg:#e6edef;--muted:#8eb5b8;--rule:rgba(142,181,184,.25);--link:#88e2d6;--link-hover:#eaddaa;
+ --code-bg:rgba(142,181,184,.15);--card:#111a1c;--accent:#88e2d6;--warn-bg:#2a2012;--warn-br:#7a5a2a;--warn-fg:#eaddaa;}}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;
+ padding:0 1.1rem 4rem;line-height:1.65;background:var(--bg);color:var(--fg);}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);
+ padding:.7rem 0;margin-bottom:1.5rem;display:flex;align-items:baseline;gap:.6rem;font-size:.85rem;z-index:5;}
+header.top .brand{font-weight:700;color:var(--accent);letter-spacing:.02em;}
+header.top .sub{color:var(--muted);}
+h1{border-bottom:2px solid var(--rule);padding-bottom:.35rem;line-height:1.25;}
+h2{margin-top:2.2rem;border-bottom:1px solid var(--rule);padding-bottom:.25rem;}
+h3{margin-top:1.6rem;}h4{margin-top:1.2rem;color:var(--muted);}
+a{color:var(--link);text-decoration:none;}a:hover{color:var(--link-hover);text-decoration:underline;}
+p.nav{font-size:.9rem;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.5rem .8rem;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.9em;}
+pre{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.9rem 1rem;overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:var(--warn-bg);border-left:4px solid var(--warn-br);
+ border-radius:0 6px 6px 0;color:var(--warn-fg);}
+blockquote p{margin:.35rem 0;}
+.table-wrap{overflow-x:auto;margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{border:1px solid var(--rule);padding:.4rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--card);}
+figure.diagram{margin:1.3rem 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1rem;
+ overflow-x:auto;text-align:center;}
+figure.diagram svg{max-width:100%;height:auto;}
+img{max-width:100%;height:auto;border-radius:6px;}
+figcaption,em img+em{color:var(--muted);}
+hr{border:none;border-top:1px solid var(--rule);margin:2rem 0;}
+footer.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.8rem;}
+</style>
+</head>
+<body>
+<header class="top"><span class="brand">NaoDec</span><span class="sub">Build Work Instructions</span></header>
+<main>
+<h1>NaoDec Build — Step 7: Edge Covers</h1>
+<p><strong>Revision:</strong> 1.0
+<strong>Date:</strong> 2026-07-14
+<strong>Status:</strong> Drafted from the author&#39;s outline + decision 9⑤. Cover material, profile, and fixing method are TBD (see Open Items).</p>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step6_Move_In.html">Step 6 — Move-In</a> · Next: <a href="NaoDec_Build_Step8_Controller_Unit_Hookup.html">Step 8 — Controller Unit Hookup</a></p>
+<h2>Purpose</h2>
+<p>Fit the <strong>25 external edge covers</strong> over the 25 lettered joints, closing out the structure&#39;s outside seams. The 5 ground-resting edges get no cover.</p>
+<h2>Quick Reference</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Covers</td>
+<td><strong>25 pieces</strong> — one per lettered joint (A–Z, no <code>W</code>)</td>
+</tr>
+<tr>
+<td>No cover on</td>
+<td>the 5 unlettered ground edges (<code>f7</code>–<code>f11</code> base edges)</td>
+</tr>
+<tr>
+<td>Per joint, on that edge</td>
+<td>2 hinges (Step 2) + internal LED strip (Step 4) + on joint M a speaker (Step 5) + this cover</td>
+</tr>
+<tr>
+<td>Door joints</td>
+<td>A, B, K, L — covers here must not block the door mechanism</td>
+</tr>
+<tr>
+<td>Top joints</td>
+<td>U, V, X, Y, Z — overhead work</td>
+</tr>
+</tbody></table></div>
+<p>The 25 lettered joints (from the marking guides): A B C D E F G H I J K L M N O P Q R S T U V X Y Z.</p>
+<h2>7.1 Fit the covers</h2>
+<ol>
+<li>Fit each cover over the <strong>outside</strong> of its lettered joint — the LED strips run on the inside (Step 4), so covers and strips are on opposite faces of the edge.</li>
+<li>Each cover must <strong>clear the 2 hinges</strong> on that joint and any speaker/bracket hardware (joint M) — profile has to bridge or notch around them (Open Item #1).</li>
+<li>Work bottom-up so offcuts/tools don&#39;t fall onto finished lower work; leave the <strong>5 top joints (U, V, X, Y, Z) for last</strong> — overhead work.</li>
+<li><strong>Door joints A, B, K, L:</strong> fit so the door still opens per the Step 2 mechanism decision — a cover spanning the door&#39;s hinge line or latch side can lock it shut (Open Item #3).</li>
+</ol>
+<blockquote>
+<p>The covers hide the assembly letters. Since the marking system exists for teardown/re-assembly, record each cover&#39;s joint letter <strong>on the cover itself</strong> (inside face) or keep a teardown map, so letters stay findable later (Open Item #2).</p>
+</blockquote>
+<h2>Safety</h2>
+<ul>
+<li>Overhead work for the top joints — positive fastening, nothing relying on friction over the occupant.</li>
+<li>Ladder work inside/outside the closed structure; the chair and equipment are now in place (Step 6), so protect them below the work.</li>
+</ul>
+<h2>Release Gate</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Required Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Count</td>
+<td>25 covers fitted, one per lettered joint; ground edges bare</td>
+</tr>
+<tr>
+<td>Clearance</td>
+<td>Each cover clears its hinges + hardware; no fabric pinch</td>
+</tr>
+<tr>
+<td>Door</td>
+<td>Door joints&#39; covers do not impede opening/closing from inside</td>
+</tr>
+<tr>
+<td>Teardown</td>
+<td>Joint letters recorded on/with each cover</td>
+</tr>
+</tbody></table></div>
+<h2>Open Items</h2>
+<ol>
+<li><strong>Cover material / profile / fixing method</strong> — screwed, clipped, magnetic, snap-fit? Must span/notch the 2 hinges (+ speaker on M). TBD.</li>
+<li><strong>Removability for teardown</strong> — covers + hinges must come apart for repeat assembly (index Open Item #5); letters stay findable.</li>
+<li><strong>Door-edge covers vs. door swing</strong> — depends on the door mechanism (Step 2 Open Item #1).</li>
+<li><strong>Function of the covers</strong> — purely cosmetic edge trim, or do they also seal the fabric edges against light leak / weather? Not stated; affects material choice.</li>
+</ol>
+<hr>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step6_Move_In.html">Step 6 — Move-In</a> · Next: <a href="NaoDec_Build_Step8_Controller_Unit_Hookup.html">Step 8 — Controller Unit Hookup</a></p>
+
+</main>
+<footer class="foot">Self-contained HTML — diagrams pre-rendered, no external dependencies. Generated from the Markdown build docs in this repository.</footer>
+</body>
+</html>

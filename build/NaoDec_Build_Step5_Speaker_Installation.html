@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec Build — Step 5: Speaker Installation — NaoDec</title>
+<style>
+:root{color-scheme:light dark;
+ --bg:#ffffff;--fg:#1e2222;--muted:#6b7a7a;--rule:#dce3e3;--link:#0b6a63;--link-hover:#0b63d6;
+ --code-bg:rgba(128,128,128,.12);--card:#f6f8f8;--accent:#0f766e;--warn-bg:#fff4e5;--warn-br:#e0a34d;--warn-fg:#7a4a00;}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b1113;--fg:#e6edef;--muted:#8eb5b8;--rule:rgba(142,181,184,.25);--link:#88e2d6;--link-hover:#eaddaa;
+ --code-bg:rgba(142,181,184,.15);--card:#111a1c;--accent:#88e2d6;--warn-bg:#2a2012;--warn-br:#7a5a2a;--warn-fg:#eaddaa;}}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;
+ padding:0 1.1rem 4rem;line-height:1.65;background:var(--bg);color:var(--fg);}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);
+ padding:.7rem 0;margin-bottom:1.5rem;display:flex;align-items:baseline;gap:.6rem;font-size:.85rem;z-index:5;}
+header.top .brand{font-weight:700;color:var(--accent);letter-spacing:.02em;}
+header.top .sub{color:var(--muted);}
+h1{border-bottom:2px solid var(--rule);padding-bottom:.35rem;line-height:1.25;}
+h2{margin-top:2.2rem;border-bottom:1px solid var(--rule);padding-bottom:.25rem;}
+h3{margin-top:1.6rem;}h4{margin-top:1.2rem;color:var(--muted);}
+a{color:var(--link);text-decoration:none;}a:hover{color:var(--link-hover);text-decoration:underline;}
+p.nav{font-size:.9rem;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.5rem .8rem;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.9em;}
+pre{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.9rem 1rem;overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:var(--warn-bg);border-left:4px solid var(--warn-br);
+ border-radius:0 6px 6px 0;color:var(--warn-fg);}
+blockquote p{margin:.35rem 0;}
+.table-wrap{overflow-x:auto;margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{border:1px solid var(--rule);padding:.4rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--card);}
+figure.diagram{margin:1.3rem 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1rem;
+ overflow-x:auto;text-align:center;}
+figure.diagram svg{max-width:100%;height:auto;}
+img{max-width:100%;height:auto;border-radius:6px;}
+figcaption,em img+em{color:var(--muted);}
+hr{border:none;border-top:1px solid var(--rule);margin:2rem 0;}
+footer.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.8rem;}
+</style>
+</head>
+<body>
+<header class="top"><span class="brand">NaoDec</span><span class="sub">Build Work Instructions</span></header>
+<main>
+<h1>NaoDec Build — Step 5: Speaker Installation</h1>
+<p><strong>Revision:</strong> 1.0
+<strong>Date:</strong> 2026-07-14
+<strong>Status:</strong> Drafted from the author&#39;s outline + decisions 2 and 9. Speaker models and mounting hardware TBD (see Open Items). Speakers install <strong>before</strong> the move-in wave so the overhead work happens while the floor is still clear.</p>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step4_Internal_Edge_Units_Installation.html">Step 4 — Internal Edge Units</a> · Next: <a href="NaoDec_Build_Step6_Move_In.html">Step 6 — Move-In</a></p>
+<h2>Purpose</h2>
+<p>Mount the six speakers on their assigned joint edges and route all six cable runs out at node 1, ready to land on the <strong>Wondom GAB8</strong> amplifier at the controller-unit area (Step 8).</p>
+<h2>Quick Reference</h2>
+<p>Positions are the <strong>seated occupant&#39;s frame</strong> (chair faces v1 — see the index Orientation Reference). Letters are <strong>structural joint letters</strong>, not the LED &quot;Edge A–F&quot; circuit names.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Speaker</th>
+<th>Joint</th>
+<th>Faces</th>
+<th>Edge (vertices)</th>
+<th>Position (occupant frame)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A</td>
+<td>A</td>
+<td>f6–f11</td>
+<td>v14–v15</td>
+<td>back right</td>
+</tr>
+<tr>
+<td>H</td>
+<td>H</td>
+<td>f5–f9</td>
+<td>v11–v12</td>
+<td>back left</td>
+</tr>
+<tr>
+<td>C</td>
+<td>C</td>
+<td>f2–f7</td>
+<td>v6–v7</td>
+<td>front right</td>
+</tr>
+<tr>
+<td>F</td>
+<td>F</td>
+<td>f4–f8</td>
+<td>v9–v10</td>
+<td>front left</td>
+</tr>
+<tr>
+<td>Y</td>
+<td>Y</td>
+<td>f1–f3</td>
+<td>v17–v18</td>
+<td>front up</td>
+</tr>
+<tr>
+<td>M</td>
+<td>M</td>
+<td>f7–f8</td>
+<td>v1–v8</td>
+<td>front down</td>
+</tr>
+</tbody></table></div>
+<p>Amplification (decision 2): all six land on the <strong>Wondom GAB8</strong> (10×50 W class-D, USB-C UAC2.0 audio from the Mac mini, 24 VDC supply — <a href="https://files.sure-electronics.com/download/GAB8_10x50W_USB_Codec_Input_User_Manual.pdf">manufacturer manual</a>). Six of its channels are speakers; two more drive the chair transducer sets (Step 6).</p>
+<h2>5.1 Mounting</h2>
+<ol>
+<li>Verify each target edge by its <strong>joint letter</strong> on the frame (A, H, C, F, Y, M) against the table — don&#39;t trust memory of left/right, the frame letters are ground truth.</li>
+<li>Fix each speaker to <strong>frame members only — never to fabric</strong> (fabric carries no load and will buzz).</li>
+<li>Per-edge cautions:<ul>
+<li><strong>M (v1–v8):</strong> this is hinged pair f7-f8&#39;s fold line, already carrying an LED strip — position the speaker so hinge, strip, and bracket don&#39;t collide (Step 2 Open Item #5).</li>
+<li><strong>A (v14–v15):</strong> one of its faces is the <strong>door</strong> (f11) — mount on the f6 side of the joint unless the door mechanism decision says otherwise, and confirm the door still operates.</li>
+<li><strong>Y (v17–v18):</strong> overhead work at the ceiling ring — do it now while the floor is empty; the mount is overhead of the occupant, so it must be positively fastened (no friction/adhesive-only fixing).</li>
+</ul>
+</li>
+<li>Aim/orientation toward the chair position (chair faces v1) — final aiming can wait for Step 9&#39;s audio checks.</li>
+</ol>
+<h2>5.2 Cabling</h2>
+<figure class="diagram"><svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 633.297px; background-color: white;" viewBox="0 0 633.296875 590" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#333333;stroke:#333333;}#my-svg .marker.cross{stroke:#333333;}#my-svg svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#my-svg .cluster-label text{fill:#333;}#my-svg .cluster-label span{color:#333;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#333;color:#333;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#my-svg .arrowheadPath{fill:#333333;}#my-svg .edgePath .path{stroke:#333333;stroke-width:1px;}#my-svg .flowchart-link{stroke:#333333;fill:none;}#my-svg .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#my-svg .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#my-svg .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#my-svg .cluster text{fill:#333;}#my-svg .cluster span{color:#333;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#my-svg .icon-shape .label rect,#my-svg .image-shape .label rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#9370DB;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].swimlane.cluster rect{filter:none;}#my-svg [data-look="neo"].node path{stroke:#9370DB;stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#9370DB;filter:none;}#my-svg [data-look="neo"].node circle{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M165.82,35L170.728,35C175.635,35,185.451,35,203.653,71.208C221.856,107.415,248.445,179.83,261.74,216.038L275.035,252.245" id="my-svg-L_SA_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SA_N1_0" data-points="W3sieCI6MTY1LjgyMDMxMjUsInkiOjM1fSx7IngiOjE5NS4yNjU2MjUsInkiOjM1fSx7IngiOjI3Ni40MTQwNjI1LCJ5IjoyNTZ9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M161.813,139L167.388,139C172.964,139,184.115,139,201.276,157.931C218.437,176.863,241.608,214.725,253.194,233.657L264.779,252.588" id="my-svg-L_SH_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SH_N1_0" data-points="W3sieCI6MTYxLjgxMjUsInkiOjEzOX0seyJ4IjoxOTUuMjY1NjI1LCJ5IjoxMzl9LHsieCI6MjY2Ljg2NzE4NzUsInkiOjI1Nn1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M165.813,243L170.721,243C175.63,243,185.448,243,193.938,244.951C202.428,246.901,209.59,250.802,213.172,252.753L216.753,254.704" id="my-svg-L_SC_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SC_N1_0" data-points="W3sieCI6MTY1LjgxMjUsInkiOjI0M30seyJ4IjoxOTUuMjY1NjI1LCJ5IjoyNDN9LHsieCI6MjIwLjI2NTYyNSwieSI6MjU2LjYxNzAyMTI3NjU5NTd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M160.031,347L165.904,347C171.776,347,183.521,347,192.974,345.049C202.428,343.099,209.59,339.198,213.172,337.247L216.753,335.296" id="my-svg-L_SF_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SF_N1_0" data-points="W3sieCI6MTYwLjAzMTI1LCJ5IjozNDd9LHsieCI6MTk1LjI2NTYyNSwieSI6MzQ3fSx7IngiOjIyMC4yNjU2MjUsInkiOjMzMy4zODI5Nzg3MjM0MDQzfV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M158.563,451L164.68,451C170.797,451,183.031,451,200.734,432.069C218.437,413.137,241.608,375.275,253.194,356.343L264.779,337.412" id="my-svg-L_SY_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SY_N1_0" data-points="W3sieCI6MTU4LjU2MjUsInkiOjQ1MX0seyJ4IjoxOTUuMjY1NjI1LCJ5Ijo0NTF9LHsieCI6MjY2Ljg2NzE4NzUsInkiOjMzNH1d" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M170.266,555L174.432,555C178.599,555,186.932,555,204.394,518.792C221.856,482.585,248.445,410.17,261.74,373.962L275.035,337.755" id="my-svg-L_SM_N1_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_SM_N1_0" data-points="W3sieCI6MTcwLjI2NTYyNSwieSI6NTU1fSx7IngiOjE5NS4yNjU2MjUsInkiOjU1NX0seyJ4IjoyNzYuNDE0MDYyNSwieSI6MzM0fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M361.203,295L365.37,295C369.536,295,377.87,295,385.536,295C393.203,295,400.203,295,403.703,295L407.203,295" id="my-svg-L_N1_GAB8_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_N1_GAB8_0" data-points="W3sieCI6MzYxLjIwMzEyNSwieSI6Mjk1fSx7IngiOjM4Ni4yMDMxMjUsInkiOjI5NX0seyJ4Ijo0MTEuMjAzMTI1LCJ5IjoyOTV9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_SA_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_SH_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_SC_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_SF_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_SY_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_SM_N1_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_N1_GAB8_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-SA-0" data-look="classic" transform="translate(89.1328125, 35)"><rect class="basic label-container" style="" x="-76.6875" y="-27" width="153.375" height="54"/><g class="label" style="" transform="translate(-46.6875, -12)"><rect/><foreignObject width="93.375" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>A · back right</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-N1-1" data-look="classic" transform="translate(290.734375, 295)"><rect class="basic label-container" style="" x="-70.46875" y="-39" width="140.9375" height="78"/><g class="label" style="" transform="translate(-40.46875, -24)"><rect/><foreignObject width="80.9375" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>node 1 (v1)<br />exit</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SH-2" data-look="classic" transform="translate(89.1328125, 139)"><rect class="basic label-container" style="" x="-72.6796875" y="-27" width="145.359375" height="54"/><g class="label" style="" transform="translate(-42.6796875, -12)"><rect/><foreignObject width="85.359375" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>H · back left</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SC-4" data-look="classic" transform="translate(89.1328125, 243)"><rect class="basic label-container" style="" x="-76.6796875" y="-27" width="153.359375" height="54"/><g class="label" style="" transform="translate(-46.6796875, -12)"><rect/><foreignObject width="93.359375" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>C · front right</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SF-6" data-look="classic" transform="translate(89.1328125, 347)"><rect class="basic label-container" style="" x="-70.8984375" y="-27" width="141.796875" height="54"/><g class="label" style="" transform="translate(-40.8984375, -12)"><rect/><foreignObject width="81.796875" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>F · front left</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SY-8" data-look="classic" transform="translate(89.1328125, 451)"><rect class="basic label-container" style="" x="-69.4296875" y="-27" width="138.859375" height="54"/><g class="label" style="" transform="translate(-39.4296875, -12)"><rect/><foreignObject width="78.859375" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Y · front up</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-SM-10" data-look="classic" transform="translate(89.1328125, 555)"><rect class="basic label-container" style="" x="-81.1328125" y="-27" width="162.265625" height="54"/><g class="label" style="" transform="translate(-51.1328125, -12)"><rect/><foreignObject width="102.265625" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>M · front down</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-GAB8-13" data-look="classic" transform="translate(518.25, 295)"><rect class="basic label-container" style="" x="-107.046875" y="-39" width="214.09375" height="78"/><g class="label" style="" transform="translate(-77.046875, -24)"><rect/><foreignObject width="154.09375" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Wondom GAB8<br />@ controller-unit area</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs></svg></figure>
+<ol>
+<li>Run each speaker cable along frame members to the base, converge at the <strong>v1 corner</strong>, exit through the Step 1 pass-through.</li>
+<li>Label both ends: <code>SPK-A</code>, <code>SPK-H</code>, <code>SPK-C</code>, <code>SPK-F</code>, <code>SPK-Y</code>, <code>SPK-M</code>.</li>
+<li>Leave the GAB8 ends coiled at the controller-unit area — landing is Step 8.</li>
+</ol>
+<h2>Safety</h2>
+<ul>
+<li>Overhead mass (Y especially): mechanical fixing rated with margin; the occupant sits below.</li>
+<li>Ladder work inside the closed structure — same rules as Steps 3–4.</li>
+<li>The frame&#39;s own load budget is still unrated (Step 2 open) — six speakers add real mass; keep them at/near frame nodes where members meet.</li>
+</ul>
+<h2>Release Gate</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Required Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Placement</td>
+<td>Six speakers on joints A, H, C, F, Y, M, verified against frame letters</td>
+</tr>
+<tr>
+<td>Fixing</td>
+<td>Frame members only; overhead unit Y positively fastened; door (joint A) still operates</td>
+</tr>
+<tr>
+<td>Cabling</td>
+<td>Six labeled runs to node 1, service loops left</td>
+</tr>
+<tr>
+<td>Clearance</td>
+<td>No contact between speaker/bracket and fabric, hinges, or LED strips</td>
+</tr>
+</tbody></table></div>
+<h2>Open Items</h2>
+<ol>
+<li><strong>Speaker models + impedance</strong> — GAB8 channels are rated at 4 Ω; confirm the chosen drivers match, and per-channel power vs. driver rating.</li>
+<li><strong>GAB8 physical location</strong> — assumed at the controller-unit table (USB-C must reach the Mac mini beside the unit); confirm, and whether it mounts inside the unit or on the table. Its <strong>24 VDC supply</strong> is a new PSU not in any power doc (recorded in Step 8).</li>
+<li><strong>Mounting hardware</strong> per speaker (bracket type, fastener spec): TBD.</li>
+<li><strong>Verify positions once v1&#39;s site orientation is fixed</strong> — the occupant-frame labels in the table were the author&#39;s intent; re-check each against the letters after Step 2 registration (index Open Item #3).</li>
+<li><strong>Cable spec</strong> (gauge/length per run for ~2–3 m outside + interior height runs): TBD.</li>
+</ol>
+<hr>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step4_Internal_Edge_Units_Installation.html">Step 4 — Internal Edge Units</a> · Next: <a href="NaoDec_Build_Step6_Move_In.html">Step 6 — Move-In</a></p>
+
+</main>
+<footer class="foot">Self-contained HTML — diagrams pre-rendered, no external dependencies. Generated from the Markdown build docs in this repository.</footer>
+</body>
+</html>

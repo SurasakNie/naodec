@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec Build — Step 9: Commissioning & Test — NaoDec</title>
+<style>
+:root{color-scheme:light dark;
+ --bg:#ffffff;--fg:#1e2222;--muted:#6b7a7a;--rule:#dce3e3;--link:#0b6a63;--link-hover:#0b63d6;
+ --code-bg:rgba(128,128,128,.12);--card:#f6f8f8;--accent:#0f766e;--warn-bg:#fff4e5;--warn-br:#e0a34d;--warn-fg:#7a4a00;}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b1113;--fg:#e6edef;--muted:#8eb5b8;--rule:rgba(142,181,184,.25);--link:#88e2d6;--link-hover:#eaddaa;
+ --code-bg:rgba(142,181,184,.15);--card:#111a1c;--accent:#88e2d6;--warn-bg:#2a2012;--warn-br:#7a5a2a;--warn-fg:#eaddaa;}}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;
+ padding:0 1.1rem 4rem;line-height:1.65;background:var(--bg);color:var(--fg);}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);
+ padding:.7rem 0;margin-bottom:1.5rem;display:flex;align-items:baseline;gap:.6rem;font-size:.85rem;z-index:5;}
+header.top .brand{font-weight:700;color:var(--accent);letter-spacing:.02em;}
+header.top .sub{color:var(--muted);}
+h1{border-bottom:2px solid var(--rule);padding-bottom:.35rem;line-height:1.25;}
+h2{margin-top:2.2rem;border-bottom:1px solid var(--rule);padding-bottom:.25rem;}
+h3{margin-top:1.6rem;}h4{margin-top:1.2rem;color:var(--muted);}
+a{color:var(--link);text-decoration:none;}a:hover{color:var(--link-hover);text-decoration:underline;}
+p.nav{font-size:.9rem;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.5rem .8rem;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.9em;}
+pre{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.9rem 1rem;overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:var(--warn-bg);border-left:4px solid var(--warn-br);
+ border-radius:0 6px 6px 0;color:var(--warn-fg);}
+blockquote p{margin:.35rem 0;}
+.table-wrap{overflow-x:auto;margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{border:1px solid var(--rule);padding:.4rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--card);}
+figure.diagram{margin:1.3rem 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1rem;
+ overflow-x:auto;text-align:center;}
+figure.diagram svg{max-width:100%;height:auto;}
+img{max-width:100%;height:auto;border-radius:6px;}
+figcaption,em img+em{color:var(--muted);}
+hr{border:none;border-top:1px solid var(--rule);margin:2rem 0;}
+footer.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.8rem;}
+</style>
+</head>
+<body>
+<header class="top"><span class="brand">NaoDec</span><span class="sub">Build Work Instructions</span></header>
+<main>
+<h1>NaoDec Build — Step 9: Commissioning &amp; Test</h1>
+<p><strong>Revision:</strong> 1.0
+<strong>Date:</strong> 2026-07-14
+<strong>Status:</strong> Drafted from decision 8. This is the first power-up: it references the existing subsystem test procedures rather than restating them. Acceptance thresholds for audio/haptics and the occupant-safety sign-off are still owed (see Open Items).</p>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step8_Controller_Unit_Hookup.html">Step 8 — Controller Unit Hookup</a></p>
+<h2>Purpose</h2>
+<p>Bring the fully wired installation to life in a controlled order, verify every subsystem, and run an end-to-end show before it carries an occupant.</p>
+<h2>Quick Reference — power-up order</h2>
+<figure class="diagram"><svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 1964.73px; background-color: white;" viewBox="0 0 1964.734375 94" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#333333;stroke:#333333;}#my-svg .marker.cross{stroke:#333333;}#my-svg svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#my-svg .cluster-label text{fill:#333;}#my-svg .cluster-label span{color:#333;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#333;color:#333;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#my-svg .arrowheadPath{fill:#333333;}#my-svg .edgePath .path{stroke:#333333;stroke-width:1px;}#my-svg .flowchart-link{stroke:#333333;fill:none;}#my-svg .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#my-svg .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#my-svg .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#my-svg .cluster text{fill:#333;}#my-svg .cluster span{color:#333;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#my-svg .icon-shape .label rect,#my-svg .image-shape .label rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#9370DB;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].swimlane.cluster rect{filter:none;}#my-svg [data-look="neo"].node path{stroke:#9370DB;stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#9370DB;filter:none;}#my-svg [data-look="neo"].node circle{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M259.172,47L263.339,47C267.505,47,275.839,47,283.505,47C291.172,47,298.172,47,301.672,47L305.172,47" id="my-svg-L_A_B_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_A_B_0" data-points="W3sieCI6MjU5LjE3MTg3NSwieSI6NDd9LHsieCI6Mjg0LjE3MTg3NSwieSI6NDd9LHsieCI6MzA5LjE3MTg3NSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M462.578,47L466.745,47C470.911,47,479.245,47,486.911,47C494.578,47,501.578,47,505.078,47L508.578,47" id="my-svg-L_B_C_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_B_C_0" data-points="W3sieCI6NDYyLjU3ODEyNSwieSI6NDd9LHsieCI6NDg3LjU3ODEyNSwieSI6NDd9LHsieCI6NTEyLjU3ODEyNSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M697.969,47L702.135,47C706.302,47,714.635,47,722.302,47C729.969,47,736.969,47,740.469,47L743.969,47" id="my-svg-L_C_D_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_C_D_0" data-points="W3sieCI6Njk3Ljk2ODc1LCJ5Ijo0N30seyJ4Ijo3MjIuOTY4NzUsInkiOjQ3fSx7IngiOjc0Ny45Njg3NSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M954.234,47L958.401,47C962.568,47,970.901,47,978.568,47C986.234,47,993.234,47,996.734,47L1000.234,47" id="my-svg-L_D_E_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_D_E_0" data-points="W3sieCI6OTU0LjIzNDM3NSwieSI6NDd9LHsieCI6OTc5LjIzNDM3NSwieSI6NDd9LHsieCI6MTAwNC4yMzQzNzUsInkiOjQ3fV0=" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M1244.75,47L1248.917,47C1253.083,47,1261.417,47,1269.083,47C1276.75,47,1283.75,47,1287.25,47L1290.75,47" id="my-svg-L_E_F_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_E_F_0" data-points="W3sieCI6MTI0NC43NSwieSI6NDd9LHsieCI6MTI2OS43NSwieSI6NDd9LHsieCI6MTI5NC43NSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M1465.906,47L1470.073,47C1474.24,47,1482.573,47,1490.24,47C1497.906,47,1504.906,47,1508.406,47L1511.906,47" id="my-svg-L_F_G_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_F_G_0" data-points="W3sieCI6MTQ2NS45MDYyNSwieSI6NDd9LHsieCI6MTQ5MC45MDYyNSwieSI6NDd9LHsieCI6MTUxNS45MDYyNSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M1692.422,47L1696.589,47C1700.755,47,1709.089,47,1716.755,47C1724.422,47,1731.422,47,1734.922,47L1738.422,47" id="my-svg-L_G_H_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_G_H_0" data-points="W3sieCI6MTY5Mi40MjE4NzUsInkiOjQ3fSx7IngiOjE3MTcuNDIxODc1LCJ5Ijo0N30seyJ4IjoxNzQyLjQyMTg3NSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_A_B_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_B_C_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_C_D_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_D_E_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_E_F_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_F_G_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_G_H_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-A-0" data-look="classic" transform="translate(133.5859375, 47)"><rect class="basic label-container" style="" x="-125.5859375" y="-39" width="251.171875" height="78"/><g class="label" style="" transform="translate(-95.5859375, -24)"><rect/><foreignObject width="191.171875" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>1 · Pre-power checks<br />rails isolated · GND · fuses</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-B-1" data-look="classic" transform="translate(385.875, 47)"><rect class="basic label-container" style="" x="-76.703125" y="-39" width="153.40625" height="78"/><g class="label" style="" transform="translate(-46.703125, -24)"><rect/><foreignObject width="93.40625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>2 · Logic 5 V<br />ESP32s boot</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-C-3" data-look="classic" transform="translate(605.2734375, 47)"><rect class="basic label-container" style="" x="-92.6953125" y="-39" width="185.390625" height="78"/><g class="label" style="" transform="translate(-62.6953125, -24)"><rect/><foreignObject width="125.390625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>3 · LED 12 V rails<br />vertex + edges</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-D-5" data-look="classic" transform="translate(851.1015625, 47)"><rect class="basic label-container" style="" x="-103.1328125" y="-39" width="206.265625" height="78"/><g class="label" style="" transform="translate(-73.1328125, -24)"><rect/><foreignObject width="146.265625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>4 · Network + WLED<br />DDP · Art-Net</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-E-7" data-look="classic" transform="translate(1124.4921875, 47)"><rect class="basic label-container" style="" x="-120.2578125" y="-39" width="240.515625" height="78"/><g class="label" style="" transform="translate(-90.2578125, -24)"><rect/><foreignObject width="180.515625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>5 · Audio<br />GAB8 · sub · transducers</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-F-9" data-look="classic" transform="translate(1380.328125, 47)"><rect class="basic label-container" style="" x="-85.578125" y="-27" width="171.15625" height="54"/><g class="label" style="" transform="translate(-55.578125, -12)"><rect/><foreignObject width="111.15625" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>6 · Scent relays</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-G-11" data-look="classic" transform="translate(1604.1640625, 47)"><rect class="basic label-container" style="" x="-88.2578125" y="-39" width="176.515625" height="78"/><g class="label" style="" transform="translate(-58.2578125, -24)"><rect/><foreignObject width="116.515625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>7 · Coils LAST<br />pre-release gate</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-H-13" data-look="classic" transform="translate(1849.578125, 47)"><rect class="basic label-container" style="" x="-107.15625" y="-27" width="214.3125" height="54"/><g class="label" style="" transform="translate(-77.15625, -12)"><rect/><foreignObject width="154.3125" height="24"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>8 · End-to-end + soak</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs></svg></figure>
+<h2>9.1 Pre-power checks (de-energized)</h2>
+<p>Confirm, before any PSU is switched on (cite <code>NaoDec_WS2815_LED_Controller_Rev1.6.html</code> engineering notes):</p>
+<ul>
+<li>The three LED V+ rails isolated from each other; coil rail separate; common GND continuous.</li>
+<li>All inline fuses fitted (F1 vertex branch, FB1 edge block, scent F_MAIN, coil exact-3 A).</li>
+<li>No short on any rail to GND.</li>
+</ul>
+<h2>9.2 Power-up order</h2>
+<ol>
+<li><strong>Logic 5 V (PSU-A)</strong> — the 3 ESP32s boot; check 3V3 rails, no brownout.</li>
+<li><strong>LED 12 V rails (PSU-B vertex, PSU-C edges)</strong> — bring up one at a time; watch inrush (NTC1 on the 50 A rail).</li>
+<li><strong>GAB8 24 V — muted</strong> until audio checks; keep gain down.</li>
+<li><strong>Coils — last, and only via their gate</strong> (§9.8).</li>
+</ol>
+<h2>9.3 Network</h2>
+<p>Per <code>NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md</code> §8:</p>
+<ul>
+<li>Router up; DHCP reservations: Mac mini static <code>192.168.50.2</code>, LED boards <code>.111</code>–<code>.113</code>, media controller <code>.114</code>.</li>
+<li>Confirm the media controller leases <code>.114</code> within ~15 s of link (its acceptance test NET-01).</li>
+</ul>
+<h2>9.4 WLED / lighting</h2>
+<ul>
+<li>Master WLED outputs CH1–CH4; Slave receives DDP and outputs CH5–CH7.</li>
+<li>Mac mini streams WLED/Art-Net over USB-C→UART to the Master.</li>
+<li>Verify each channel lights its intended strips; <strong>bench-verify the CH1 vertex waveform</strong> (20 m run, controller Note 14) before trusting it.</li>
+<li>Record the confirmed <strong>C1–C6 ↔ CH2–CH7</strong> mapping from Step 8 against what actually lights.</li>
+</ul>
+<h2>9.5 Media controller</h2>
+<p>Run the controller&#39;s own acceptance suite as-is — <code>NaoDec_Media_Playback_Controller_Build_and_Max_Setup.md</code> §11 (ELEC, NET, FUNC, SYS tests: play/pause/stop one-shot, volume ramp, no-command-on-boot, reconnect, 8 h soak).</p>
+<h2>9.6 Audio</h2>
+<ul>
+<li>GAB8 enumerates as a USB audio device on the Mac mini (macOS, no driver).</li>
+<li>Per-channel check: each of the 6 <strong>speakers</strong> (A, H, C, F, Y, M) sounds on its own channel and in the right occupant-frame position; fix any swap now.</li>
+<li><strong>Transducer sets</strong> (back, seat) drive from their 2 channels — feel, not just level.</li>
+<li><strong>Subwoofer</strong> plays from the Mac mini 3.5 mm line.</li>
+</ul>
+<h2>9.7 Scent</h2>
+<ul>
+<li>Per <code>firmware/Scent_controller/README.md</code>: exercise each of the 4 relays/atomizers (web UI / UDP / serial command), confirm mist output and no drip onto electronics.</li>
+</ul>
+<h2>9.8 Coils (pre-release gate — do this last, cautiously)</h2>
+<ul>
+<li><strong>Do not energize</strong> until the XL4015 is qualified per <a href="../XL4015_CC_CV_Mockup_Test_Procedure.md"><code>XL4015_CC_CV_Mockup_Test_Procedure.md</code></a> <strong>and</strong> the assembled-loop resistance is measured against the ~1.85 Ω estimate.</li>
+<li>Set CV 11.0 V, CC 3.0 A on the bench first; exact-3 A fuse in; thermal cutoff bonded.</li>
+<li>Only then bring the loop up through the buck; watch the TCO and connector temperatures.</li>
+<li>This subsystem stays <strong>pre-release</strong> — commissioning it is a gated experiment, not a routine power-up.</li>
+</ul>
+<h2>9.9 End-to-end &amp; soak</h2>
+<ul>
+<li>Run a full show cue (light + sound + haptics + scent together) from the Mac mini / media controller.</li>
+<li>Soak (8 h target, per the media SYS-02 pattern) with no unintended commands, no thermal creep, no scent drip.</li>
+<li>Complete the commissioning record below.</li>
+</ul>
+<h2>Commissioning Record</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Date / commissioned by</td>
+<td></td>
+</tr>
+<tr>
+<td>Rail isolation + GND verified</td>
+<td></td>
+</tr>
+<tr>
+<td>C1–C6 ↔ CH2–CH7 map confirmed</td>
+<td></td>
+</tr>
+<tr>
+<td>WLED master/slave + Art-Net OK</td>
+<td></td>
+</tr>
+<tr>
+<td>Media controller suite (§11) pass</td>
+<td></td>
+</tr>
+<tr>
+<td>Audio: 6 speakers + 2 transducer sets + sub</td>
+<td></td>
+</tr>
+<tr>
+<td>Scent: 4 atomizers</td>
+<td></td>
+</tr>
+<tr>
+<td>Coils: qualified + loop resistance</td>
+<td>(pre-release)</td>
+</tr>
+<tr>
+<td>End-to-end show + soak</td>
+<td></td>
+</tr>
+<tr>
+<td>Open issues</td>
+<td></td>
+</tr>
+</tbody></table></div>
+<h2>Release Gate</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Required Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Pre-power</td>
+<td>Rails isolated, fuses in, no shorts</td>
+</tr>
+<tr>
+<td>Lighting</td>
+<td>All 7 channels correct; CH1 waveform verified</td>
+</tr>
+<tr>
+<td>Network + media</td>
+<td>Reservations held; media suite passes</td>
+</tr>
+<tr>
+<td>Audio</td>
+<td>All speakers/transducers/sub correct and positioned</td>
+</tr>
+<tr>
+<td>Scent</td>
+<td>All atomizers fire; no drip</td>
+</tr>
+<tr>
+<td>Coils</td>
+<td>Pre-release gate passed or subsystem left un-powered by decision</td>
+</tr>
+<tr>
+<td>Occupant safety</td>
+<td>Signed off (see Open Items) before anyone sits inside</td>
+</tr>
+</tbody></table></div>
+<h2>Open Items</h2>
+<ol>
+<li><strong>Acceptance thresholds</strong> for audio level/positioning and haptic intensity — none defined.</li>
+<li><strong>Occupant-safety sign-off</strong> — who authorizes a person inside (platform load rating, egress, ventilation, mains-inside, fabric-near-strips — all still open across Steps 1, 2, 6 and the index). Step 9 must not pass until that owner signs.</li>
+<li><strong>Coil commissioning</strong> stays pre-release — decide per build whether it&#39;s energized at all in this revision.</li>
+</ol>
+<hr>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step8_Controller_Unit_Hookup.html">Step 8 — Controller Unit Hookup</a></p>
+
+</main>
+<footer class="foot">Self-contained HTML — diagrams pre-rendered, no external dependencies. Generated from the Markdown build docs in this repository.</footer>
+</body>
+</html>
