@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec Build — Step 2: NaoDec Structure Set-Up — NaoDec</title>
+<style>
+:root{color-scheme:light dark;
+ --bg:#ffffff;--fg:#1e2222;--muted:#6b7a7a;--rule:#dce3e3;--link:#0b6a63;--link-hover:#0b63d6;
+ --code-bg:rgba(128,128,128,.12);--card:#f6f8f8;--accent:#0f766e;--warn-bg:#fff4e5;--warn-br:#e0a34d;--warn-fg:#7a4a00;}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b1113;--fg:#e6edef;--muted:#8eb5b8;--rule:rgba(142,181,184,.25);--link:#88e2d6;--link-hover:#eaddaa;
+ --code-bg:rgba(142,181,184,.15);--card:#111a1c;--accent:#88e2d6;--warn-bg:#2a2012;--warn-br:#7a5a2a;--warn-fg:#eaddaa;}}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;
+ padding:0 1.1rem 4rem;line-height:1.65;background:var(--bg);color:var(--fg);}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);
+ padding:.7rem 0;margin-bottom:1.5rem;display:flex;align-items:baseline;gap:.6rem;font-size:.85rem;z-index:5;}
+header.top .brand{font-weight:700;color:var(--accent);letter-spacing:.02em;}
+header.top .sub{color:var(--muted);}
+h1{border-bottom:2px solid var(--rule);padding-bottom:.35rem;line-height:1.25;}
+h2{margin-top:2.2rem;border-bottom:1px solid var(--rule);padding-bottom:.25rem;}
+h3{margin-top:1.6rem;}h4{margin-top:1.2rem;color:var(--muted);}
+a{color:var(--link);text-decoration:none;}a:hover{color:var(--link-hover);text-decoration:underline;}
+p.nav{font-size:.9rem;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.5rem .8rem;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.9em;}
+pre{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.9rem 1rem;overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:var(--warn-bg);border-left:4px solid var(--warn-br);
+ border-radius:0 6px 6px 0;color:var(--warn-fg);}
+blockquote p{margin:.35rem 0;}
+.table-wrap{overflow-x:auto;margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{border:1px solid var(--rule);padding:.4rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--card);}
+figure.diagram{margin:1.3rem 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1rem;
+ overflow-x:auto;text-align:center;}
+figure.diagram svg{max-width:100%;height:auto;}
+img{max-width:100%;height:auto;border-radius:6px;}
+figcaption,em img+em{color:var(--muted);}
+hr{border:none;border-top:1px solid var(--rule);margin:2rem 0;}
+footer.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.8rem;}
+</style>
+</head>
+<body>
+<header class="top"><span class="brand">NaoDec</span><span class="sub">Build Work Instructions</span></header>
+<main>
+<h1>NaoDec Build — Step 2: NaoDec Structure Set-Up</h1>
+<p><strong>Revision:</strong> 1.1
+<strong>Date:</strong> 2026-07-14
+<strong>Status:</strong> 2.1 (panel build) is outlined pending materials; 2.2 (panel installation) is now specified per the author&#39;s decisions — hinged pairs, erection order, and the all-edges-hinged rule. Residual unknowns (door mechanism, hinge spec, bracing) are in Open Items.</p>
+<blockquote>
+<p>Rev 1.1 — §2.2 Panel Installation filled in per decisions 6+7 and 9 in
+<a href="NaoDec_Build_Pending_Decisions.html"><code>NaoDec_Build_Pending_Decisions.html</code></a>: every lettered
+edge carries 2 hinges (ground edges none), panels pre-build into 5 hinged pairs + the
+door, erection runs lower section → upper section → ceiling pair. Face references
+aligned to the marking-guide renumbering (<code>Face N</code> = <code>fN</code>).</p>
+<p>Rev 1.0 — Initial outline (2.1 panel build; 2.2 was undefined).</p>
+</blockquote>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step1_Base_Platform_Setup.html">Step 1 — Base Platform Setup</a> · Next: <a href="NaoDec_Build_Step3_Vertex_Units_Installation.html">Step 3 — Vertex Units Installation</a></p>
+<h2>Purpose</h2>
+<p>Step 2 builds and erects the NaoDec frame itself on top of the Step 1 platform: the 11 built pentagon panels of a regular dodecahedron, joined edge-to-edge by hinges.</p>
+<h2>Quick Reference</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Fact</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Shape</td>
+<td>Regular dodecahedron — 20 vertices, 30 edges, 12 pentagon faces</td>
+</tr>
+<tr>
+<td>Faces built</td>
+<td>11 of 12 — <code>f12</code> (bottom) intentionally unbuilt as the entry opening</td>
+</tr>
+<tr>
+<td>Panel construction</td>
+<td>Wooden frame + stretched fabric</td>
+</tr>
+<tr>
+<td>Panel grouping</td>
+<td><strong>5 hinged pairs + 1 single panel (the door <code>f11</code>)</strong></td>
+</tr>
+<tr>
+<td>Pair hinge joints</td>
+<td><strong>M</strong> (f7-f8) · <strong>O</strong> (f9-f10) · <strong>R</strong> (f2-f6) · <strong>T</strong> (f3-f4) · <strong>U</strong> (f1-f5)</td>
+</tr>
+<tr>
+<td>Joint fastening</td>
+<td><strong>2 hinges per lettered edge — all 25 joints (50 hinges)</strong>; the 5 ground edges get none</td>
+</tr>
+<tr>
+<td>Door face</td>
+<td><code>f11</code></td>
+</tr>
+<tr>
+<td>Top / ceiling face</td>
+<td><code>f1</code></td>
+</tr>
+<tr>
+<td>Dihedral angle</td>
+<td>≈ 116.57° between adjacent faces (regular dodecahedron)</td>
+</tr>
+<tr>
+<td>Joint marking</td>
+<td>Matching letters join (A–Z, no <code>W</code>) — 25 lettered joints, per the marking guides</td>
+</tr>
+<tr>
+<td>Edges resting on the platform</td>
+<td>5 unlettered edges, on faces <code>f7</code>–<code>f11</code></td>
+</tr>
+</tbody></table></div>
+<p><img src="../images/build/step2_joints_iso.png" alt="Assembly letters and faces — isometric view">
+<em>Assembly letters on the 30 edges, <code>f1 · Top</code>, <code>f11 · Door</code>, and the 5 dashed OPEN base edges. Snapshot of <code>NaoDec_3D_Structure_Framework_Rev1.0.html</code> (isometric, dark theme).</em></p>
+<h2>2.1 Pentagon Panel</h2>
+<p><strong>Purpose:</strong> build the 11 wooden-frame + stretched-fabric pentagon panels.</p>
+<h3>2.1.1 How to Build the Panel?</h3>
+<p><strong>Inputs needed (not yet specified):</strong></p>
+<ul>
+<li>Frame material and section size</li>
+<li>Corner joinery method (how the 5 frame members meet at each pentagon corner)</li>
+<li>Fabric type and how it&#39;s stretched/attached to the frame</li>
+<li>Fastener spec</li>
+<li>Finished pentagon edge length and per-panel weight</li>
+</ul>
+<p>Whatever the build method, every panel needs its <strong>assembly letters</strong> transferred onto the frame at each edge, per <code>NaoDec_Face_Edge_Marking_Rev1.0.html</code> (or the interactive variant), and its <strong>hinge halves fitted at 2 positions per lettered edge</strong> (see 2.2.1) — ideally on the bench, not on the ladder.</p>
+<h4>2.1.1.1 Side and Ceiling</h4>
+<p>The build method splits into <strong>Side</strong> and <strong>Ceiling</strong> variants:</p>
+<ul>
+<li><strong>Side</strong> covers the 9 wall faces (<code>f2</code>–<code>f10</code> — lower ring <code>f7</code>–<code>f10</code> and upper ring <code>f2</code>–<code>f6</code> minus the door).</li>
+<li><strong>Ceiling</strong> is <code>f1</code> — the top, opposite the unbuilt bottom.</li>
+<li>Not yet covered by this split: the <strong>door</strong> (<code>f11</code>), which needs to open or be removable — arguably a third build variant. Also not addressed: how the frame confirms the bottom (<code>f12</code>) stays unbuilt/open at the platform interface.</li>
+</ul>
+<p><em>(TBD — the actual build steps, materials, and what specifically differs between Side and Ceiling panels are pending the author&#39;s input.)</em></p>
+<h2>2.2 Panel Installation</h2>
+<p>Reference geometry: <a href="../NaoDec_3D_Structure_Framework_Rev1.0.html"><code>NaoDec_3D_Structure_Framework_Rev1.0.html</code></a> (or the <a href="../images/build/">snapshots</a> offline).</p>
+<h3>2.2.1 Hinged pairs — how panels attach</h3>
+<p><strong>Every lettered edge gets 2 hinges; matching letters join.</strong> Only the 5 ground-resting edges have no hinges. The hinges are the panel-to-panel fastener — no separate bolts/clamps are specified. A hinge allows the pair to fold during handling; once the last panel closes the solid, the geometry itself locks every dihedral at ≈ 116.57° and the assembly becomes rigid.</p>
+<p>Pre-build on the bench: <strong>5 hinged pairs + 1 single panel (the door):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Pair</th>
+<th>Faces</th>
+<th>Hinge joint</th>
+<th>Hinge edge (vertices)</th>
+<th>Section</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>f7 + f8</td>
+<td><strong>M</strong></td>
+<td>v1–v8</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td>2</td>
+<td>f9 + f10</td>
+<td><strong>O</strong></td>
+<td>v3–v12</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td>3</td>
+<td>f2 + f6</td>
+<td><strong>R</strong></td>
+<td>v15–v16</td>
+<td>Upper</td>
+</tr>
+<tr>
+<td>4</td>
+<td>f3 + f4</td>
+<td><strong>T</strong></td>
+<td>v9–v18</td>
+<td>Upper</td>
+</tr>
+<tr>
+<td>5</td>
+<td>f1 + f5</td>
+<td><strong>U</strong></td>
+<td>v19–v20</td>
+<td>Ceiling + back wall</td>
+</tr>
+<tr>
+<td>—</td>
+<td>f11 (Door)</td>
+<td>single panel</td>
+<td>—</td>
+<td>Lower</td>
+</tr>
+</tbody></table></div>
+<p>The five pairs + door cover all 11 built faces exactly once. Note <code>f5</code> is an upper-ring <strong>wall</strong>: pair 5 is &quot;the ceiling and the wall it hinges to,&quot; not two ceiling panels.</p>
+<p>The remaining 20 lettered joints are hinged <strong>on site</strong> during erection (2 hinges each, matching letters). Joint edges are crowded: 2 hinges + an internal LED strip (Step 4) + on joint <strong>M</strong> also speaker M (Step 5) + an external edge cover (Step 7) all share the same edge — see Open Items.</p>
+<h3>2.2.2 Erection sequence</h3>
+<figure class="diagram"><svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 867.656px; background-color: white;" viewBox="0 0 867.65625 118" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#333333;stroke:#333333;}#my-svg .marker.cross{stroke:#333333;}#my-svg svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#my-svg .cluster-label text{fill:#333;}#my-svg .cluster-label span{color:#333;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#333;color:#333;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#my-svg .arrowheadPath{fill:#333333;}#my-svg .edgePath .path{stroke:#333333;stroke-width:1px;}#my-svg .flowchart-link{stroke:#333333;fill:none;}#my-svg .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#my-svg .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#my-svg .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#my-svg .cluster text{fill:#333;}#my-svg .cluster span{color:#333;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#my-svg .icon-shape .label rect,#my-svg .image-shape .label rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#9370DB;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].swimlane.cluster rect{filter:none;}#my-svg [data-look="neo"].node path{stroke:#9370DB;stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#9370DB;filter:none;}#my-svg [data-look="neo"].node circle{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M268,59L272.167,59C276.333,59,284.667,59,292.333,59C300,59,307,59,310.5,59L314,59" id="my-svg-L_A_B_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_A_B_0" data-points="W3sieCI6MjY4LCJ5Ijo1OX0seyJ4IjoyOTMsInkiOjU5fSx7IngiOjMxOCwieSI6NTl9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M549.656,59L553.823,59C557.99,59,566.323,59,573.99,59C581.656,59,588.656,59,592.156,59L595.656,59" id="my-svg-L_B_C_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_B_C_0" data-points="W3sieCI6NTQ5LjY1NjI1LCJ5Ijo1OX0seyJ4Ijo1NzQuNjU2MjUsInkiOjU5fSx7IngiOjU5OS42NTYyNSwieSI6NTl9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_A_B_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g class="label" data-id="L_B_C_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-A-0" data-look="classic" transform="translate(138, 59)"><rect class="basic label-container" style="" x="-130" y="-51" width="260" height="102"/><g class="label" style="" transform="translate(-100, -36)"><rect/><foreignObject width="200" height="72"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Phase 1 · Lower section<br />pair f7-f8 · pair f9-f10 · door f11</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-B-1" data-look="classic" transform="translate(433.828125, 59)"><rect class="basic label-container" style="" x="-115.828125" y="-39" width="231.65625" height="78"/><g class="label" style="" transform="translate(-85.828125, -24)"><rect/><foreignObject width="171.65625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Phase 2 · Upper section<br />pair f2-f6 · pair f3-f4</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-C-3" data-look="classic" transform="translate(729.65625, 59)"><rect class="basic label-container" style="" x="-130" y="-51" width="260" height="102"/><g class="label" style="" transform="translate(-100, -36)"><rect/><foreignObject width="200" height="72"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table; white-space: break-spaces; line-height: 1.5; max-width: 200px; text-align: center; width: 200px;"><span class="nodeLabel"><p>Phase 3 · Close the top<br />pair f1-f5 (ceiling + back wall)</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs></svg></figure>
+<ol>
+<li><strong>Lower section:</strong> stand pair f7-f8, pair f9-f10, and the door f11 on their ground edges (per the landing map in 2.2.3) and hinge the adjacent lower joints (L, N, K — matching letters).</li>
+<li><strong>Upper section:</strong> lift pair f2-f6 and pair f3-f4 onto the lower ring; hinge every letter that meets (C, D, E, F, G, H, I, J, A, B, S).</li>
+<li><strong>Close with pair f1-f5:</strong> the last lift places the 5th upper wall (<code>f5</code>) and the ceiling (<code>f1</code>) together; hinge the remaining letters (P, Q, V, X, Y, Z). Closing this pair locks the whole solid rigid.</li>
+</ol>
+<blockquote>
+<p>⚠ Until Phase 2 ties them together, the lower panels lean inward at ~116.57° and are <strong>not self-supporting</strong> — temporary bracing/props are required (spec TBD, see Open Items). The f1-f5 pair is the heaviest, highest lift; rigging method TBD.</p>
+</blockquote>
+<p><img src="../images/build/step2_joints_front.png" alt="Front view of the lettered frame">
+<em>Front standard view — useful when checking letter positions phase by phase. Snapshot of <code>NaoDec_3D_Structure_Framework_Rev1.0.html</code>.</em></p>
+<h3>2.2.3 Base placement &amp; registration</h3>
+<p>The 5 unlettered ground edges land on the platform as:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Ground edge</th>
+<th>Belongs to face</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>v5–v1</td>
+<td>f7</td>
+</tr>
+<tr>
+<td>v1–v2</td>
+<td>f8</td>
+</tr>
+<tr>
+<td>v2–v3</td>
+<td>f9</td>
+</tr>
+<tr>
+<td>v3–v4</td>
+<td>f10</td>
+</tr>
+<tr>
+<td>v4–v5</td>
+<td><strong>f11 (Door)</strong></td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><strong>The chair faces v1</strong> (Step 6), and the controller unit sits outside, ~2–3 m from v1 (decision 1). The door edge (v4–v5) ends up <strong>behind-left of the seated occupant</strong>.</li>
+<li><strong>Mark the platform before erecting anything:</strong> v1&#39;s corner position and the 5 ground-edge lines. One face of rotation error ruins every left/right instruction in Steps 3–9. Registration-mark method TBD.</li>
+<li>Which real-world direction v1 faces on site is an open item (index, Open Items #3).</li>
+</ul>
+<h2>Cross-References</h2>
+<ul>
+<li><a href="../NaoDec_Face_Edge_Marking_Rev1.0.html"><code>NaoDec_Face_Edge_Marking_Rev1.0.html</code></a> / <a href="../NaoDec_Face_Edge_Marking_Interactive_Rev1.0.html">interactive</a> — per-face letter diagrams</li>
+<li><a href="../NaoDec_3D_Structure_Framework_Rev1.0.html"><code>NaoDec_3D_Structure_Framework_Rev1.0.html</code></a> — 3D geometry with letters</li>
+<li><a href="../Paint_Comparison_Maxzo_RustTech_vs_JBP_SmartGlaze.md"><code>Paint_Comparison_Maxzo_RustTech_vs_JBP_SmartGlaze.md</code></a> — coating comparison, if panel frames get painted (still unplaced in the sequence)</li>
+</ul>
+<h2>Safety</h2>
+<ul>
+<li><strong>Unbraced lower ring:</strong> five inward-leaning panels + a door panel are unstable until the upper ring closes — keep crew clear of fall lines, brace each phase.</li>
+<li><strong>Door egress:</strong> the door is the occupant&#39;s only exit (the bottom opening sits under the riser). Whatever mechanism 2.2&#39;s open item settles on must be operable <strong>from inside</strong>.</li>
+<li>The erected frame stands over the occupant; no frame load rating exists yet (see Step 1 Safety for the platform side).</li>
+</ul>
+<h2>Release Gate</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Required Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>11 panels built</td>
+<td>Frame + fabric complete, letters marked, hinge halves fitted per 2.2.1</td>
+</tr>
+<tr>
+<td>5 pairs + door pre-built</td>
+<td>Pair hinges (M, O, R, T, U) fold freely and seat at the dihedral</td>
+</tr>
+<tr>
+<td>Base registered</td>
+<td>Ground edges on the platform marks; v1 corner where planned</td>
+</tr>
+<tr>
+<td>All 25 joints hinged</td>
+<td>2 hinges per joint, matching letters verified</td>
+</tr>
+<tr>
+<td>Door</td>
+<td>Operable from inside and outside (mechanism per Open Item #1)</td>
+</tr>
+<tr>
+<td>Ground edges</td>
+<td>Hinge-free, seated on the platform</td>
+</tr>
+</tbody></table></div>
+<h2>Open Items</h2>
+<ol>
+<li><strong>Door mechanism</strong> — with all four of its lettered edges hinged (A, B, K, L), how does <code>f11</code> open? Designate a swing edge + lift-off/removable-pin hinges on the other three, or make the whole panel removable. Affects Step 7 (covers on door edges) and egress.</li>
+<li><strong>Hinge spec</strong> — type, size, load rating, removable-pin or fixed, corrosion finish: TBD. 50 hinges + spares.</li>
+<li><strong>Temporary bracing</strong> for Phase 1/2 — props, clamps, crew count: TBD.</li>
+<li><strong>Site orientation of v1</strong> + platform registration-mark method (2.2.3).</li>
+<li><strong>Hardware sharing the joint edges</strong> — 2 hinges + internal LED strip + (joint M) speaker + external cover per edge; a per-edge layout that keeps them from colliding is TBD.</li>
+<li><strong>Panel construction specifics</strong> (2.1) — materials, joinery, fabric, fasteners, dimensions, weight.</li>
+<li><strong>Side vs. Ceiling build differences</strong> (2.1.1.1) — plus the door as a likely third variant.</li>
+<li><strong>Painting/finishing</strong> — the paint comparison doc exists but no step schedules painting.</li>
+</ol>
+<hr>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step1_Base_Platform_Setup.html">Step 1 — Base Platform Setup</a> · Next: <a href="NaoDec_Build_Step3_Vertex_Units_Installation.html">Step 3 — Vertex Units Installation</a></p>
+
+</main>
+<footer class="foot">Self-contained HTML — diagrams pre-rendered, no external dependencies. Generated from the Markdown build docs in this repository.</footer>
+</body>
+</html>

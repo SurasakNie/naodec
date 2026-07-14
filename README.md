@@ -19,6 +19,7 @@ The design uses two ESP32-S3-WROOM-1 N16R8 modules running WLED in a master/slav
 ```
 naodec/
 ├── index.html                                     # GitHub Pages auto-index
+├── NaoDec_Build_Work_Instructions.html             # Rendered build start page (links into build/); shown on the site index
 ├── NaoDec_Build_Work_Instructions.md               # Build sequence index (9 steps) — links to per-step docs
 ├── NaoDec_Build_Pending_Decisions.md               # Recorded build decisions the step docs implement
 ├── NaoDec_Build_Step1_Base_Platform_Setup.md       # Step 1: pallet, rise-up platform, chair platform
@@ -30,6 +31,7 @@ naodec/
 ├── NaoDec_Build_Step7_Edge_Covers.md               # Step 7: 25 external edge covers
 ├── NaoDec_Build_Step8_Controller_Unit_Hookup.md    # Step 8: land node-1 cables into the controller unit
 ├── NaoDec_Build_Step9_Commissioning_and_Test.md    # Step 9: power-up order, config, acceptance
+├── build/                                           # Rendered HTML of each build step (reached from the start page, not the site index)
 ├── images/build/                                    # Snapshots of the 3D pages used in the build docs
 ├── NaoDec_WS2815_LED_Controller_Rev1.6.html       # Full controller schematic (interactive)
 ├── NaoDec_3D_Structure_Framework_Rev1.0.html      # Pure geometry: vertices/edges/faces, no LED wiring
@@ -133,6 +135,11 @@ docs run from the base platform through structure, LED/vertex/edge install, spea
 (chair · subwoofer · scent), edge covers, controller-unit hookup, and commissioning. The build
 decisions the docs implement are recorded in
 [`NaoDec_Build_Pending_Decisions.md`](NaoDec_Build_Pending_Decisions.md).
+
+A rendered, self-contained HTML version is published from the start page
+[`NaoDec_Build_Work_Instructions.html`](NaoDec_Build_Work_Instructions.html) (the only build page listed
+on the site index); it links to each step's rendered page under [`build/`](build/), with the Mermaid
+diagrams pre-rendered inline so the pages need no network or build step to view.
 
 > **Status:** Steps 1–9 drafted from the author's full outline; hardware specifics still marked TBD
 > are flagged per step, and cross-cutting gaps (occupant safety, door mechanism, controller-unit

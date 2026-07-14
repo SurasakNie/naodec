@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NaoDec Build — Step 3: Vertex Units Installation (+ Series Coils) — NaoDec</title>
+<style>
+:root{color-scheme:light dark;
+ --bg:#ffffff;--fg:#1e2222;--muted:#6b7a7a;--rule:#dce3e3;--link:#0b6a63;--link-hover:#0b63d6;
+ --code-bg:rgba(128,128,128,.12);--card:#f6f8f8;--accent:#0f766e;--warn-bg:#fff4e5;--warn-br:#e0a34d;--warn-fg:#7a4a00;}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#0b1113;--fg:#e6edef;--muted:#8eb5b8;--rule:rgba(142,181,184,.25);--link:#88e2d6;--link-hover:#eaddaa;
+ --code-bg:rgba(142,181,184,.15);--card:#111a1c;--accent:#88e2d6;--warn-bg:#2a2012;--warn-br:#7a5a2a;--warn-fg:#eaddaa;}}
+*{box-sizing:border-box}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:900px;margin:0 auto;
+ padding:0 1.1rem 4rem;line-height:1.65;background:var(--bg);color:var(--fg);}
+header.top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--rule);
+ padding:.7rem 0;margin-bottom:1.5rem;display:flex;align-items:baseline;gap:.6rem;font-size:.85rem;z-index:5;}
+header.top .brand{font-weight:700;color:var(--accent);letter-spacing:.02em;}
+header.top .sub{color:var(--muted);}
+h1{border-bottom:2px solid var(--rule);padding-bottom:.35rem;line-height:1.25;}
+h2{margin-top:2.2rem;border-bottom:1px solid var(--rule);padding-bottom:.25rem;}
+h3{margin-top:1.6rem;}h4{margin-top:1.2rem;color:var(--muted);}
+a{color:var(--link);text-decoration:none;}a:hover{color:var(--link-hover);text-decoration:underline;}
+p.nav{font-size:.9rem;background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.5rem .8rem;}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px;font-size:.9em;}
+pre{background:var(--card);border:1px solid var(--rule);border-radius:7px;padding:.9rem 1rem;overflow-x:auto;}
+pre code{background:none;padding:0;}
+blockquote{margin:1rem 0;padding:.6rem 1rem;background:var(--warn-bg);border-left:4px solid var(--warn-br);
+ border-radius:0 6px 6px 0;color:var(--warn-fg);}
+blockquote p{margin:.35rem 0;}
+.table-wrap{overflow-x:auto;margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.92rem;}
+th,td{border:1px solid var(--rule);padding:.4rem .6rem;text-align:left;vertical-align:top;}
+th{background:var(--card);}
+figure.diagram{margin:1.3rem 0;background:#fff;border:1px solid var(--rule);border-radius:8px;padding:1rem;
+ overflow-x:auto;text-align:center;}
+figure.diagram svg{max-width:100%;height:auto;}
+img{max-width:100%;height:auto;border-radius:6px;}
+figcaption,em img+em{color:var(--muted);}
+hr{border:none;border-top:1px solid var(--rule);margin:2rem 0;}
+footer.foot{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.8rem;}
+</style>
+</head>
+<body>
+<header class="top"><span class="brand">NaoDec</span><span class="sub">Build Work Instructions</span></header>
+<main>
+<h1>NaoDec Build — Step 3: Vertex Units Installation (+ Series Coils)</h1>
+<p><strong>Revision:</strong> 1.0
+<strong>Date:</strong> 2026-07-14
+<strong>Status:</strong> Drafted from the author&#39;s outline + decisions 1, 3, 9. Mounting method and some routing details TBD (see Open Items). The series-coil subsystem remains <strong>pre-release (Rev 0)</strong> — its numbers are provisional and it must not be powered outside its own qualification gates.</p>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step2_Structure_Setup.html">Step 2 — Structure Set-Up</a> · Next: <a href="NaoDec_Build_Step4_Internal_Edge_Units_Installation.html">Step 4 — Internal Edge Units</a></p>
+<h2>Purpose</h2>
+<p>With all 11 panels up, install the 20 <strong>vertex units</strong> (LED channel CH1) in daisy-chain order, co-route the <strong>series-coil loop</strong> along the same path (decision 3), and bring both runs out at node 1 toward the controller unit.</p>
+<h2>Quick Reference</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Vertex units</td>
+<td><strong>20 units × 3 LEDs = 60 × WS2815</strong></td>
+<td><code>NaoDec_WS2815_LED_Controller_Rev1.6.html</code></td>
+</tr>
+<tr>
+<td>Channel</td>
+<td>CH1 · Master GPIO1 · WLED Out 1</td>
+<td>same</td>
+</tr>
+<tr>
+<td>Chain path</td>
+<td><strong>Node 0 → v1 → v2 → … → v20</strong> (one daisy-chain)</td>
+<td><code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code></td>
+</tr>
+<tr>
+<td>Cable run</td>
+<td>~20 m — the longest data run in the rig</td>
+<td>README</td>
+</tr>
+<tr>
+<td>Data cable</td>
+<td>AWG18, <strong>shielded twisted pair</strong> advised; bench-verify the waveform</td>
+<td>controller doc, Note 14</td>
+</tr>
+<tr>
+<td>Power</td>
+<td>Isolated <strong>12 V / 5 A rail</strong> (PSU-B); 16 AWG branch (README says 18 — discrepancy already logged in <code>NaoDec_Power_and_Controller_Box_Report.md</code> §10)</td>
+<td>power report</td>
+</tr>
+<tr>
+<td>Optional injection</td>
+<td>2nd 12 V/5 A feed at <strong>LED #31</strong> (mid-chain), separate +12 V rails, common GND</td>
+<td>controller doc, Note 17</td>
+</tr>
+<tr>
+<td>WS2815 backup line</td>
+<td>HEAD pixel BI → GND; downstream BI ← previous DO</td>
+<td>controller doc, Note 6</td>
+</tr>
+<tr>
+<td>Coils (pre-release)</td>
+<td>60 × 7-turn coils, 3 per vertex unit; <strong>route with the vertex chain</strong></td>
+<td>decision 3 · coil docs</td>
+</tr>
+</tbody></table></div>
+<p><img src="../images/build/step3_vertex_chain.png" alt="Vertex chain routing">
+<em>The single CH1 daisy-chain: POWER IN (Node 0) → v1, base ring v1–v5, transition v5→v6, middle ring v6–v15, transition v15→v16, top ring v16–v20. Snapshot of <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code> (circuits hidden).</em></p>
+<figure class="diagram"><svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="flowchart" style="max-width: 1150.27px; background-color: white;" viewBox="0 0 1150.265625 94" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#my-svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#333333;stroke:#333333;}#my-svg .marker.cross{stroke:#333333;}#my-svg svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;}#my-svg p{margin:0;}#my-svg .label{font-family:"trebuchet ms",verdana,arial,sans-serif;color:#333;}#my-svg .cluster-label text{fill:#333;}#my-svg .cluster-label span{color:#333;}#my-svg .cluster-label span p{background-color:transparent;}#my-svg .label text,#my-svg span{fill:#333;color:#333;}#my-svg .node rect,#my-svg .node circle,#my-svg .node ellipse,#my-svg .node polygon,#my-svg .node path{fill:#ECECFF;stroke:#9370DB;stroke-width:1px;}#my-svg .rough-node .label text,#my-svg .node .label text,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-anchor:middle;}#my-svg .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#my-svg .rough-node .label,#my-svg .node .label,#my-svg .image-shape .label,#my-svg .icon-shape .label{text-align:center;}#my-svg .node.clickable{cursor:pointer;}#my-svg .root .anchor path{fill:#333333!important;stroke-width:0;stroke:#333333;}#my-svg .arrowheadPath{fill:#333333;}#my-svg .edgePath .path{stroke:#333333;stroke-width:1px;}#my-svg .flowchart-link{stroke:#333333;fill:none;}#my-svg .edgeLabel{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .edgeLabel p{background-color:rgba(232,232,232, 0.8);}#my-svg .edgeLabel rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .labelBkg{background-color:rgba(232, 232, 232, 0.5);}#my-svg .cluster rect{fill:#ffffde;stroke:#aaaa33;stroke-width:1px;}#my-svg .cluster text{fill:#333;}#my-svg .cluster span{color:#333;}#my-svg div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:12px;background:hsl(80, 100%, 96.2745098039%);border:1px solid #aaaa33;border-radius:2px;pointer-events:none;z-index:100;}#my-svg .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#333;}#my-svg rect.text{fill:none;stroke-width:0;}#my-svg .icon-shape,#my-svg .image-shape{background-color:rgba(232,232,232, 0.8);text-align:center;}#my-svg .icon-shape p,#my-svg .image-shape p{background-color:rgba(232,232,232, 0.8);padding:2px;}#my-svg .icon-shape .label rect,#my-svg .image-shape .label rect{opacity:0.5;background-color:rgba(232,232,232, 0.8);fill:rgba(232,232,232, 0.8);}#my-svg .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#my-svg .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#my-svg .node .neo-node{stroke:#9370DB;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].swimlane.cluster rect{filter:none;}#my-svg [data-look="neo"].node path{stroke:#9370DB;stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#9370DB;filter:none;}#my-svg [data-look="neo"].node circle{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:#9370DB;filter:drop-shadow(1px 2px 2px rgba(185, 185, 185, 1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="my-svg_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"/></marker><marker id="my-svg_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"/></marker><marker id="my-svg_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"/></marker><g class="root"><g class="clusters"/><g class="edgePaths"><path d="M174.703,47L178.87,47C183.036,47,191.37,47,199.036,47C206.703,47,213.703,47,217.203,47L220.703,47" id="my-svg-L_N0_B_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_N0_B_0" data-points="W3sieCI6MTc0LjcwMzEyNSwieSI6NDd9LHsieCI6MTk5LjcwMzEyNSwieSI6NDd9LHsieCI6MjI0LjcwMzEyNSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M468.766,47L477.823,47C486.88,47,504.995,47,522.443,47C539.891,47,556.672,47,565.063,47L573.453,47" id="my-svg-L_B_M_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_B_M_0" data-points="W3sieCI6NDY4Ljc2NTYyNSwieSI6NDd9LHsieCI6NTIzLjEwOTM3NSwieSI6NDd9LHsieCI6NTc3LjQ1MzEyNSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/><path d="M787.719,47L798.259,47C808.799,47,829.88,47,850.294,47C870.708,47,890.456,47,900.329,47L910.203,47" id="my-svg-L_M_T_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_M_T_0" data-points="W3sieCI6Nzg3LjcxODc1LCJ5Ijo0N30seyJ4Ijo4NTAuOTYwOTM3NSwieSI6NDd9LHsieCI6OTE0LjIwMzEyNSwieSI6NDd9XQ==" data-look="classic" marker-end="url(#my-svg_flowchart-v2-pointEnd)"/></g><g class="edgeLabels"><g class="edgeLabel"><g class="label" data-id="L_N0_B_0" transform="translate(0, 0)"><foreignObject width="0" height="0"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(523.109375, 47)"><g class="label" data-id="L_B_M_0" transform="translate(-29.34375, -12)"><foreignObject width="58.6875" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>v5 → v6</p></span></div></foreignObject></g></g><g class="edgeLabel" transform="translate(850.9609375, 47)"><g class="label" data-id="L_M_T_0" transform="translate(-38.2421875, -12)"><foreignObject width="76.484375" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="labelBkg" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="edgeLabel"><p>v15 → v16</p></span></div></foreignObject></g></g></g><g class="nodes"><g class="node default" id="my-svg-flowchart-N0-0" data-look="classic" transform="translate(91.3515625, 47)"><rect class="basic label-container" style="" x="-83.3515625" y="-39" width="166.703125" height="78"/><g class="label" style="" transform="translate(-53.3515625, -24)"><rect/><foreignObject width="106.703125" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Node 0<br />(controller unit)</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-B-1" data-look="classic" transform="translate(346.734375, 47)"><rect class="basic label-container" style="" x="-122.03125" y="-39" width="244.0625" height="78"/><g class="label" style="" transform="translate(-92.03125, -24)"><rect/><foreignObject width="184.0625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Base ring<br />v1 → v2 → v3 → v4 → v5</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-M-3" data-look="classic" transform="translate(682.5859375, 47)"><rect class="basic label-container" style="" x="-105.1328125" y="-39" width="210.265625" height="78"/><g class="label" style="" transform="translate(-75.1328125, -24)"><rect/><foreignObject width="150.265625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Middle ring<br />v6 → v7 → … → v15</p></span></div></foreignObject></g></g><g class="node default" id="my-svg-flowchart-T-5" data-look="classic" transform="translate(1028.234375, 47)"><rect class="basic label-container" style="" x="-114.03125" y="-39" width="228.0625" height="78"/><g class="label" style="" transform="translate(-84.03125, -24)"><rect/><foreignObject width="168.0625" height="48"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 200px; text-align: center;"><span class="nodeLabel"><p>Top ring<br />v16 → v17 → … → v20</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"/></filter></defs></svg></figure>
+<h2>3.1 Install the vertex units</h2>
+<ol>
+<li>Confirm Step 2&#39;s release gate passed (structure rigid, base registered — v1 is where the marks say it is).</li>
+<li>Fit the 20 vertex units at v1…v20, <strong>in chain order starting at v1</strong> (data flows v1 → v20; WS2815 is fed at DI, arrows in the mapping page show direction).</li>
+<li>Wire unit-to-unit exactly per the chain path — base ring first (floor level), then middle ring, then top ring (v16–v20 are overhead work inside the closed dome; do them before the floor fills up in Step 6).</li>
+<li>Tie the <strong>first pixel&#39;s BI to GND</strong>; downstream each BI takes the previous pixel&#39;s DO (controller doc Note 6).</li>
+<li>If the optional mid-chain power injection is adopted, land the second 12 V feed at LED #31 — that is an <strong>additional run to node 1</strong> to include in Step 8&#39;s inventory.</li>
+</ol>
+<h2>3.2 Series-coil co-routing (pre-release Rev 0)</h2>
+<p>Per decision 3, the 60-coil series loop (3 coils per vertex unit) routes <strong>along the same path as the vertex chain</strong>:</p>
+<ul>
+<li>Positive: Node 0 → v1 → … → v20 (with the chain).</li>
+<li>Return: v20 → v16 → v15 → v6 → v5 → v1 → Node 0 (per the mapping page&#39;s coil view).</li>
+</ul>
+<p><img src="../images/build/step3_vertex_coil.png" alt="Vertex chain with coil loop">
+<em>Coil loop co-routed with the vertex chain. Snapshot of <code>NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html</code> (Coil display on).</em></p>
+<p>Non-negotiables from the coil docs (<code>NaoDec_Series_Coil_Build_Rev0_Pre-Release.html</code>, <code>NaoDec_Vertex_Series_Coil_Rev1.0.html</code>, CLAUDE.md):</p>
+<ul>
+<li><strong>Never run the string without the XL4015 CC/CV buck</strong> (CV 11.0 V, CC 3.0 A). The cold loop is ~1.85 Ω — direct 12 V would attempt ~6.5 A / ~78 W.</li>
+<li><strong>Exact 3 A slow-blow fuse</strong> at the buck input (not 3–5 A), local input decoupling, and a 70–80 °C thermal cutoff bonded to the hottest area.</li>
+<li>The coil branch keeps its <strong>own isolated 12 V feed</strong> — never tied to the LED V+ rails.</li>
+<li>Keep all runs and slack <strong>uncoiled</strong>; JST SM connectors with both pins paralleled.</li>
+<li>Subsystem is <strong>pre-release</strong>: it does not power up in Step 9 until its own qualification (see <code>XL4015_CC_CV_Mockup_Test_Procedure.md</code>) and the assembled-loop resistance measurement pass.</li>
+</ul>
+<h2>3.3 Routing and labeling to node 1</h2>
+<ol>
+<li>Dress both runs (CH1 data+power, coil pair, optional injection feed) down to the <strong>v1 base corner</strong> and out through the Step 1 pass-through (Step 1 Open Item #6) toward the controller unit ~2–3 m away.</li>
+<li>Label every conductor at both ends (scheme TBD — see Open Items); leave service loops at node 1.</li>
+<li>Do <strong>not</strong> land anything at the controller unit yet — that&#39;s Step 8.</li>
+</ol>
+<h2>Safety</h2>
+<ul>
+<li>No powered work: rails stay off/disconnected throughout Steps 3–7.</li>
+<li>Overhead work at v16–v20 inside the closed structure — ladder footing on the platform, don&#39;t load panel frames or fabric.</li>
+<li>The coil loop stays open-circuit (insulated ends) until Step 9&#39;s qualification.</li>
+</ul>
+<h2>Release Gate</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Required Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Chain order</td>
+<td>20 units wired v1 → v20, DI direction verified against the mapping page</td>
+</tr>
+<tr>
+<td>Continuity/polarity</td>
+<td>End-to-end continuity; +12 V/GND polarity checked at head, LED #31, and tail — before access gets harder</td>
+</tr>
+<tr>
+<td>BI wiring</td>
+<td>Head BI → GND confirmed</td>
+</tr>
+<tr>
+<td>Coil loop</td>
+<td>Routed with chain, ends insulated, <strong>loop resistance measured and recorded</strong> (expect ~1.85 Ω cold, per coil docs)</td>
+</tr>
+<tr>
+<td>Labeling</td>
+<td>Every run labeled both ends; service loops left at node 1</td>
+</tr>
+<tr>
+<td>Rails</td>
+<td>No connection to any PSU yet; coil branch physically separate from LED wiring</td>
+</tr>
+</tbody></table></div>
+<h2>Open Items</h2>
+<ol>
+<li><strong>Vertex-unit mounting method</strong> at the frame corners — bracket/clip/strap: TBD.</li>
+<li><strong>Injection run decision</strong> — adopt the LED #31 mid-chain feed or not (affects Step 8 inventory).</li>
+<li><strong>Labeling scheme + strain relief spec</strong> at node 1 (shared with Steps 4–6; define once).</li>
+<li><strong>Ceiling access</strong> — v16–v20 are reachable only from inside once <code>f1-f5</code> closes; confirm ladder/scaffold approach that doesn&#39;t load the frames.</li>
+</ol>
+<hr>
+<p class="nav"><a href="../NaoDec_Build_Work_Instructions.html">← Back to Build Work Instructions</a> · Previous: <a href="NaoDec_Build_Step2_Structure_Setup.html">Step 2 — Structure Set-Up</a> · Next: <a href="NaoDec_Build_Step4_Internal_Edge_Units_Installation.html">Step 4 — Internal Edge Units</a></p>
+
+</main>
+<footer class="foot">Self-contained HTML — diagrams pre-rendered, no external dependencies. Generated from the Markdown build docs in this repository.</footer>
+</body>
+</html>
