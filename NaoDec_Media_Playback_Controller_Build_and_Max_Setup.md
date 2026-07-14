@@ -1,10 +1,16 @@
 # NaoDec Media Playback Controller Build and Max Setup
 
-**Revision:** 3.1  
-**Date:** 2026-07-10  
+**Revision:** 3.2  
+**Date:** 2026-07-14  
 **Controller:** ESP32-S3 wired-Ethernet (W5500) OSC controller for Max/MSP media playback  
 **Schematic:** `NaoDec_Media_Playback_Controller_Schematic_Rev3.0.html`
 
+> Rev 3.2 — Added a "Symptom / Check" row to Section 10 for cross-triggering between
+> Play and Pause (one button also firing the other's transport command): isolate with
+> `[print OSC_IN]` first, then an unpowered GPIO9↔GPIO10 continuity check to localize a
+> header/PCB bridge vs. a panel-side harness short vs. a firmware pin-map bug.
+> Documentation only — hardware is unchanged at Rev 3.0.
+>
 > Rev 3.1 — Added a Quick Reference table ahead of Section 1: all four OSC addresses
 > (including `/volume` for the encoder — not just the transport switches), mDNS
 > hostname, UDP port, Max host IP, and the controller's reserved IP. Also aligned
@@ -407,6 +413,7 @@ If Max receives nothing:
 | Wrong port | Confirm both firmware and Max use UDP `9000` |
 | ESP32 not reachable | LED1 blinking means no link/lease: check the Cat6 at both ends, the router LAN port, and the DHCP reservation (type `STATUS` for link/IP/MAC). Then confirm same LAN/VLAN |
 | Duplicate button messages | Increase firmware debounce or check switch wiring |
+| One button triggers a second transport command (e.g. Play also fires Pause) | Confirm with `[print OSC_IN]`: both messages printing means the fault is upstream of Max. Power off and check continuity GPIO9↔GPIO10 (Play↔Pause) unpowered: ~0 Ohm is a bridge at the adjacent DevKitC-1 header pins or PCB node; ~200 Ohm is a panel-side short in the button harness or connectors; ~20 kOhm (R3+R4 through the 3V3 bus) is healthy wiring — check the firmware's GPIO pin map instead. Only one message printing means the fault is in the Max `[route]` patching or the player's own play/pause toggle behavior |
 | Encoder direction reversed | Swap A/B wiring or reverse direction in firmware |
 | Volume affects lights | The Max patch is mapped to NeoDDP brightness instead of media gain |
 
