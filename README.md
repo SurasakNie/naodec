@@ -19,9 +19,18 @@ The design uses two ESP32-S3-WROOM-1 N16R8 modules running WLED in a master/slav
 ```
 naodec/
 ├── index.html                                     # GitHub Pages auto-index
-├── NaoDec_Build_Work_Instructions.md               # Full build sequence index — links to per-step docs
+├── NaoDec_Build_Work_Instructions.md               # Build sequence index (9 steps) — links to per-step docs
+├── NaoDec_Build_Pending_Decisions.md               # Recorded build decisions the step docs implement
 ├── NaoDec_Build_Step1_Base_Platform_Setup.md       # Step 1: pallet, rise-up platform, chair platform
-├── NaoDec_Build_Step2_Structure_Setup.md           # Step 2: pentagon panel build & structure set-up
+├── NaoDec_Build_Step2_Structure_Setup.md           # Step 2: pentagon panels — build + hinged erection
+├── NaoDec_Build_Step3_Vertex_Units_Installation.md # Step 3: vertex units (CH1) + series-coil co-route
+├── NaoDec_Build_Step4_Internal_Edge_Units_Installation.md # Step 4: 6 edge LED circuits (CH2–CH7)
+├── NaoDec_Build_Step5_Speaker_Installation.md      # Step 5: 6 speakers on joint edges → GAB8
+├── NaoDec_Build_Step6_Move_In.md                   # Step 6: scent unit, subwoofer, chair + transducers
+├── NaoDec_Build_Step7_Edge_Covers.md               # Step 7: 25 external edge covers
+├── NaoDec_Build_Step8_Controller_Unit_Hookup.md    # Step 8: land node-1 cables into the controller unit
+├── NaoDec_Build_Step9_Commissioning_and_Test.md    # Step 9: power-up order, config, acceptance
+├── images/build/                                    # Snapshots of the 3D pages used in the build docs
 ├── NaoDec_WS2815_LED_Controller_Rev1.6.html       # Full controller schematic (interactive)
 ├── NaoDec_3D_Structure_Framework_Rev1.0.html      # Pure geometry: vertices/edges/faces, no LED wiring
 ├── NaoDec_3D_Vertex_and_Edges_LED_Mapping_Rev1.3.html  # 3D LED position & channel map
@@ -118,13 +127,16 @@ static-only reference table, is in
 
 ## Build Work Instructions
 
-Step-by-step physical build sequence — platform, then structure, with further steps (LED install,
-controller box, coil subsystem, media/scent controllers, finishing, commissioning) to be added. Each
-step is a self-contained document, indexed from one top-level file:
-[`NaoDec_Build_Work_Instructions.md`](NaoDec_Build_Work_Instructions.md).
+Step-by-step physical build sequence, indexed from one top-level file:
+[`NaoDec_Build_Work_Instructions.md`](NaoDec_Build_Work_Instructions.md). Nine self-contained step
+docs run from the base platform through structure, LED/vertex/edge install, speakers, move-in
+(chair · subwoofer · scent), edge covers, controller-unit hookup, and commissioning. The build
+decisions the docs implement are recorded in
+[`NaoDec_Build_Pending_Decisions.md`](NaoDec_Build_Pending_Decisions.md).
 
-> **Status:** in progress. Steps 1–2 are drafted; later steps aren't defined yet, and several open
-> items (load ratings, panel materials, the door-panel build) are flagged in the doc itself.
+> **Status:** Steps 1–9 drafted from the author's full outline; hardware specifics still marked TBD
+> are flagged per step, and cross-cutting gaps (occupant safety, door mechanism, controller-unit
+> build, teardown) are in the index's Open Items.
 
 ---
 
@@ -282,9 +294,17 @@ Each schematic supports:
 | Simple_WS2815_Controller | 1.0 | Single-controller reference |
 | NaoDec_Controller_Box_Configs | 1.1 | Current · electrical enclosure vs PC case · audited power calculations |
 | NaoDec_Power_and_Controller_Box_Report | 1.0 | Full power budget, PSU specs, voltage-drop analysis, audit findings |
-| NaoDec_Build_Work_Instructions | 1.0 | In progress · top-level build sequence index, links to per-step docs |
-| NaoDec_Build_Step1_Base_Platform_Setup | 1.0 | In progress · pallet, rise-up platform, chair platform — materials/load rating pending |
-| NaoDec_Build_Step2_Structure_Setup | 1.0 | In progress · pentagon panel build — 2.2 not yet defined |
+| NaoDec_Build_Work_Instructions | 1.1 | Build sequence index (9 steps) + orientation/terminology + sequence-level open items |
+| NaoDec_Build_Pending_Decisions | — | Decision record · 10 answered build decisions the step docs implement |
+| NaoDec_Build_Step1_Base_Platform_Setup | 1.1 | Pallet, rise-up platform, chair platform — materials/load rating pending |
+| NaoDec_Build_Step2_Structure_Setup | 1.1 | Pentagon panels — build + hinged pairs + erection sequence |
+| NaoDec_Build_Step3_Vertex_Units_Installation | 1.0 | Vertex units (CH1) + series-coil co-route to node 1 |
+| NaoDec_Build_Step4_Internal_Edge_Units_Installation | 1.0 | 6 edge LED circuits (CH2–CH7) along the 30 edges |
+| NaoDec_Build_Step5_Speaker_Installation | 1.0 | 6 speakers on joint edges → Wondom GAB8 |
+| NaoDec_Build_Step6_Move_In | 1.0 | Scent unit, subwoofer, chair + 4 transducers + media controller |
+| NaoDec_Build_Step7_Edge_Covers | 1.0 | 25 external edge covers over the lettered joints |
+| NaoDec_Build_Step8_Controller_Unit_Hookup | 1.0 | Land node-1 cables into the controller unit (Node 0) |
+| NaoDec_Build_Step9_Commissioning_and_Test | 1.0 | Power-up order, network/WLED/audio/scent/coil tests |
 
 ---
 

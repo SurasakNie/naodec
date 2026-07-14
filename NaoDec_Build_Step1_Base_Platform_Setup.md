@@ -1,8 +1,13 @@
 # NaoDec Build — Step 1: Base Platform Setup
 
-**Revision:** 1.0
-**Date:** 2026-07-13
+**Revision:** 1.1
+**Date:** 2026-07-14
 **Status:** Drafted from the author's outline — materials, dimensions, and load rating are not yet specified (see Open Items). Do not place an occupant on the finished platform until those are filled in and the Release Gate passes.
+
+> Rev 1.1 — Cable-egress open items updated for decision 1 (controller unit sits *outside*
+> the structure, ~2–3 m from node 1 — not under the platform as originally planned), plus
+> floor cable protection on the walk-in path. See
+> [`NaoDec_Build_Pending_Decisions.md`](NaoDec_Build_Pending_Decisions.md).
 
 [← Back to Build Work Instructions](NaoDec_Build_Work_Instructions.md) · Next: [Step 2 — NaoDec Structure Set-Up](NaoDec_Build_Step2_Structure_Setup.md)
 
@@ -108,6 +113,8 @@ Don't proceed to erecting Step 2 on top of this platform until:
 3. **Chair platform load rating** — no number yet for chair + occupant + safety factor. Safety-relevant; see the Safety section above.
 4. **Chair leg lock hardware** — mechanism not chosen (cleat/bracket/track/pin), and depends on the actual chair's leg footprint.
 5. **Interface to Step 2** — how the dodecahedron's open bottom face (`f12`, per `NaoDec_3D_Structure_Framework_Rev1.0.html`) actually lands on / attaches to this platform isn't described yet in either step.
+6. **Cable exit at node 1** — every wire run (Steps 3–6) leaves the structure near the v1 base corner toward the controller unit ~2–3 m away, at ground level. The pass-through (under a ground edge? a notch in the platform lip? a grommeted channel?) has to be provisioned in this step's build, and isn't specified.
+7. **Floor cable protection** — the occupant walks in through the door (`f11`) and across the platform to the chair; the base-edge LED runs and the node-1 harness cross that path. Ramped covers / routing away from the walk path: not specified.
 
 ---
 
