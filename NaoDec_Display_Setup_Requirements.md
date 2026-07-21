@@ -2,6 +2,7 @@
 
 **Project**: NaoDec — 3 m × 3 m × 3 m interactive product-display installation
 **Scope**: Single display area in department store
+**Footprint**: **4 m × 5.5 m (22 m²)** total allocated floor area · **minimum 2.75 m** ceiling clearance
 **Role**: Vendor/Supplier technical team setup
 **Power basis**: Requirement = **1.25× the current setup**, from a **220 V single-phase** main input, **10 hrs/day** operation
 
@@ -19,11 +20,11 @@
 
 ### Physical & Space
 - [ ] Floor load capacity (kg/m²) — verify against display + product + occupant weight (**confirm on site**)
-- [x] Ceiling height clearance — **needs ≥ 3 m + service access** (the cube is 3 m tall)
+- [x] Ceiling height clearance — **minimum 2.75 m** available + service access; **confirm the assembled structure (nominal ~3 m dodecahedron) fits under 2.75 m before install**
 - [ ] Access routes — confirm doorways/corridors fit the panel modules (largest single part = one pentagon panel; **door aperture vs. chair — measure before move-in**, Step 6 Open Item #1)
 - [ ] Flooring type — tile, wood, or concrete (affects platform footing method)
 - [ ] Structural anchoring allowed? — bolts, adhesive, or weights only? (free-standing platform assumed)
-- [ ] Column/obstruction clearance within the 3 × 3 m footprint
+- [ ] Column/obstruction clearance within the **4 m × 5.5 m (22 m²)** allocated area
 
 ### Electrical
 - [x] Available power outlet near booth — **1 needed** at the controller/operator station (outside the cube, ~2–3 m from vertex v1)
@@ -69,9 +70,9 @@
 
 | Deliverable | Content | Format |
 |---|---|---|
-| **Floor Plan** | 3 m × 3 m footprint (9 m²), controller/operator station ~2–3 m outside the cube, cable route to the single 220 V outlet | CAD/PDF drawing |
+| **Floor Plan** | **4 m × 5.5 m (22 m²)** allocated area — the ~3 m structure + operator/controller station + chair + subwoofer + egress; min 2.75 m ceiling; cable route to the single 220 V outlet | CAD/PDF drawing |
 | **Electrical Load Sheet** | Continuous **~1.0 kW** (1.25× of ~780 W current draw), transient peak **~1.36 kW**, **~7.8 kWh/day** at 10 h/day, 220 V single-phase, dedicated 16 A — full-white worst-case basis | Signed technical sheet (this §3) |
-| **Structural Analysis** | Weight distribution over 9 m², platform footing, stability certification (height > 2.5 m), CoG / tipping analysis | Eng. report or calc |
+| **Structural Analysis** | Weight distribution over the structure footprint (within the 4 m × 5.5 m / 22 m² area), platform footing, stability certification (height > 2.5 m), CoG / tipping analysis | Eng. report or calc |
 | **Material Documentation** | SDS for scent fragrance/atomizer fluid; no other hazardous materials | PDF datasheet |
 | **Setup Manual** | 9-step assembly ([`NaoDec_Build_Work_Instructions.md`](NaoDec_Build_Work_Instructions.md)) | Technical manual (PDF) |
 | **Operation Manual** | Daily power-up/down, emergency shutdown, scent refill, staff responsibilities | User-friendly guide |
@@ -155,16 +156,18 @@ is negligible.
 
 ### Load Verification
 ```
-Total Load = Cube structure + panels/edges + vertex & edge LED units
+Total Load = Structure (dodecahedron) + panels/edges + vertex & edge LED units
            + chair (PC-610) + seated occupant + subwoofer + operator table
-Distributed over the 3 m × 3 m = 9 m² footprint.
+Allocated floor area = 4 m × 5.5 m = 22 m² (structure + chair + operator station + egress).
+Floor-load check uses the structure's ground-contact footprint (a ~3 m-span pentagon base),
+within the 22 m² — not the full allocated area.
 ```
-**Action:** Confirm the store floor rating supports the assembled cube + chair + occupant +
+**Action:** Confirm the store floor rating supports the assembled structure + chair + occupant +
 subwoofer. Retail floors are typically rated 500–800 kg/m². **Total assembled weight is not yet
 tabulated in the repo** — compile from the build BOM before sign-off (Step 6 platform-load note).
 
 ### Stability Certification
-- Cube height is **3 m ( > 2.5 m )** → **structural analysis required.**
+- Structure height (nominal ~3 m; **must fit under the 2.75 m ceiling — confirm**) is **> 2.5 m** → **structural analysis required.**
 - Free-standing platform; document center of gravity and tipping-hazard analysis.
 - 25 lettered panel joints are hinged (2 hinges each, 50 total) for rigidity; the 5 base edges rest
   on the platform.
@@ -179,7 +182,7 @@ tabulated in the repo** — compile from the build BOM before sign-off (Step 6 p
 
 ### 3–4 Weeks Before
 - [ ] Confirm booth location with store manager
-- [ ] Request store specs (floor load, **dedicated 16 A / 220 V outlet**, ceiling ≥ 3 m, HVAC)
+- [ ] Request store specs (floor load, **dedicated 16 A / 220 V outlet**, ceiling ≥ 2.75 m, HVAC)
 - [x] Electrical load sheet prepared (this §3)
 - [ ] Begin/confirm structural stability analysis (height > 2.5 m)
 
@@ -262,6 +265,7 @@ tabulated in the repo** — compile from the build BOM before sign-off (Step 6 p
 
 **Requirement basis:** power requirement = **1.25× the current setup's continuous operating draw**;
 main input **220 V single-phase**; operation **10 hrs/day** (not 24/7 → no backup power required).
+Space: **4 m × 5.5 m (22 m²)** total allocated floor area, **minimum 2.75 m** ceiling clearance.
 Power factor assumed **≈ 0.9**; control-box PSU efficiency assumed **≈ 85 %** for the DC→AC
 conversion. LED figure is the **full-white worst case** (15 mA/px) — there is no higher case.
 
@@ -281,5 +285,7 @@ conversion. LED figure is the **full-white worst case** (15 mA/px) — there is 
    power-recliner actuator. Confirm from the chair's transformer label.
 4. **Table height actuator (~120 W, intermittent)** — no model supplied; confirm when selected.
 5. **Total assembled weight** — not yet tabulated; compile from the build BOM for §4.
+6. **Assembled structure height** — confirm the nominal ~3 m dodecahedron fits under the
+   **2.75 m** ceiling clearance (repo gives no exact height); lower the platform/riser if needed.
 
-**Version**: 1.0 | **Last Updated**: 2026-07-21 | **Status**: Ready for Distribution
+**Version**: 1.1 | **Last Updated**: 2026-07-21 | **Status**: Ready for Distribution
