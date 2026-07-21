@@ -313,6 +313,7 @@ Each schematic supports:
 | NaoDec_Build_Step7_Edge_Covers | 1.0 | 25 external edge covers over the lettered joints |
 | NaoDec_Build_Step8_Controller_Unit_Hookup | 1.0 | Land node-1 cables into the controller unit (Node 0) |
 | NaoDec_Build_Step9_Commissioning_and_Test | 1.0 | Power-up order, network/WLED/audio/scent/coil tests |
+| NaoDec_Display_Setup_Requirements | 1.0 | Department-store setup requirements · full connected-load inventory · power @ 1.25× current setup, 220 V single-phase, 10 h/day |
 
 ---
 
