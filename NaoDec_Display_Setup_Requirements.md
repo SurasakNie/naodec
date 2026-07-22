@@ -1,8 +1,10 @@
 # NaoDec — Department Store Display Setup: Technical Requirements
 
-**Project**: NaoDec — 3 m × 3 m × 3 m interactive product-display installation
+**Project**: NaoDec — **3 m × 3 m × 2.5 m (W × L × H)** interactive product-display structure
 **Scope**: Single display area in department store
-**Footprint**: **4 m × 5.5 m (22 m²)** total allocated floor area · **minimum 2.75 m** ceiling clearance
+**Footprint**: **4 m × 5.5 m (22 m²)** total allocated floor area · structure occupies a 3 m × 3 m
+zone within it · operator/controller station sits in the remaining area, outside the structure ·
+**minimum 2.75 m** ceiling clearance
 **Role**: Vendor/Supplier technical team setup
 **Power basis**: Requirement = **1.25× the current setup**, from a **220 V single-phase** main input, **10 hrs/day** operation
 
@@ -19,8 +21,8 @@
 ## 1. STORE REQUIREMENTS TO CONFIRM
 
 ### Physical & Space
-- [ ] Floor load capacity (kg/m²) — verify against display + product + occupant weight (**confirm on site**)
-- [x] Ceiling height clearance — **minimum 2.75 m** available + service access; **confirm the assembled structure (nominal ~3 m dodecahedron) fits under 2.75 m before install**
+- [x] Floor load capacity — total load **~290 kg** over the structure's **9 m² footprint ≈ 32 kg/m²** (§4); comfortably within typical retail ratings — **confirm the store's actual rating on site**
+- [x] Ceiling height clearance — **minimum 2.75 m** available + service access; the structure's **2.5 m** height fits with **~0.25 m margin** — keep this margin clear of the platform/riser
 - [ ] Access routes — confirm doorways/corridors fit the panel modules (largest single part = one pentagon panel; **door aperture vs. chair — measure before move-in**, Step 6 Open Item #1)
 - [ ] Flooring type — tile, wood, or concrete (affects platform footing method)
 - [ ] Structural anchoring allowed? — bolts, adhesive, or weights only? (free-standing platform assumed)
@@ -42,8 +44,8 @@
 - [ ] Air circulation pattern near booth location
 
 ### Safety & Compliance
-- [ ] Fire code — emergency exits access, extinguisher placement (occupant sits inside an enclosed 3 m volume — egress path must stay clear, Step 6 Safety)
-- [x] Structural stability certification — **required** (height > 2.5 m; see §4)
+- [ ] Fire code — emergency exits access, extinguisher placement (occupant sits inside an enclosed 3 m × 3 m × 2.5 m volume — egress path must stay clear, Step 6 Safety)
+- [x] Structural stability certification — **recommended as required** (structure height 2.5 m, at the template's >2.5 m threshold, occupied + ~290 kg; see §4)
 - [ ] Product liability insurance requirements
 - [ ] Safety railings/barriers — n/a (no elevated platform/fall hazard; occupant is seated at floor level)
 - [x] Emergency shutdown — **accessible kill switch on the 220 V feed required by code** (see §3)
@@ -70,9 +72,9 @@
 
 | Deliverable | Content | Format |
 |---|---|---|
-| **Floor Plan** | **4 m × 5.5 m (22 m²)** allocated area — the ~3 m structure + operator/controller station + chair + subwoofer + egress; min 2.75 m ceiling; cable route to the single 220 V outlet | CAD/PDF drawing |
+| **Floor Plan** | **4 m × 5.5 m (22 m²)** allocated area — the **3 m × 3 m × 2.5 m** structure (+ chair + subwoofer + egress) occupies a 3 × 3 m zone; the **operator, table, controller unit, Mac mini, and monitor sit outside that zone**, in the remaining allocated area; min 2.75 m ceiling; cable route to the single 220 V outlet | CAD/PDF drawing |
 | **Electrical Load Sheet** | Continuous **~1.0 kW** (1.25× of ~792 W current draw), transient peak **~1.37 kW**, **~7.9 kWh/day** at 10 h/day, 220 V single-phase, dedicated 16 A — full-white worst-case basis | Signed technical sheet (this §3) |
-| **Structural Analysis** | Weight distribution over the structure footprint (within the 4 m × 5.5 m / 22 m² area), platform footing, stability certification (height > 2.5 m), CoG / tipping analysis | Eng. report or calc |
+| **Structural Analysis** | Weight distribution (**~290 kg over the 9 m² structure footprint ≈ 32 kg/m²**), platform footing, stability certification (structure height **2.5 m**, at the template's >2.5 m threshold), CoG / tipping analysis | Eng. report or calc |
 | **Material Documentation** | SDS for scent fragrance/atomizer fluid; no other hazardous materials | PDF datasheet |
 | **Setup Manual** | 9-step assembly ([`NaoDec_Build_Work_Instructions.md`](NaoDec_Build_Work_Instructions.md)) | Technical manual (PDF) |
 | **Operation Manual** | Daily power-up/down, emergency shutdown, scent refill, staff responsibilities | User-friendly guide |
@@ -159,18 +161,25 @@ is negligible.
 
 ### Load Verification
 ```
-Total Load = Structure (dodecahedron) + panels/edges + vertex & edge LED units
-           + chair (PC-610) + seated occupant + subwoofer + operator table
-Allocated floor area = 4 m × 5.5 m = 22 m² (structure + chair + operator station + egress).
-Floor-load check uses the structure's ground-contact footprint (a ~3 m-span pentagon base),
-within the 22 m² — not the full allocated area.
+Total Load ≈ 290 kg = Structure (dodecahedron panels/edges + vertex & edge LED units)
+                     + chair (PC-610) + seated occupant + subwoofer + scent unit
+Confined to the structure's 3 m × 3 m = 9 m² footprint (within the 22 m² allocated area).
+
+Floor loading ≈ 290 kg / 9 m² ≈ 32 kg/m²
+
+The operator + table + controller unit + Mac mini + monitor sit OUTSIDE the 3 × 3 m
+structure footprint, in the remaining allocated area — a separate, much lighter load zone.
 ```
-**Action:** Confirm the store floor rating supports the assembled structure + chair + occupant +
-subwoofer. Retail floors are typically rated 500–800 kg/m². **Total assembled weight is not yet
-tabulated in the repo** — compile from the build BOM before sign-off (Step 6 platform-load note).
+**Action:** Confirm the store floor rating supports **~32 kg/m²** under the structure zone.
+Retail floors are typically rated 500–800 kg/m² — comfortably sufficient; confirm the store's
+actual rating and check the operator-station zone separately (lightweight: table + electronics).
 
 ### Stability Certification
-- Structure height (nominal ~3 m; **must fit under the 2.75 m ceiling — confirm**) is **> 2.5 m** → **structural analysis required.**
+- Structure height is **2.5 m** — exactly at the template's **>2.5 m** mandatory-certification
+  threshold (not strictly over it). Given the structure is **occupied** (a seated person inside)
+  and carries **~290 kg**, proceed with stability certification and CoG/tipping analysis as best
+  practice regardless of the literal threshold.
+- Structure height fits under the **2.75 m** ceiling clearance with **~0.25 m** margin.
 - Free-standing platform; document center of gravity and tipping-hazard analysis.
 - 25 lettered panel joints are hinged (2 hinges each, 50 total) for rigidity; the 5 base edges rest
   on the platform.
@@ -187,7 +196,7 @@ tabulated in the repo** — compile from the build BOM before sign-off (Step 6 p
 - [ ] Confirm booth location with store manager
 - [ ] Request store specs (floor load, **dedicated 16 A / 220 V outlet**, ceiling ≥ 2.75 m, HVAC)
 - [x] Electrical load sheet prepared (this §3)
-- [ ] Begin/confirm structural stability analysis (height > 2.5 m)
+- [ ] Begin/confirm structural stability analysis (structure height 2.5 m, at the >2.5 m threshold — see §4)
 
 ### 2 Weeks Before
 - [ ] Finalize drawings and calculations
@@ -268,7 +277,10 @@ tabulated in the repo** — compile from the build BOM before sign-off (Step 6 p
 
 **Requirement basis:** power requirement = **1.25× the current setup's continuous operating draw**;
 main input **220 V single-phase**; operation **10 hrs/day** (not 24/7 → no backup power required).
-Space: **4 m × 5.5 m (22 m²)** total allocated floor area, **minimum 2.75 m** ceiling clearance.
+Space: **4 m × 5.5 m (22 m²)** total allocated floor area, **minimum 2.75 m** ceiling clearance;
+structure is **3 m × 3 m × 2.5 m (W×L×H)**, occupying a 3×3 m zone within the allocated area; total
+structure-zone weight **~290 kg**, with the operator/table/controller-unit/Mac mini/monitor sitting
+outside that zone (all user-confirmed).
 Power factor assumed **≈ 0.9**; control-box PSU efficiency assumed **≈ 85 %** for the DC→AC
 conversion. LED figure is the **full-white worst case** (15 mA/px) — there is no higher case.
 
@@ -278,21 +290,31 @@ conversion. LED figure is the **full-white worst case** (15 mA/px) — there is 
 - [`NaoDec_Build_Step6_Move_In.md`](NaoDec_Build_Step6_Move_In.md) — subwoofer own-mains, chair + transducers, media controller USB adapter.
 - [`NaoDec_Build_Step8_Controller_Unit_Hookup.md`](NaoDec_Build_Step8_Controller_Unit_Hookup.md) — confirms the router lives in the controller unit and flags *"no single mains/CB plan exists"* for the unit + Mac mini + GAB8 + subwoofer + chair adapter (Open Item).
 - [`NaoDec_Media_Playback_Controller_Rev3.0_Ethernet_Rationale.md`](NaoDec_Media_Playback_Controller_Rev3.0_Ethernet_Rationale.md) — ASUS RT-AX1800HP router (Mac mini + chair W5500 both wired to it; no separate switch needed).
-- Mean Well **LRS-350-24** — 24 V / 14.6 A / 350 W (GAB8 supply ceiling).
-- **Edifier T5** — 70 W RMS active subwoofer (class-D, switching PSU).
+- Mean Well **LRS-350-24 / LRS-350N2** — 24 V / 14.6 A / 350 W. **This is the GAB8 manufacturer's
+  own recommended PSU model** ([Wondom/Sure Electronics GAB8 user manual](https://files.sure-electronics.com/download/GAB8_10x50W_USB_Codec_Input_User_Manual.pdf);
+  [Audiophonics product page](https://www.audiophonics.fr/en/amplifier-boards/wondom-gab8-p-18755.html)) —
+  confirms the chosen PSU is exactly matched to the board, not oversized/undersized.
+- [**Edifier T5**](https://www.edifier.com/global/p/subwoofers/t5) — 70 W RMS active subwoofer,
+  class-D amp, universal switching PSU, auto-standby when idle.
 - Human Touch **Perfect Chair PC-610** Omni-Motion power recliner.
 
-**Assumptions to confirm against nameplates** (refine §3.1 when known):
-1. **GAB8 typical operating draw (~120 W)** — assumed ≈ ⅓ of the LRS-350-24 rating; measure at
-   working volume. PSU ceiling (350 W / ~400 W AC) is firm.
-2. **Edifier T5 peak (~100 W)** — from the 70 W RMS rating; confirm mains draw.
-3. **Chair PC-610 actuator (~120 W, intermittent)** — no published wattage; typical ~29 V
-   power-recliner actuator. Confirm from the chair's transformer label.
-4. **Table height actuator (~120 W, intermittent)** — no model supplied; confirm when selected.
-5. **Total assembled weight** — not yet tabulated; compile from the build BOM for §4.
-6. **Router draw (~12 W typical / ~18 W adapter max)** — standard 12 V/1.5 A brick rating for this
-   router class; confirm from the RT-AX1800HP's actual adapter label.
-7. **Assembled structure height** — confirm the nominal ~3 m dodecahedron fits under the
-   **2.75 m** ceiling clearance (repo gives no exact height); lower the platform/riser if needed.
+**Datasheet findings (items 1–2 below):** neither the GAB8 amplifier board nor the Edifier T5
+publish a "typical AC input consumption" figure — both manufacturers spec only **RMS output
+power** and **recommended PSU rating**, which is standard practice for class-D audio gear (actual
+draw is program-dependent). No better figure than an engineering estimate exists for either.
 
-**Version**: 1.2 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
+**Remaining assumptions / estimates** (refine §3.1 if better data becomes available):
+1. **GAB8 typical operating draw (~120 W)** — engineering estimate ≈ ⅓ of the manufacturer-matched
+   LRS-350-24 rating (350 W); no published typical-draw figure exists. PSU ceiling (350 W / ~400 W
+   AC) is firm and manufacturer-specified.
+2. **Edifier T5 typical draw (~70 W) / peak (~100 W)** — engineering estimate from the 70 W RMS
+   output rating; no published AC input consumption figure exists. Auto-standby reduces draw when
+   idle (not modeled — conservative for the continuous-operation total).
+3. **Chair PC-610 actuator (~120 W, intermittent)** — engineering estimate for a standard dual-motor
+   ~29 V linear-actuator recliner mechanism; no published wattage. Finalized per user direction.
+4. **Table height actuator (~120 W, intermittent)** — engineering estimate (no model specified);
+   finalized per user direction.
+5. **Router draw (~12 W typical / ~18 W adapter max)** — standard 12 V/1.5 A brick rating for this
+   router class; confirm from the RT-AX1800HP's actual adapter label if precision is needed.
+
+**Version**: 1.3 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
