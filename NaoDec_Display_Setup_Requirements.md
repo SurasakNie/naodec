@@ -71,7 +71,7 @@
 | Deliverable | Content | Format |
 |---|---|---|
 | **Floor Plan** | **4 m × 5.5 m (22 m²)** allocated area — the ~3 m structure + operator/controller station + chair + subwoofer + egress; min 2.75 m ceiling; cable route to the single 220 V outlet | CAD/PDF drawing |
-| **Electrical Load Sheet** | Continuous **~1.0 kW** (1.25× of ~780 W current draw), transient peak **~1.36 kW**, **~7.8 kWh/day** at 10 h/day, 220 V single-phase, dedicated 16 A — full-white worst-case basis | Signed technical sheet (this §3) |
+| **Electrical Load Sheet** | Continuous **~1.0 kW** (1.25× of ~792 W current draw), transient peak **~1.37 kW**, **~7.9 kWh/day** at 10 h/day, 220 V single-phase, dedicated 16 A — full-white worst-case basis | Signed technical sheet (this §3) |
 | **Structural Analysis** | Weight distribution over the structure footprint (within the 4 m × 5.5 m / 22 m² area), platform footing, stability certification (height > 2.5 m), CoG / tipping analysis | Eng. report or calc |
 | **Material Documentation** | SDS for scent fragrance/atomizer fluid; no other hazardous materials | PDF datasheet |
 | **Setup Manual** | 9-step assembly ([`NaoDec_Build_Work_Instructions.md`](NaoDec_Build_Work_Instructions.md)) | Technical manual (PDF) |
@@ -101,9 +101,10 @@ The control box's figures are DC loads from the audited power report, converted 
 | E | Media playback controller (standalone; 5 V/2 A USB adapter) | ~12 W | ~12 W | Step 6 doc |
 | F | Wondom **GAB8** amplifier on **Mean Well LRS-350-24** (24 V / 14.6 A / 350 W); drives 6 speakers + 4 transducers | ~120 W | ~400 W | PSU ceiling; typ ≈ ⅓ |
 | G | **Edifier T5** active subwoofer (70 W RMS, class-D) | ~70 W | ~100 W | model spec |
-| | **Continuous operating subtotal (A–G)** | **~780 W** | ~1,115 W | |
-| H | Chair recline actuator — **Perfect Chair PC-610** | 0 W idle | ~120 W | intermittent¹ |
-| I | Table height-adjust actuator | 0 W idle | ~120 W | intermittent¹ |
+| H | Router — **ASUS RT-AX1800HP** (in controller unit; wired LAN to Mac mini + chair W5500) | ~12 W | ~18 W | typical draw / 12 V-1.5 A adapter rating |
+| | **Continuous operating subtotal (A–H)** | **~792 W** | ~1,133 W | |
+| I | Chair recline actuator — **Perfect Chair PC-610** | 0 W idle | ~120 W | intermittent¹ |
+| J | Table height-adjust actuator | 0 W idle | ~120 W | intermittent¹ |
 
 *Notes:* The **6 speakers and 4 chair transducers are passive** — they are driven by the GAB8
 and sit inside item F's budget, not separate mains loads. The **vertex-strip 12 VDC injection**
@@ -115,25 +116,25 @@ toward the transient peak / breaker sizing but **not** the continuous total.
 
 | Quantity | Value | Notes |
 |---|---|---|
-| Current setup — continuous operating load | **~780 W** | all subsystems active, LEDs full white |
-| **1.25× design requirement (deliverable)** | **~975 W ≈ 1.0 kW** | sustained provisioning target |
-| Worst-case transient | **~1,355 W (~1.36 kW)** | all supplies at rated max + both actuators moving, seconds only |
+| Current setup — continuous operating load | **~792 W** | all subsystems active, LEDs full white |
+| **1.25× design requirement (deliverable)** | **~990 W ≈ 1.0 kW** | sustained provisioning target |
+| Worst-case transient | **~1,373 W (~1.37 kW)** | all supplies at rated max + both actuators moving, seconds only |
 
 **At 220 V single-phase** (power factor ≈ 0.9 assumed):
 
 | Condition | Power | Current @ 220 V |
 |---|---|---|
-| Continuous operating | ~780 W | **~3.9 A** |
-| **1.25× target** | ~975 W | **~4.9 A** |
-| Worst-case transient | ~1,355 W | **~6.9 A** |
+| Continuous operating | ~792 W | **~4.0 A** |
+| **1.25× target** | ~990 W | **~5.0 A** |
+| Worst-case transient | ~1,373 W | **~6.9 A** |
 
-**Daily energy (10 h/day):** ~780 W × 10 h ≈ **~7.8 kWh/day** (~230 kWh/month); actuator energy
+**Daily energy (10 h/day):** ~792 W × 10 h ≈ **~7.9 kWh/day** (~238 kWh/month); actuator energy
 is negligible.
 
 ### 3.3 Connection Requirements
 
 - **Recommended:** one **dedicated 16 A** single-phase 220 V circuit (capacity ≈ 3,520 W). At the
-  1.25× target the circuit runs **~28 % loaded**, comfortably absorbing the ~1.36 kW transient plus
+  1.25× target the circuit runs **~28 % loaded**, comfortably absorbing the ~1.37 kW transient plus
   actuator/SMPS inrush. The template's dedicated **20 A** is also acceptable and adds margin.
   - The **1.25× figure is the sustained headroom**; the **circuit rating** independently covers
     short transients.
@@ -144,9 +145,11 @@ is negligible.
 - **Emergency cutoff:** accessible **kill switch** on the 220 V feed — required by code.
 - **Distribution behind the single outlet:** the one dedicated circuit feeds (i) the **control box**
   — which retains its own **10 A 2-pole C-curve MCB + NTC 10 Ω inrush limiter** guarding only its
-  ~387 W branch — plus (ii) the **AV/host station** (Mac mini, monitor, media controller), (iii) the
-  **GAB8 24 V PSU (LRS-350-24)**, (iv) the **Edifier T5 subwoofer** (own mains), and (v) the **two
-  actuators**. Use a fused/breakered power strip or sub-distribution at the operator station.
+  ~387 W branch — plus (ii) the **AV/host station** (Mac mini, monitor, media controller, **router**),
+  (iii) the **GAB8 24 V PSU (LRS-350-24)**, (iv) the **Edifier T5 subwoofer** (own mains), and (v) the
+  **two actuators**. Use a fused/breakered power strip or sub-distribution at the operator station —
+  the repo itself flags this as an open item (`NaoDec_Build_Step8_Controller_Unit_Hookup.md`: *"no
+  single mains/CB plan exists"* for the unit + Mac mini + GAB8 + subwoofer + chair adapter).
 - **Rail isolation (internal):** keep the 5 V, 12 V-Strip#1, 12 V-Edges, and 24 V-amp **positive**
   rails isolated per the source design; GND may share a single star point.
 
@@ -273,6 +276,8 @@ conversion. LED figure is the **full-white worst case** (15 mA/px) — there is 
 - [`NaoDec_Power_and_Controller_Box_Report.md`](NaoDec_Power_and_Controller_Box_Report.md) — audited control-box budget (329 W DC: LED ~313 W, logic ~4 W, scent ~12 W; 10 A MCB; PSU specs).
 - [`NaoDec_Build_Pending_Decisions.md`](NaoDec_Build_Pending_Decisions.md) §2 — audio chain (Mac mini → Wondom GAB8 @ 24 VDC → 6 speakers + 4 transducers; Mac mini → subwoofer).
 - [`NaoDec_Build_Step6_Move_In.md`](NaoDec_Build_Step6_Move_In.md) — subwoofer own-mains, chair + transducers, media controller USB adapter.
+- [`NaoDec_Build_Step8_Controller_Unit_Hookup.md`](NaoDec_Build_Step8_Controller_Unit_Hookup.md) — confirms the router lives in the controller unit and flags *"no single mains/CB plan exists"* for the unit + Mac mini + GAB8 + subwoofer + chair adapter (Open Item).
+- [`NaoDec_Media_Playback_Controller_Rev3.0_Ethernet_Rationale.md`](NaoDec_Media_Playback_Controller_Rev3.0_Ethernet_Rationale.md) — ASUS RT-AX1800HP router (Mac mini + chair W5500 both wired to it; no separate switch needed).
 - Mean Well **LRS-350-24** — 24 V / 14.6 A / 350 W (GAB8 supply ceiling).
 - **Edifier T5** — 70 W RMS active subwoofer (class-D, switching PSU).
 - Human Touch **Perfect Chair PC-610** Omni-Motion power recliner.
@@ -285,7 +290,9 @@ conversion. LED figure is the **full-white worst case** (15 mA/px) — there is 
    power-recliner actuator. Confirm from the chair's transformer label.
 4. **Table height actuator (~120 W, intermittent)** — no model supplied; confirm when selected.
 5. **Total assembled weight** — not yet tabulated; compile from the build BOM for §4.
-6. **Assembled structure height** — confirm the nominal ~3 m dodecahedron fits under the
+6. **Router draw (~12 W typical / ~18 W adapter max)** — standard 12 V/1.5 A brick rating for this
+   router class; confirm from the RT-AX1800HP's actual adapter label.
+7. **Assembled structure height** — confirm the nominal ~3 m dodecahedron fits under the
    **2.75 m** ceiling clearance (repo gives no exact height); lower the platform/riser if needed.
 
-**Version**: 1.1 | **Last Updated**: 2026-07-21 | **Status**: Ready for Distribution
+**Version**: 1.2 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
