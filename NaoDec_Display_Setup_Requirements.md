@@ -79,24 +79,23 @@ zone within it · operator/controller station sits in the remaining area, outsid
 
 ### Move-In Component Schedule
 
-Dimensions/weights as measured by the vendor (2026-07-22); items marked *TBD* still need a weight
-before the trolley/elevator load-capacity check can be finalized.
+Dimensions/weights as measured by the vendor (2026-07-22).
 
 | Component | Qty | Dimensions (W × H × D) | Weight (each) | Notes |
 |---|---|---|---|---|
-| Pentagon panel | 11 | 1.69 m × 1.61 m × 0.03 m | *TBD* | flat; large 2D footprint, thin |
-| Chair platform (pentagon) | 1 | 1.91 m × 1.82 m; platform height 0.23 m | *TBD* | **largest single component — likely bottleneck** |
+| Pentagon panel | 11 | 1.69 m × 1.61 m × 0.03 m | ~6 kg | ~66 kg total; flat, large 2D footprint but light |
+| Chair platform (pentagon) | 1 | 1.91 m × 1.82 m; platform height 0.23 m | ~50 kg | **largest footprint — likely bottleneck**; light enough for a 2-person carry |
 | Structure platform — door step | 1 | 0.35 m × 0.7 m × 0.15 m | 18 kg | |
 | Structure platform — side | 4 | 0.10 m × 0.7 m × 0.15 m | 6.2 kg (24.8 kg total) | |
-| Chair (Perfect Chair PC-610) | 1 | *TBD* | *TBD* | |
-| Table (height-adjustable) | 1 | *TBD* | *TBD* | |
-| Pallet | 1 | 1.1 m × 1.1 m × 0.16 m | *TBD* | standard pallet footprint |
+| Chair — **Perfect Chair PC-610** | 1 | 1.09 m L × 0.79 m W × 1.19 m H upright (extends to 1.60 m reclined) | ~30 kg | inside the 3×3 m structure zone |
+| Table (height-adjustable) | 1 | 0.6 m × 1.2 m × 0.8 m | ~15 kg | **outside** the 3×3 m structure zone (operator station) |
+| Pallet (plastic) | 1 | 1.1 m × 1.1 m × 0.16 m | ~5 kg | |
 
-**Action:** confirm the elevator/doorway clear opening against the **chair platform's 1.91 m ×
-1.82 m** footprint (diagonal ≈ 2.64 m) first — if it doesn't fit flat, check whether it can be
-tilted through with adequate clearance, or whether it disassembles/ships in sections. Obtain the
-remaining *TBD* weights to finalize the trolley and elevator load-capacity check, and to
-cross-verify against the **~290 kg** total structure-zone weight (§4).
+**Action:** given these weights, no single item is a load-capacity concern (heaviest single carry
+≈ 50 kg — well within a standard hand trolley or a 2-person lift). The constraint is **size, not
+weight**: confirm the elevator/doorway clear opening against the **chair platform's 1.91 m ×
+1.82 m** footprint (diagonal ≈ 2.64 m) — if it doesn't fit flat, check whether it can be tilted
+through with adequate clearance, or whether it disassembles/ships in sections.
 
 ### Commercial Terms
 - [ ] Booth rental fee and payment schedule
@@ -213,6 +212,14 @@ structure footprint, in the remaining allocated area — a separate, much lighte
 **Action:** Confirm the store floor rating supports **~32 kg/m²** under the structure zone.
 Retail floors are typically rated 500–800 kg/m² — comfortably sufficient; confirm the store's
 actual rating and check the operator-station zone separately (lightweight: table + electronics).
+
+**Weight reconciliation** (against the §1 Move-In Component Schedule): known structure-zone
+hardware — 11 panels (~66 kg) + structure platform (~42.8 kg) + chair platform (~50 kg) + pallet
+(~5 kg) + chair (~30 kg) ≈ **~194 kg**. Adding an assumed average adult occupant (~75 kg) and the
+Edifier T5 subwoofer (~8.6 kg, per its published spec) ≈ **~278 kg** — consistent with (~12 kg
+under) the stated **~290 kg** total; the remainder is plausibly framework hardware, hinges,
+wiring, LED strips, and the scent unit, none individually itemized. The operator table (~15 kg)
+is **excluded** — it sits outside the structure zone.
 
 ### Stability Certification
 - Structure height is **2.5 m** — exactly at the template's **>2.5 m** mandatory-certification
@@ -356,9 +363,10 @@ draw is program-dependent). No better figure than an engineering estimate exists
    finalized per user direction.
 5. **Router draw (~12 W typical / ~18 W adapter max)** — standard 12 V/1.5 A brick rating for this
    router class; confirm from the RT-AX1800HP's actual adapter label if precision is needed.
-6. **Component weights** (panels, chair platform, chair, table, pallet) — dimensions are
-   user-provided (2026-07-22); only the structure-platform pieces have weights (18 kg door step,
-   6.2 kg × 4 sides). The rest are *TBD* — needed for the §1 trolley/elevator load-capacity check
-   and to cross-verify against the **~290 kg** total structure-zone weight.
+6. **Component weights** (panels ~6 kg, chair platform ~50 kg, chair ~30 kg, table ~15 kg, pallet
+   ~5 kg) — all user-provided (2026-07-22); see the §1 Move-In Component Schedule and the §4
+   weight reconciliation. The ~12 kg gap between itemized hardware and the stated ~290 kg total
+   (framework/hinges/wiring/LED strips/scent unit) is not individually itemized but is small
+   enough not to be a concern.
 
-**Version**: 1.4 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
+**Version**: 1.5 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
