@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NaoDec — Department Store Display Setup: Team Notes</title>
+  <style>
+    :root { --ink:#e9f1f5; --muted:#a9bac4; --rule:#36505e; --blue:#78cbe7; --pale:#162d38; --accent:#f2a34a; --surface:#10202a; --surface-2:#172d38; --heading:#b9e8f6; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:#071218; font:16px/1.58 "Segoe UI", Arial, sans-serif; }
+    main { max-width:1080px; margin:32px auto; padding:48px 56px 64px; background:var(--surface); box-shadow:0 8px 28px #0009; }
+    header { border-bottom:4px solid var(--accent); margin-bottom:36px; padding-bottom:24px; }
+    h1,h2,h3 { color:var(--heading); line-height:1.2; }
+    h1 { font-size:2.1rem; margin:0 0 12px; }
+    h2 { font-size:1.48rem; border-bottom:1px solid var(--rule); padding-bottom:8px; margin:42px 0 18px; }
+    h3 { font-size:1.12rem; margin:28px 0 10px; }
+    p { margin:0 0 15px; }
+    .lede { font-size:1.08rem; }
+    .meta { color:var(--muted); font-size:.94rem; }
+    .callout { margin:22px 0; padding:16px 20px; background:var(--pale); border-left:4px solid var(--blue); }
+    table { width:100%; border-collapse:collapse; margin:14px 0 22px; font-size:.94rem; }
+    th, td { padding:9px 10px; border:1px solid var(--rule); vertical-align:top; text-align:left; }
+    th { background:#21404e; color:#e8f6fb; font-weight:700; }
+    td.num, th.num { text-align:right; white-space:nowrap; }
+    tr.total td { font-weight:700; background:var(--surface-2); }
+    code, pre { font-family:Consolas, "Courier New", monospace; }
+    pre { padding:16px 18px; overflow:auto; background:#172b35; color:#edf7fa; border-radius:4px; line-height:1.45; }
+    ul { padding-left:22px; margin:8px 0 18px; }
+    li { margin:5px 0; }
+    a { color:var(--blue); }
+    footer { margin-top:48px; padding-top:18px; border-top:1px solid var(--rule); color:var(--muted); font-size:.9rem; }
+    @media print { body { color:#17202a; background:white; } main { max-width:none; margin:0; padding:0; background:white; box-shadow:none; } h1,h2,h3 { color:#123c52; } th { color:#153b50; background:#e7f0f3; } tr.total td { background:#f7fafb; } .callout { background:#edf7fa; } h2 { break-after:avoid; } table, .callout { break-inside:avoid; } }
+    @media (max-width:700px) { main { margin:0; padding:28px 20px 40px; } h1 { font-size:1.65rem; } table { font-size:.82rem; } th,td { padding:7px 6px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>NaoDec — Department Store Display Setup: Team Notes</h1>
+    <p class="lede"><strong>Purpose:</strong> Internal briefing explaining how every number in the store-facing requirements document was derived: the reasoning, sources, and revision history behind the figures.</p>
+    <p class="meta"><strong>Companion document:</strong> <code>NaoDec_Display_Setup_Requirements.md</code> v1.7 (2026-07-22) — send that one to the store; use this one internally.</p>
+  </header>
+
+  <section>
+    <h2>1. Executive Summary</h2>
+    <table>
+      <thead><tr><th>Question</th><th>Answer</th></tr></thead>
+      <tbody>
+        <tr><td>Power requirement</td><td><strong>~1.0 kW continuous</strong> (1.25× of ~792 W current draw), ~1.37 kW transient peak</td></tr>
+        <tr><td>Main input</td><td><strong>220 V single-phase</strong>, dedicated <strong>16 A</strong> circuit (TIS 166-2549)</td></tr>
+        <tr><td>Operating pattern</td><td><strong>10 hrs/day</strong> (not 24/7) → no backup power needed; ~7.9 kWh/day</td></tr>
+        <tr><td>Total floor area</td><td><strong>4 m × 5.5 m (22 m²)</strong> allocated; structure occupies a 3×3 m zone within it</td></tr>
+        <tr><td>Structure size</td><td><strong>3 m × 3 m × 2.5 m (W×L×H)</strong> — fits under the 2.75 m minimum ceiling with ~0.25 m margin</td></tr>
+        <tr><td>Structural design load</td><td><strong>~345 kg</strong> over the structure’s 9 m² footprint ≈ <strong>38 kg/m²</strong> (including occupant rated maximum 100 kg)</td></tr>
+        <tr><td>Logistics bottleneck</td><td><strong>Chair platform (1.91 m × 1.82 m)</strong> — largest single component; confirm elevator/door clearance before committing to elevator delivery</td></tr>
+        <tr><td>Biggest open item</td><td>Elevator/gate/trolley specifications from the store — not yet known</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>2. Space &amp; Structure</h2>
+    <ul>
+      <li><strong>Total allocated floor area:</strong> 4 m × 5.5 m = <strong>22 m²</strong>.</li>
+      <li><strong>Structure footprint:</strong> 3 m × 3 m = <strong>9 m²</strong>, sitting inside the allocated area.</li>
+      <li><strong>Structure height:</strong> <strong>2.5 m</strong> (W × L × H = 3 m × 3 m × 2.5 m). It fits under the store’s <strong>minimum 2.75 m</strong> ceiling clearance with <strong>~0.25 m</strong> margin; keep that margin clear of the platform/riser.</li>
+      <li>The <strong>operator station</strong> (table, controller unit, Mac mini, monitor) sits outside the 3×3 m structure zone, in the remaining ~13 m² of the allocated area.</li>
+    </ul>
+    <div class="callout">The structure height sits exactly at the template’s “&gt;2.5 m mandatory stability-certification” threshold, not strictly over it. Certification is still recommended because the structure is occupied and carries a ~345 kg load.</div>
+  </section>
+
+  <section>
+    <h2>3. Power Requirement — Full Derivation</h2>
+    <p><strong>The rule:</strong> Provisioning target = <strong>1.25× the current setup’s continuous operating draw</strong>, main input 220 V single-phase, 10 hrs/day operation (so no backup power requirement).</p>
+    <h3>3.1 Connected-load inventory (every device, AC mains draw)</h3>
+    <table>
+      <thead><tr><th>#</th><th>Item</th><th class="num">Typical</th><th class="num">Rated/Peak</th><th>Basis</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>Control box — LED strips (1,740× WS2815 @ 15 mA/px full white) + 5 V logic + scent controller</td><td class="num">~387 W</td><td class="num">~387 W</td><td>Audited 329 W DC ÷ 0.85 PSU efficiency</td></tr>
+        <tr><td>B</td><td>Mac mini (media/show host)</td><td class="num">~65 W</td><td class="num">~90 W</td><td>Apple-silicon typical</td></tr>
+        <tr><td>C</td><td>Operator monitor</td><td class="num">~50 W</td><td class="num">~50 W</td><td>24–27″ desktop display</td></tr>
+        <tr><td>D</td><td>2× cooling fans @ 38 W</td><td class="num">~76 W</td><td class="num">~76 W</td><td>Nameplate (measured)</td></tr>
+        <tr><td>E</td><td>Media playback controller (standalone, 5 V/2 A adapter)</td><td class="num">~12 W</td><td class="num">~12 W</td><td>Build docs</td></tr>
+        <tr><td>F</td><td>Wondom GAB8 amp on Mean Well LRS-350-24 (drives 6 speakers + 4 transducers)</td><td class="num">~120 W</td><td class="num">~400 W</td><td>PSU ceiling; typical ≈ ⅓</td></tr>
+        <tr><td>G</td><td>Edifier T5 active subwoofer (70 W RMS)</td><td class="num">~70 W</td><td class="num">~100 W</td><td>Manufacturer spec</td></tr>
+        <tr><td>H</td><td>Router — ASUS RT-AX1800HP (in controller unit)</td><td class="num">~12 W</td><td class="num">~18 W</td><td>Typical 12 V/1.5 A adapter class</td></tr>
+        <tr class="total"><td></td><td>Continuous subtotal (A–H)</td><td class="num">~792 W</td><td class="num">~1,133 W</td><td></td></tr>
+        <tr><td>I</td><td>Chair recline actuator (Perfect Chair PC-610)</td><td class="num">0 W idle</td><td class="num">~120 W</td><td>Intermittent — moves for seconds only</td></tr>
+        <tr><td>J</td><td>Table height-adjust actuator</td><td class="num">0 W idle</td><td class="num">~120 W</td><td>Intermittent</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Notes:</strong> The six speakers and four chair transducers are passive, driven by the GAB8 (item F), not separate loads. The vertex-strip 12 VDC power injection redistributes existing current, adding no new load. The full-white LED figure (15 mA/px) is already the worst case.</p>
+    <h3>3.2 The 1.25× calculation</h3>
+    <pre>Current continuous draw:      792 W
+1.25× design target:          792 × 1.25 = 990 W  ≈  1.0 kW
+Worst-case transient:         1,133 W (all rated max) + 240 W (both actuators) = 1,373 W ≈ 1.37 kW</pre>
+    <p><strong>Converted to current @ 220 V single-phase</strong> (power factor ≈ 0.9 assumed):</p>
+    <table><thead><tr><th>Condition</th><th class="num">Power</th><th class="num">Current</th></tr></thead><tbody>
+      <tr><td>Continuous operating</td><td class="num">792 W</td><td class="num">~4.0 A</td></tr>
+      <tr class="total"><td>1.25× target (the deliverable)</td><td class="num">990 W</td><td class="num">~5.0 A</td></tr>
+      <tr><td>Worst-case transient</td><td class="num">1,373 W</td><td class="num">~6.9 A</td></tr>
+    </tbody></table>
+    <p><strong>Daily energy:</strong> 792 W × 10 h ≈ <strong>~7.9 kWh/day</strong> (~238 kWh/month).</p>
+    <h3>3.3 Circuit recommendation</h3>
+    <p>Provide one <strong>dedicated 16 A, 220 V single-phase</strong> circuit (TIS 166-2549 socket), running at only ~28% load at the 1.25× target. It comfortably absorbs the 1.37 kW transient plus actuator/SMPS inrush. A 20 A circuit also works if the store prefers more margin. Add surge protection, an accessible <strong>kill switch</strong>, and a fused sub-distribution at the operator station feeding the control box (which keeps its own 10 A MCB + inrush limiter), AV/host station, GAB8 24 V PSU, subwoofer, and both actuators.</p>
+    <h3>3.4 What we couldn’t get better numbers for</h3>
+    <p>Neither the <strong>GAB8 amp</strong> nor the <strong>Edifier T5</strong> publish typical AC consumption. Manufacturers specify RMS output and recommended PSU rating; actual draw is program-dependent. The GAB8 manual recommends the Mean Well LRS-350-24/N2 — the PSU already chosen — confirming it is correctly matched. The ~120 W (GAB8) and ~70 W (T5) figures are engineering estimates, cited to manufacturer sources.</p>
+  </section>
+
+  <section>
+    <h2>4. Structural Weight — Full Derivation and Revision History</h2>
+    <p>Different totals in old messages reflect three tracked revisions:</p>
+    <table><thead><tr><th>Stage</th><th class="num">Total</th><th>What changed</th></tr></thead><tbody>
+      <tr><td>1</td><td class="num">~290 kg</td><td>Original figure as stated</td></tr>
+      <tr><td>2</td><td class="num">~305 kg</td><td>Switched occupant from an assumed average adult (~75 kg) to the <strong>rated maximum (100 kg)</strong> — the correct structural-design basis</td></tr>
+      <tr class="total"><td>3</td><td class="num">~345 kg</td><td>Itemized previously unaccounted LED tubes, edge covers, vertex units, and speakers (~30 kg), and corrected the chair weight to confirmed <strong>40 kg</strong></td></tr>
+    </tbody></table>
+    <p><strong>Current design total: use ~345 kg.</strong></p>
+    <h3>4.1 Itemized breakdown</h3>
+    <table><thead><tr><th>Item</th><th class="num">Weight</th></tr></thead><tbody>
+      <tr><td>11× pentagon panel @ ~6 kg</td><td class="num">~66 kg</td></tr>
+      <tr><td>Structure platform (1× door step 18 kg + 4× side 6.2 kg)</td><td class="num">~42.8 kg</td></tr>
+      <tr><td>Chair platform (pentagon, 1.91 × 1.82 m)</td><td class="num">~50 kg</td></tr>
+      <tr><td>Plastic pallet</td><td class="num">~5 kg</td></tr>
+      <tr><td>Chair — Perfect Chair PC-610</td><td class="num"><strong>40 kg</strong></td></tr>
+      <tr><td>LED tubes (30 × 100 g)</td><td class="num">3 kg</td></tr>
+      <tr><td>Edge covers (30 × 200 g)</td><td class="num">6 kg</td></tr>
+      <tr><td>Vertex units (20 × 400 g)</td><td class="num">8 kg</td></tr>
+      <tr><td>Speakers with mounts (6 × 1,000 g)</td><td class="num">6 kg</td></tr>
+      <tr><td>Above four rows + wiring/cable allowance, rounded</td><td class="num"><strong>~30 kg</strong></td></tr>
+      <tr><td>Occupant — rated maximum, not average</td><td class="num"><strong>100 kg</strong></td></tr>
+      <tr><td>Edifier T5 subwoofer (published spec)</td><td class="num">~8.6 kg</td></tr>
+      <tr class="total"><td>Total</td><td class="num">≈ 342 kg → use ~345 kg (rounded for margin)</td></tr>
+    </tbody></table>
+    <p><strong>Floor loading:</strong> 345 kg / 9 m² ≈ <strong>38 kg/m²</strong> — trivial against a typical retail floor rating of 500–800 kg/m², but still needs sign-off from the actual store engineer.</p>
+    <p><strong>Chair capacity cross-check:</strong> the Perfect Chair PC-610 is rated for occupants up to <strong>~181 kg (400 lb)</strong>, above the 100 kg design cap.</p>
+    <p><strong>Excluded:</strong> operator table (~15 kg), controller unit, Mac mini, and monitor. These sit outside the 3×3 m structure footprint.</p>
+  </section>
+
+  <section>
+    <h2>5. Logistics &amp; Move-In</h2>
+    <h3>5.1 Component schedule (for trolley/elevator/dock planning)</h3>
+    <table><thead><tr><th>Component</th><th class="num">Qty</th><th>Size</th><th class="num">Weight</th></tr></thead><tbody>
+      <tr><td>Pentagon panel</td><td class="num">11</td><td>1.69 × 1.61 × 0.03 m</td><td class="num">~6 kg each</td></tr>
+      <tr><td><strong>Chair platform</strong></td><td class="num">1</td><td><strong>1.91 × 1.82 m</strong>, 0.23 m tall</td><td class="num">~50 kg</td></tr>
+      <tr><td>Structure platform — door step</td><td class="num">1</td><td>0.35 × 0.7 × 0.15 m</td><td class="num">18 kg</td></tr>
+      <tr><td>Structure platform — side</td><td class="num">4</td><td>0.10 × 0.7 × 0.15 m</td><td class="num">6.2 kg each</td></tr>
+      <tr><td>Chair (PC-610)</td><td class="num">1</td><td>1.09 × 0.79 × 1.19 m (extends to 1.60 m)</td><td class="num">40 kg</td></tr>
+      <tr><td>Table</td><td class="num">1</td><td>0.6 × 1.2 × 0.8 m</td><td class="num">~15 kg</td></tr>
+      <tr><td>Pallet</td><td class="num">1</td><td>1.1 × 1.1 × 0.16 m</td><td class="num">~5 kg</td></tr>
+    </tbody></table>
+    <div class="callout"><strong>Key finding:</strong> Weight is not the constraint; size is. The chair platform’s 1.91 m × 1.82 m footprint (diagonal ≈ 2.64 m) is the largest component and may not fit an elevator or standard doorway flat. Confirm actual elevator cab/door dimensions before committing to elevator delivery; freight lift, wide-corridor routing, or sectional shipping may be needed.</div>
+    <h3>5.2 Logistics questions still open with the store</h3>
+    <ul>
+      <li>Move-in/setup time allowance — is overnight setup possible?</li>
+      <li>Drop-off/loading gate location — ground level or an upper-floor gate, and distance to the display area?</li>
+      <li>Floor protection — does the plaza supply mats/runners for the move-in path, or do we bring our own?</li>
+      <li>Trolley/hand-truck — available to borrow? Size and maximum load rating?</li>
+      <li><strong>Elevator</strong> — cab interior dimensions, door clear-opening width, and weight capacity (check against the 1.91 × 1.82 m chair platform specifically).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>6. Open Items</h2>
+    <h3>From the store (cannot be resolved by us)</h3>
+    <ul>
+      <li>Numeric floor-load rating, flooring type, and anchoring policy</li>
+      <li>Ceiling/HVAC specifics: temperature/humidity range and ventilation pattern</li>
+      <li>Fire code / egress requirements and insurance requirements</li>
+      <li>Operating hours, security policy, and on-site maintenance ownership</li>
+      <li>Commercial terms: rental fee, duration, signage limits, and exclusivity</li>
+      <li>All logistics questions in §5.2</li>
+    </ul>
+    <h3>From us / needs physical measurement, not more research</h3>
+    <ul>
+      <li>Door aperture versus chair dimensions (the repository flags this as unverified)</li>
+      <li>Cable run length from the outlet to the operator station</li>
+      <li>Actual measured current draw for the GAB8, subwoofer, and router at commissioning (Step 9), replacing engineering estimates with measured values</li>
+      <li>Elevator/doorway clearance versus the 1.91 × 1.82 m chair platform footprint</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>7. Sources</h2>
+    <ul>
+      <li><code>NaoDec_Power_and_Controller_Box_Report.md</code> — audited control-box power budget (329 W DC).</li>
+      <li><code>NaoDec_Build_Pending_Decisions.md</code> §2 — audio chain (Mac mini → GAB8 @ 24 VDC → speakers/transducers; Mac mini → subwoofer).</li>
+      <li><code>NaoDec_Build_Step6_Move_In.md</code> — subwoofer own-mains, chair + transducers, media controller adapter.</li>
+      <li><code>NaoDec_Build_Step8_Controller_Unit_Hookup.md</code> — router location; flags no single mains/CB plan as an open item.</li>
+      <li>Mean Well LRS-350-24/N2 datasheet + Wondom/Sure Electronics GAB8 manual — confirms the PSU is manufacturer-matched to the amp.</li>
+      <li>Edifier T5 product page — 70 W RMS specification.</li>
+      <li>Human Touch Perfect Chair PC-610 — ~181 kg (400 lb) rated occupant capacity.</li>
+      <li>All physical dimensions/weights in §§4–5 are vendor/user-provided measurements (2026-07-22).</li>
+    </ul>
+  </section>
+  <footer><strong>Version:</strong> 1.0 &nbsp;|&nbsp; <strong>Companion to Requirements:</strong> v1.7 &nbsp;|&nbsp; <strong>Last updated:</strong> 2026-07-22</footer>
+</main>
+</body>
+</html>
