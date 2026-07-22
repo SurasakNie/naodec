@@ -23,7 +23,10 @@ zone within it · operator/controller station sits in the remaining area, outsid
 ### Physical & Space
 - [x] Floor load capacity — total load **~290 kg** over the structure's **9 m² footprint ≈ 32 kg/m²** (§4); comfortably within typical retail ratings — **confirm the store's actual rating on site**
 - [x] Ceiling height clearance — **minimum 2.75 m** available + service access; the structure's **2.5 m** height fits with **~0.25 m margin** — keep this margin clear of the platform/riser
-- [ ] Access routes — confirm doorways/corridors fit the panel modules (largest single part = one pentagon panel; **door aperture vs. chair — measure before move-in**, Step 6 Open Item #1)
+- [ ] Access routes — confirm doorways/corridors/elevator fit every load-in component (see the
+  **Move-In Component Schedule** below); the **chair platform (1.91 m × 1.82 m)** is the single
+  largest item and the likely bottleneck; **door aperture vs. chair — measure before move-in**,
+  Step 6 Open Item #1
 - [ ] Flooring type — tile, wood, or concrete (affects platform footing method)
 - [ ] Structural anchoring allowed? — bolts, adhesive, or weights only? (free-standing platform assumed)
 - [ ] Column/obstruction clearance within the **4 m × 5.5 m (22 m²)** allocated area
@@ -53,11 +56,47 @@ zone within it · operator/controller station sits in the remaining area, outsid
 
 ### Access & Operations
 - [ ] Setup date/time window (assembly target < 1 day; see build steps 1–9)
+- [ ] **Move-in/setup time allowance** — how much time is available to bring in every component and
+  fully set up? **Is overnight setup an option** (store closed hours)?
+- [ ] **Drop-off / loading gate** — where is it? **Ground level, or an upper-floor loading gate?**
+  If upper floor, confirm which floor and how goods reach it.
+- [ ] **Distance from the drop-off gate to the display area** — affects trolley trips, cable
+  slack, and move-in duration.
+- [ ] **Floor protection** — does the plaza provide protection mats/runners for the move-in path,
+  or must the vendor supply their own? (Distinct from the Step 6 in-structure base-edge LED
+  protection, which the vendor already supplies.)
+- [ ] **Trolley/hand-truck** — is one available to borrow from the store? If so, **what size** and
+  **maximum load rating**? (Needed to plan the door-step/side panels — see schedule below.)
+- [ ] **Elevator (if used)** — **cab interior dimensions**, **door clear-opening width**, and
+  **weight capacity**. Check specifically against the **chair platform (1.91 m × 1.82 m)** — the
+  largest single component (see Move-In Component Schedule below) — before committing to
+  elevator-based delivery; a freight elevator or a wide corridor bypass may be required.
 - [ ] Store operating hours vs. technical-team access hours
 - [ ] Security during off-hours (the cube is lockable via the door panel f11)
 - [ ] On-site maintenance during operating hours — store staff or vendor team?
 - [ ] Teardown timeline and process
 - [ ] Storage of packaging/excess materials during display period
+
+### Move-In Component Schedule
+
+Dimensions/weights as measured by the vendor (2026-07-22); items marked *TBD* still need a weight
+before the trolley/elevator load-capacity check can be finalized.
+
+| Component | Qty | Dimensions (W × H × D) | Weight (each) | Notes |
+|---|---|---|---|---|
+| Pentagon panel | 11 | 1.69 m × 1.61 m × 0.03 m | *TBD* | flat; large 2D footprint, thin |
+| Chair platform (pentagon) | 1 | 1.91 m × 1.82 m; platform height 0.23 m | *TBD* | **largest single component — likely bottleneck** |
+| Structure platform — door step | 1 | 0.35 m × 0.7 m × 0.15 m | 18 kg | |
+| Structure platform — side | 4 | 0.10 m × 0.7 m × 0.15 m | 6.2 kg (24.8 kg total) | |
+| Chair (Perfect Chair PC-610) | 1 | *TBD* | *TBD* | |
+| Table (height-adjustable) | 1 | *TBD* | *TBD* | |
+| Pallet | 1 | 1.1 m × 1.1 m × 0.16 m | *TBD* | standard pallet footprint |
+
+**Action:** confirm the elevator/doorway clear opening against the **chair platform's 1.91 m ×
+1.82 m** footprint (diagonal ≈ 2.64 m) first — if it doesn't fit flat, check whether it can be
+tilted through with adequate clearance, or whether it disassembles/ships in sections. Obtain the
+remaining *TBD* weights to finalize the trolley and elevator load-capacity check, and to
+cross-verify against the **~290 kg** total structure-zone weight (§4).
 
 ### Commercial Terms
 - [ ] Booth rental fee and payment schedule
@@ -77,6 +116,7 @@ zone within it · operator/controller station sits in the remaining area, outsid
 | **Structural Analysis** | Weight distribution (**~290 kg over the 9 m² structure footprint ≈ 32 kg/m²**), platform footing, stability certification (structure height **2.5 m**, at the template's >2.5 m threshold), CoG / tipping analysis | Eng. report or calc |
 | **Material Documentation** | SDS for scent fragrance/atomizer fluid; no other hazardous materials | PDF datasheet |
 | **Setup Manual** | 9-step assembly ([`NaoDec_Build_Work_Instructions.md`](NaoDec_Build_Work_Instructions.md)) | Technical manual (PDF) |
+| **Move-In Component Schedule** | Dimensions/weights of every load-in piece (§1) — for the store's trolley/elevator/dock sizing check | Sheet (this §1) |
 | **Operation Manual** | Daily power-up/down, emergency shutdown, scent refill, staff responsibilities | User-friendly guide |
 | **Insurance Certificate** | General + product liability, store named additional insured | PDF certificate |
 | **Site Contact Info** | On-site lead + emergency contact + escalation | Written sheet (§7) |
@@ -316,5 +356,9 @@ draw is program-dependent). No better figure than an engineering estimate exists
    finalized per user direction.
 5. **Router draw (~12 W typical / ~18 W adapter max)** — standard 12 V/1.5 A brick rating for this
    router class; confirm from the RT-AX1800HP's actual adapter label if precision is needed.
+6. **Component weights** (panels, chair platform, chair, table, pallet) — dimensions are
+   user-provided (2026-07-22); only the structure-platform pieces have weights (18 kg door step,
+   6.2 kg × 4 sides). The rest are *TBD* — needed for the §1 trolley/elevator load-capacity check
+   and to cross-verify against the **~290 kg** total structure-zone weight.
 
-**Version**: 1.3 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
+**Version**: 1.4 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
