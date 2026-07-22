@@ -21,7 +21,7 @@ zone within it · operator/controller station sits in the remaining area, outsid
 ## 1. STORE REQUIREMENTS TO CONFIRM
 
 ### Physical & Space
-- [x] Floor load capacity — total load **~290 kg** over the structure's **9 m² footprint ≈ 32 kg/m²** (§4); comfortably within typical retail ratings — **confirm the store's actual rating on site**
+- [x] Floor load capacity — total design load **~305 kg** (incl. occupant rated **max 100 kg**) over the structure's **9 m² footprint ≈ 34 kg/m²** (§4); comfortably within typical retail ratings — **confirm the store's actual rating on site**
 - [x] Ceiling height clearance — **minimum 2.75 m** available + service access; the structure's **2.5 m** height fits with **~0.25 m margin** — keep this margin clear of the platform/riser
 - [ ] Access routes — confirm doorways/corridors/elevator fit every load-in component (see the
   **Move-In Component Schedule** below); the **chair platform (1.91 m × 1.82 m)** is the single
@@ -48,7 +48,7 @@ zone within it · operator/controller station sits in the remaining area, outsid
 
 ### Safety & Compliance
 - [ ] Fire code — emergency exits access, extinguisher placement (occupant sits inside an enclosed 3 m × 3 m × 2.5 m volume — egress path must stay clear, Step 6 Safety)
-- [x] Structural stability certification — **recommended as required** (structure height 2.5 m, at the template's >2.5 m threshold, occupied + ~290 kg; see §4)
+- [x] Structural stability certification — **recommended as required** (structure height 2.5 m, at the template's >2.5 m threshold, occupied (max 100 kg) + ~305 kg design load; see §4)
 - [ ] Product liability insurance requirements
 - [ ] Safety railings/barriers — n/a (no elevated platform/fall hazard; occupant is seated at floor level)
 - [x] Emergency shutdown — **accessible kill switch on the 220 V feed required by code** (see §3)
@@ -112,7 +112,7 @@ through with adequate clearance, or whether it disassembles/ships in sections.
 |---|---|---|
 | **Floor Plan** | **4 m × 5.5 m (22 m²)** allocated area — the **3 m × 3 m × 2.5 m** structure (+ chair + subwoofer + egress) occupies a 3 × 3 m zone; the **operator, table, controller unit, Mac mini, and monitor sit outside that zone**, in the remaining allocated area; min 2.75 m ceiling; cable route to the single 220 V outlet | CAD/PDF drawing |
 | **Electrical Load Sheet** | Continuous **~1.0 kW** (1.25× of ~792 W current draw), transient peak **~1.37 kW**, **~7.9 kWh/day** at 10 h/day, 220 V single-phase, dedicated 16 A — full-white worst-case basis | Signed technical sheet (this §3) |
-| **Structural Analysis** | Weight distribution (**~290 kg over the 9 m² structure footprint ≈ 32 kg/m²**), platform footing, stability certification (structure height **2.5 m**, at the template's >2.5 m threshold), CoG / tipping analysis | Eng. report or calc |
+| **Structural Analysis** | Weight distribution (**~305 kg design load over the 9 m² structure footprint ≈ 34 kg/m²**, incl. occupant rated max 100 kg), platform footing, stability certification (structure height **2.5 m**, at the template's >2.5 m threshold), CoG / tipping analysis | Eng. report or calc |
 | **Material Documentation** | SDS for scent fragrance/atomizer fluid; no other hazardous materials | PDF datasheet |
 | **Setup Manual** | 9-step assembly ([`NaoDec_Build_Work_Instructions.md`](NaoDec_Build_Work_Instructions.md)) | Technical manual (PDF) |
 | **Move-In Component Schedule** | Dimensions/weights of every load-in piece (§1) — for the store's trolley/elevator/dock sizing check | Sheet (this §1) |
@@ -200,32 +200,38 @@ is negligible.
 
 ### Load Verification
 ```
-Total Load ≈ 290 kg = Structure (dodecahedron panels/edges + vertex & edge LED units)
-                     + chair (PC-610) + seated occupant + subwoofer + scent unit
+Total Design Load ≈ 302 kg (round to ~305 kg for margin) =
+    Structure (dodecahedron panels/edges + vertex & edge LED units)
+  + chair (PC-610) + occupant (rated max 100 kg) + subwoofer + scent unit
 Confined to the structure's 3 m × 3 m = 9 m² footprint (within the 22 m² allocated area).
 
-Floor loading ≈ 290 kg / 9 m² ≈ 32 kg/m²
+Floor loading ≈ 305 kg / 9 m² ≈ 34 kg/m²
 
 The operator + table + controller unit + Mac mini + monitor sit OUTSIDE the 3 × 3 m
 structure footprint, in the remaining allocated area — a separate, much lighter load zone.
 ```
-**Action:** Confirm the store floor rating supports **~32 kg/m²** under the structure zone.
+**Action:** Confirm the store floor rating supports **~34 kg/m²** under the structure zone.
 Retail floors are typically rated 500–800 kg/m² — comfortably sufficient; confirm the store's
 actual rating and check the operator-station zone separately (lightweight: table + electronics).
 
-**Weight reconciliation** (against the §1 Move-In Component Schedule): known structure-zone
-hardware — 11 panels (~66 kg) + structure platform (~42.8 kg) + chair platform (~50 kg) + pallet
-(~5 kg) + chair (~30 kg) ≈ **~194 kg**. Adding an assumed average adult occupant (~75 kg) and the
-Edifier T5 subwoofer (~8.6 kg, per its published spec) ≈ **~278 kg** — consistent with (~12 kg
-under) the stated **~290 kg** total; the remainder is plausibly framework hardware, hinges,
-wiring, LED strips, and the scent unit, none individually itemized. The operator table (~15 kg)
-is **excluded** — it sits outside the structure zone.
+**Weight reconciliation** (against the §1 Move-In Component Schedule), using the **rated maximum
+occupant weight (100 kg)** as the structural design basis rather than an average-adult estimate:
+known structure-zone hardware — 11 panels (~66 kg) + structure platform (~42.8 kg) + chair
+platform (~50 kg) + pallet (~5 kg) + chair (~30 kg) ≈ **~194 kg**. Adding the **100 kg max
+occupant rating** and the Edifier T5 subwoofer (~8.6 kg, per its published spec) ≈ **~302 kg**.
+This is **~12 kg above** the originally-stated **~290 kg** figure — the difference is the switch
+from an average-adult assumption to the maximum rated occupant; use **~305 kg** (rounded up for
+margin) as the structural design total going forward. The remaining small gap versus itemized
+hardware is plausibly framework hardware, hinges, wiring, LED strips, and the scent unit, none
+individually itemized. The operator table (~15 kg) is **excluded** — it sits outside the
+structure zone. **Chair capacity cross-check:** the Perfect Chair PC-610 itself is rated for
+occupants up to **~181 kg (400 lb)** — comfortably clears the 100 kg design cap.
 
 ### Stability Certification
 - Structure height is **2.5 m** — exactly at the template's **>2.5 m** mandatory-certification
-  threshold (not strictly over it). Given the structure is **occupied** (a seated person inside)
-  and carries **~290 kg**, proceed with stability certification and CoG/tipping analysis as best
-  practice regardless of the literal threshold.
+  threshold (not strictly over it). Given the structure is **occupied** (a seated person, rated
+  max **100 kg**) and carries a **~305 kg** design load, proceed with stability certification and
+  CoG/tipping analysis as best practice regardless of the literal threshold.
 - Structure height fits under the **2.75 m** ceiling clearance with **~0.25 m** margin.
 - Free-standing platform; document center of gravity and tipping-hazard analysis.
 - 25 lettered panel joints are hinged (2 hinges each, 50 total) for rigidity; the 5 base edges rest
@@ -326,7 +332,8 @@ is **excluded** — it sits outside the structure zone.
 main input **220 V single-phase**; operation **10 hrs/day** (not 24/7 → no backup power required).
 Space: **4 m × 5.5 m (22 m²)** total allocated floor area, **minimum 2.75 m** ceiling clearance;
 structure is **3 m × 3 m × 2.5 m (W×L×H)**, occupying a 3×3 m zone within the allocated area; total
-structure-zone weight **~290 kg**, with the operator/table/controller-unit/Mac mini/monitor sitting
+structure-zone design weight **~305 kg** (incl. occupant rated **max 100 kg** — see §4 for the
+switch from an average-adult estimate to this rated max), with the operator/table/controller-unit/Mac mini/monitor sitting
 outside that zone (all user-confirmed).
 Power factor assumed **≈ 0.9**; control-box PSU efficiency assumed **≈ 85 %** for the DC→AC
 conversion. LED figure is the **full-white worst case** (15 mA/px) — there is no higher case.
@@ -365,8 +372,12 @@ draw is program-dependent). No better figure than an engineering estimate exists
    router class; confirm from the RT-AX1800HP's actual adapter label if precision is needed.
 6. **Component weights** (panels ~6 kg, chair platform ~50 kg, chair ~30 kg, table ~15 kg, pallet
    ~5 kg) — all user-provided (2026-07-22); see the §1 Move-In Component Schedule and the §4
-   weight reconciliation. The ~12 kg gap between itemized hardware and the stated ~290 kg total
-   (framework/hinges/wiring/LED strips/scent unit) is not individually itemized but is small
+   weight reconciliation. The remaining small gap between itemized hardware and the ~305 kg design
+   total (framework/hinges/wiring/LED strips/scent unit) is not individually itemized but is small
    enough not to be a concern.
+7. **Occupant weight** — design basis is the **rated maximum of 100 kg per occupant**, not an
+   average-adult estimate; this raises the structural design total from the originally-stated
+   ~290 kg to **~305 kg** (§4). The Perfect Chair PC-610 itself is rated to ~181 kg (400 lb),
+   comfortably above this cap.
 
-**Version**: 1.5 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
+**Version**: 1.6 | **Last Updated**: 2026-07-22 | **Status**: Ready for Distribution
